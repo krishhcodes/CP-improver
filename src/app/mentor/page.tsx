@@ -225,20 +225,20 @@ export default function MentorStudio() {
   return (
     <div className="space-y-6 pb-12 animate-fade-in">
       {/* Studio Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-white/[0.08] pb-6">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-200 pb-6">
         <div>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-500/20 via-indigo-500/20 to-blue-500/20 border border-indigo-500/30 flex items-center justify-center">
-              <Bot className="w-5 h-5 text-indigo-400" />
+            <div className="w-10 h-10 rounded-xl bg-sky-50 border border-sky-200 flex items-center justify-center shadow-xs">
+              <Bot className="w-5 h-5 text-sky-600" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+              <h1 className="text-2xl font-black tracking-tight text-slate-900 flex items-center gap-2">
                 AI CP Mentor Studio
-                <span className="text-xs px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20 font-medium">
+                <span className="text-xs px-2 py-0.5 rounded-full bg-sky-100 text-sky-800 border border-sky-200 font-bold">
                   Socratic Intelligence
                 </span>
               </h1>
-              <p className="text-xs text-zinc-400 mt-0.5">
+              <p className="text-xs text-slate-500 mt-0.5">
                 Deliberate algorithmic coaching, progressive spoiler-free hint tiers, and static code diagnostics.
               </p>
             </div>
@@ -246,17 +246,17 @@ export default function MentorStudio() {
         </div>
 
         {/* Persona Selector Tabs */}
-        <div className="flex items-center gap-1.5 bg-[#0a0f1d] border border-white/[0.08] p-1.5 rounded-xl self-start lg:self-auto">
-          <span className="text-xs font-semibold text-zinc-400 px-2 uppercase tracking-wider text-[10px]">
+        <div className="flex items-center gap-1.5 bg-slate-100 border border-slate-200 p-1.5 rounded-xl self-start lg:self-auto shadow-xs">
+          <span className="text-xs font-bold text-slate-500 px-2 uppercase tracking-wider text-[10px]">
             Persona:
           </span>
           <button
             onClick={() => setPersona("SOCRATIC")}
             className={cn(
-              "px-3 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5",
+              "px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5",
               persona === "SOCRATIC"
-                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30"
-                : "text-zinc-400 hover:text-white"
+                ? "bg-white text-slate-900 shadow-sm"
+                : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
             )}
           >
             🎓 Socratic
@@ -264,10 +264,10 @@ export default function MentorStudio() {
           <button
             onClick={() => setPersona("STRICT_COACH")}
             className={cn(
-              "px-3 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5",
+              "px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5",
               persona === "STRICT_COACH"
-                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30"
-                : "text-zinc-400 hover:text-white"
+                ? "bg-white text-slate-900 shadow-sm"
+                : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
             )}
           >
             ⚡ Strict Coach
@@ -275,10 +275,10 @@ export default function MentorStudio() {
           <button
             onClick={() => setPersona("DIAGNOSTICIAN")}
             className={cn(
-              "px-3 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5",
+              "px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5",
               persona === "DIAGNOSTICIAN"
-                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30"
-                : "text-zinc-400 hover:text-white"
+                ? "bg-white text-slate-900 shadow-sm"
+                : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
             )}
           >
             🔬 Diagnostician
@@ -291,12 +291,12 @@ export default function MentorStudio() {
         {/* LEFT COLUMN: Problem Context, Hint Drawer & Code Reviewer (5 cols) */}
         <div className="lg:col-span-5 space-y-6">
           {/* Problem Selector Card */}
-          <div className="glass-panel border border-white/[0.08] rounded-2xl p-5 space-y-3">
+          <div className="bg-white border border-slate-200/90 shadow-sm rounded-2xl p-5 space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
                 Active Problem Focus
               </span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-white/[0.04] text-zinc-300 border border-white/[0.08]">
+              <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 font-bold">
                 {activeProblem.rating} Rating
               </span>
             </div>
@@ -313,10 +313,10 @@ export default function MentorStudio() {
                     setReviewReport(null);
                   }}
                   className={cn(
-                    "flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition-all text-center border",
+                    "flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all text-center border shadow-xs",
                     selectedProblemIndex === idx
-                      ? "bg-indigo-600/20 text-indigo-300 border-indigo-500/40"
-                      : "bg-white/[0.02] text-zinc-400 border-white/[0.06] hover:bg-white/[0.04]"
+                      ? "bg-sky-50 text-sky-800 border-sky-300"
+                      : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-white"
                   )}
                 >
                   {p.key}
@@ -325,12 +325,12 @@ export default function MentorStudio() {
             </div>
 
             <div className="pt-2">
-              <h3 className="text-sm font-bold text-white">{activeProblem.name}</h3>
+              <h3 className="text-sm font-extrabold text-slate-900">{activeProblem.name}</h3>
               <div className="flex flex-wrap gap-1.5 mt-1.5">
                 {activeProblem.tags.map((t) => (
                   <span
                     key={t}
-                    className="text-[10px] px-2 py-0.5 rounded bg-white/[0.03] text-zinc-400 border border-white/[0.05]"
+                    className="text-[10px] px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-medium border border-slate-200"
                   >
                     #{t}
                   </span>
@@ -340,18 +340,18 @@ export default function MentorStudio() {
           </div>
 
           {/* 4-Tier Progressive Socratic Hint Drawer */}
-          <div className="glass-panel border border-white/[0.08] rounded-2xl p-5 space-y-4">
+          <div className="bg-white border border-slate-200/90 shadow-sm rounded-2xl p-5 space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Lightbulb className="w-4 h-4 text-amber-400" />
-                <h3 className="text-sm font-bold text-white">Progressive Socratic Hints</h3>
+                <Lightbulb className="w-4 h-4 text-amber-600" />
+                <h3 className="text-sm font-extrabold text-slate-900">Progressive Socratic Hints</h3>
               </div>
-              <span className="text-[10px] text-zinc-400">Spoiler-Free Tiers</span>
+              <span className="text-[10px] text-slate-400 font-semibold">Spoiler-Free Tiers</span>
             </div>
 
             {/* Display Unlocked Hints */}
             {hints.length === 0 ? (
-              <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] text-center text-xs text-zinc-400">
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-center text-xs text-slate-500 font-medium">
                 No hints unlocked yet. Solve on your own first, or unlock Tier 1 for the fundamental problem observation.
               </div>
             ) : (
@@ -359,26 +359,26 @@ export default function MentorStudio() {
                 {hints.map((h) => (
                   <div
                     key={h.tier}
-                    className="p-3.5 rounded-xl bg-amber-950/10 border border-amber-500/20 space-y-1.5 animate-fade-in"
+                    className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200 space-y-1.5 animate-fade-in shadow-xs"
                   >
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-bold text-amber-400">
+                      <span className="font-bold text-amber-900">
                         Tier {h.tier}: {h.title}
                       </span>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-semibold uppercase">
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-bold uppercase border border-amber-300">
                         {h.category.replace(/_/g, " ")}
                       </span>
                     </div>
-                    <p className="text-xs text-zinc-300 leading-relaxed">{h.content}</p>
+                    <p className="text-xs text-slate-700 leading-relaxed font-medium">{h.content}</p>
                     {h.textbookCitation && (
-                      <div className="mt-2 pt-2 border-t border-amber-500/10 flex items-center justify-between text-[11px]">
-                        <div className="flex items-center gap-1.5 text-amber-300/90">
-                          <BookOpen className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                      <div className="mt-2 pt-2 border-t border-amber-200/60 flex items-center justify-between text-[11px]">
+                        <div className="flex items-center gap-1.5 text-amber-900 font-semibold">
+                          <BookOpen className="w-3.5 h-3.5 text-amber-600 shrink-0" />
                           <span>{h.textbookCitation.book} ({h.textbookCitation.chapter})</span>
                         </div>
                         <Link
                           href={`/learn/${h.textbookCitation.learnSlug}`}
-                          className="text-amber-400 hover:text-white font-semibold underline underline-offset-2 flex items-center gap-0.5 shrink-0 ml-2"
+                          className="text-amber-800 hover:text-amber-950 font-bold underline underline-offset-2 flex items-center gap-0.5 shrink-0 ml-2"
                         >
                           <span>Study Theory</span>
                           <ChevronRight className="w-3 h-3" />
@@ -391,7 +391,7 @@ export default function MentorStudio() {
                           `Let's discuss Tier ${h.tier} hint for ${activeProblem.name}: "${h.title}". What is the reasoning behind this invariant?`
                         )
                       }
-                      className="text-[11px] text-indigo-400 hover:text-indigo-300 font-medium pt-1 flex items-center gap-1 transition-colors"
+                      className="text-[11px] text-sky-700 hover:text-sky-800 font-bold pt-1 flex items-center gap-1 transition-colors"
                     >
                       Discuss hint with mentor <ArrowRight className="w-3 h-3" />
                     </button>
@@ -405,13 +405,13 @@ export default function MentorStudio() {
               <button
                 onClick={handleUnlockNextHint}
                 disabled={loadingHint}
-                className="w-full py-2.5 bg-gradient-to-r from-amber-500/20 to-orange-500/20 hover:from-amber-500/30 hover:to-orange-500/30 text-amber-300 border border-amber-500/30 font-medium text-xs rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+                className="w-full py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-50 shadow-xs"
               >
                 {loadingHint ? (
-                  <div className="w-3.5 h-3.5 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
+                  <div className="w-3.5 h-3.5 border-2 border-amber-600 border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <>
-                    <Lightbulb className="w-3.5 h-3.5" />
+                    <Lightbulb className="w-3.5 h-3.5 text-amber-600" />
                     Unlock Tier {unlockedTier} Hint ({unlockedTier === 1 ? "Observation" : unlockedTier === 2 ? "Algorithm" : unlockedTier === 3 ? "Invariant Proof" : "Edge Cases"})
                   </>
                 )}
@@ -420,13 +420,13 @@ export default function MentorStudio() {
           </div>
 
           {/* Instant Code Reviewer & Bug Diagnostic */}
-          <div className="glass-panel border border-white/[0.08] rounded-2xl p-5 space-y-3">
+          <div className="bg-white border border-slate-200/90 shadow-sm rounded-2xl p-5 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Code2 className="w-4 h-4 text-indigo-400" />
-                <h3 className="text-sm font-bold text-white">Static Code Review & Bug Diagnostic</h3>
+                <Code2 className="w-4 h-4 text-sky-600" />
+                <h3 className="text-sm font-extrabold text-slate-900">Static Code Review & Bug Diagnostic</h3>
               </div>
-              <span className="text-[10px] text-zinc-400">C++ / Python / Java</span>
+              <span className="text-[10px] text-slate-400 font-semibold">C++ / Python / Java</span>
             </div>
 
             <textarea
@@ -434,14 +434,14 @@ export default function MentorStudio() {
               onChange={(e) => setSourceCode(e.target.value)}
               rows={8}
               placeholder="Paste your competitive programming solution here..."
-              className="w-full bg-[#080d1a] border border-white/[0.08] rounded-xl p-3 text-xs font-mono text-zinc-300 focus:outline-none focus:border-indigo-500 transition-colors leading-relaxed"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-mono text-slate-800 focus:outline-none focus:border-sky-500 transition-colors leading-relaxed shadow-xs"
             />
 
             <div className="flex items-center justify-between gap-3">
               <button
                 onClick={handleAnalyzeCode}
                 disabled={analyzingCode}
-                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs rounded-xl shadow-lg shadow-indigo-600/20 flex items-center gap-1.5 transition-all disabled:opacity-50"
+                className="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs rounded-xl shadow-sm flex items-center gap-1.5 transition-all disabled:opacity-50"
               >
                 {analyzingCode ? (
                   <>
@@ -462,7 +462,7 @@ export default function MentorStudio() {
                     `Can you review this solution code for ${activeProblem.name} (${activeProblem.rating}) and identify any complexity traps, potential TLE, or 32-bit overflow errors?\n\n\`\`\`cpp\n${sourceCode}\n\`\`\``
                   )
                 }
-                className="text-xs text-zinc-400 hover:text-white transition-colors"
+                className="text-xs text-slate-500 hover:text-slate-900 font-bold transition-colors"
               >
                 Send to Mentor Chat
               </button>
@@ -470,25 +470,25 @@ export default function MentorStudio() {
 
             {/* Analysis Report Output */}
             {reviewReport && (
-              <div className="mt-4 pt-4 border-t border-white/[0.08] space-y-3 animate-fade-in">
+              <div className="mt-4 pt-4 border-t border-slate-100 space-y-3 animate-fade-in">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-zinc-400">
-                    Est. Complexity: <strong className="text-white">{reviewReport.estimatedComplexity}</strong>
+                  <span className="text-slate-500">
+                    Est. Complexity: <strong className="text-slate-900">{reviewReport.estimatedComplexity}</strong>
                   </span>
                   <span
                     className={cn(
-                      "px-2 py-0.5 rounded text-[10px] font-bold uppercase",
+                      "px-2 py-0.5 rounded text-[10px] font-bold uppercase border shadow-xs",
                       reviewReport.hasCriticalIssues
-                        ? "bg-red-500/20 text-red-300 border border-red-500/30"
-                        : "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                        ? "bg-rose-100 text-rose-800 border-rose-300"
+                        : "bg-emerald-100 text-emerald-800 border-emerald-300"
                     )}
                   >
                     {reviewReport.hasCriticalIssues ? "Hazards Detected" : "Clean Structure"}
                   </span>
                 </div>
 
-                <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.06] text-xs text-zinc-300">
-                  <span className="font-semibold text-zinc-400 block text-[10px] uppercase mb-0.5">
+                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700">
+                  <span className="font-bold text-slate-500 block text-[10px] uppercase mb-0.5">
                     Risk Verdict:
                   </span>
                   {reviewReport.verdictRisk}
@@ -498,30 +498,30 @@ export default function MentorStudio() {
                   <div
                     key={i}
                     className={cn(
-                      "p-3 rounded-xl text-xs space-y-1 border",
+                      "p-3 rounded-xl text-xs space-y-1 border shadow-xs",
                       iss.severity === "CRITICAL"
-                        ? "bg-red-950/20 border-red-500/30 text-red-200"
-                        : "bg-amber-950/20 border-amber-500/30 text-amber-200"
+                        ? "bg-rose-50/80 border-rose-200 text-rose-900"
+                        : "bg-amber-50/80 border-amber-200 text-amber-900"
                     )}
                   >
                     <div className="flex items-center justify-between font-bold">
                       <span>{iss.title}</span>
-                      <span className="text-[10px] uppercase font-semibold">{iss.category}</span>
+                      <span className="text-[10px] uppercase font-bold">{iss.category}</span>
                     </div>
-                    <p className="text-[11px] text-zinc-300 leading-relaxed">{iss.description}</p>
-                    <div className="text-[11px] text-zinc-400 pt-1">
-                      <strong className="text-zinc-200">Suggested Fix: </strong>
+                    <p className="text-[11px] text-slate-700 leading-relaxed font-medium">{iss.description}</p>
+                    <div className="text-[11px] text-slate-600 pt-1">
+                      <strong className="text-slate-900 font-bold">Suggested Fix: </strong>
                       {iss.suggestedFix}
                     </div>
                     {iss.textbookCitation && (
-                      <div className="mt-2 pt-2 border-t border-white/[0.08] flex items-center justify-between text-[11px]">
-                        <div className="flex items-center gap-1.5 text-zinc-300">
-                          <BookOpen className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                      <div className="mt-2 pt-2 border-t border-slate-200/60 flex items-center justify-between text-[11px]">
+                        <div className="flex items-center gap-1.5 text-slate-700">
+                          <BookOpen className="w-3.5 h-3.5 text-sky-600 shrink-0" />
                           <span>{iss.textbookCitation.book} &bull; {iss.textbookCitation.chapter}</span>
                         </div>
                         <Link
                           href={`/learn/${iss.textbookCitation.learnSlug}`}
-                          className="text-indigo-400 hover:text-indigo-300 font-semibold underline underline-offset-2 flex items-center gap-0.5 shrink-0 ml-2"
+                          className="text-sky-700 hover:text-sky-800 font-bold underline underline-offset-2 flex items-center gap-0.5 shrink-0 ml-2"
                         >
                           <span>Read Guide</span>
                           <ChevronRight className="w-3 h-3" />
@@ -536,18 +536,18 @@ export default function MentorStudio() {
         </div>
 
         {/* RIGHT COLUMN: Interactive Mentor Chat (7 cols) */}
-        <div className="lg:col-span-7 flex flex-col h-[750px] glass-panel border border-white/[0.08] rounded-2xl overflow-hidden shadow-2xl">
+        <div className="lg:col-span-7 flex flex-col h-[750px] bg-white border border-slate-200 shadow-sm rounded-2xl overflow-hidden">
           {/* Chat Header */}
-          <div className="px-5 py-3.5 border-b border-white/[0.08] bg-white/[0.02] flex items-center justify-between">
+          <div className="px-5 py-3.5 border-b border-slate-200 bg-slate-50/70 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
               </span>
-              <span className="text-xs font-semibold text-white">Mentor Intelligence Stream</span>
+              <span className="text-xs font-bold text-slate-900">Mentor Intelligence Stream</span>
             </div>
-            <div className="text-[11px] text-zinc-400">
-              Active Persona: <strong className="text-indigo-400 capitalize">{persona.replace(/_/g, " ")}</strong>
+            <div className="text-[11px] text-slate-500">
+              Active Persona: <strong className="text-sky-700 capitalize font-bold">{persona.replace(/_/g, " ")}</strong>
             </div>
           </div>
 
@@ -561,8 +561,8 @@ export default function MentorStudio() {
                   className={cn("flex gap-3 text-xs leading-relaxed animate-fade-in", isUser ? "justify-end" : "justify-start")}
                 >
                   {!isUser && (
-                    <div className="w-7 h-7 rounded-lg bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center shrink-0 mt-0.5">
-                      <Bot className="w-4 h-4 text-indigo-400" />
+                    <div className="w-7 h-7 rounded-lg bg-sky-100 border border-sky-200 flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
+                      <Bot className="w-4 h-4 text-sky-700" />
                     </div>
                   )}
 
@@ -570,8 +570,8 @@ export default function MentorStudio() {
                     className={cn(
                       "max-w-[85%] rounded-2xl p-4 space-y-2",
                       isUser
-                        ? "bg-indigo-600 text-white rounded-tr-none shadow-lg shadow-indigo-600/20"
-                        : "bg-white/[0.04] text-zinc-200 border border-white/[0.08] rounded-tl-none"
+                        ? "bg-sky-600 text-white rounded-tr-none shadow-sm font-medium"
+                        : "bg-slate-50 text-slate-800 border border-slate-200 rounded-tl-none font-medium shadow-xs"
                     )}
                   >
                     <div className="whitespace-pre-wrap">{m.content}</div>
@@ -581,16 +581,16 @@ export default function MentorStudio() {
             })}
 
             {isThinking && (
-              <div className="flex items-center gap-2 text-xs text-zinc-400 pl-10">
-                <div className="w-3 h-3 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" />
+              <div className="flex items-center gap-2 text-xs text-slate-400 pl-10">
+                <div className="w-3 h-3 border-2 border-sky-600 border-t-transparent rounded-full animate-spin" />
                 <span>Mentor is analyzing algorithmic structure...</span>
               </div>
             )}
           </div>
 
           {/* Quick Prompts Bar */}
-          <div className="p-3 border-t border-white/[0.06] bg-white/[0.01] flex items-center gap-2 overflow-x-auto">
-            <span className="text-[10px] font-semibold uppercase text-zinc-400 shrink-0">Prompts:</span>
+          <div className="p-3 border-t border-slate-100 bg-slate-50/50 flex items-center gap-2 overflow-x-auto">
+            <span className="text-[10px] font-bold uppercase text-slate-400 shrink-0">Prompts:</span>
             {[
               "Why did my solution TLE on test 4?",
               "Give me a gentle hint for Problem C",
@@ -600,7 +600,7 @@ export default function MentorStudio() {
               <button
                 key={i}
                 onClick={() => handleSendMessage(p)}
-                className="px-2.5 py-1 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-[11px] text-zinc-300 border border-white/[0.06] shrink-0 transition-colors"
+                className="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 text-[11px] text-slate-600 font-semibold border border-slate-200 shrink-0 transition-colors shadow-xs"
               >
                 {p}
               </button>
@@ -608,7 +608,7 @@ export default function MentorStudio() {
           </div>
 
           {/* Chat Input Bar */}
-          <div className="p-4 border-t border-white/[0.08] bg-[#070b14]">
+          <div className="p-4 border-t border-slate-200 bg-white">
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -621,12 +621,12 @@ export default function MentorStudio() {
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 placeholder={`Ask ${persona.replace(/_/g, " ").toLowerCase()} mentor about an algorithm, time complexity, or hint...`}
-                className="flex-1 bg-[#0a0f1e] border border-white/[0.1] rounded-xl px-4 py-2.5 text-xs text-white placeholder-zinc-400 focus:outline-none focus:border-indigo-500 transition-colors"
+                className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-sky-500 transition-colors shadow-xs"
               />
               <button
                 type="submit"
                 disabled={!inputMessage.trim() || isThinking}
-                className="p-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl shadow-lg shadow-indigo-600/30 transition-all disabled:opacity-40"
+                className="p-2.5 bg-sky-600 hover:bg-sky-500 text-white rounded-xl shadow-sm transition-all disabled:opacity-40"
               >
                 <Send className="w-4 h-4" />
               </button>

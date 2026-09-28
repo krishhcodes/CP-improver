@@ -30,7 +30,7 @@ export function SkillRadarChart({ data }: SkillRadarChartProps) {
 
   if (!mounted) {
     return (
-      <div className="w-full h-64 flex items-center justify-center text-xs text-zinc-500">
+      <div className="w-full h-64 flex items-center justify-center text-xs text-slate-500">
         Loading skill radar...
       </div>
     );
@@ -40,24 +40,24 @@ export function SkillRadarChart({ data }: SkillRadarChartProps) {
     <div className="relative w-full h-72 flex items-center justify-center">
       <ResponsiveContainer width="100%" height="100%">
         <RadarChart cx="50%" cy="50%" outerRadius="75%" data={data}>
-          <PolarGrid stroke="rgba(255, 255, 255, 0.1)" strokeDasharray="3 3" />
+          <PolarGrid stroke="#e2e8f0" strokeDasharray="3 3" />
           <PolarAngleAxis
             dataKey="subject"
-            tick={{ fill: "#cbd5e1", fontSize: 11, fontWeight: 600 }}
+            tick={{ fill: "#334155", fontSize: 11, fontWeight: 700 }}
           />
           <PolarRadiusAxis
             angle={30}
             domain={[0, 100]}
-            tick={{ fill: "#64748b", fontSize: 9 }}
-            stroke="rgba(255, 255, 255, 0.05)"
+            tick={{ fill: "#94a3b8", fontSize: 9 }}
+            stroke="#e2e8f0"
           />
           <Tooltip content={<RadarCustomTooltip />} />
           <Radar
             name="Proficiency"
             dataKey="proficiency"
-            stroke="#818cf8"
+            stroke="#0284c7"
             strokeWidth={2}
-            fill="#6366f1"
+            fill="#38bdf8"
             fillOpacity={0.35}
           />
         </RadarChart>
@@ -70,12 +70,12 @@ function RadarCustomTooltip({ active, payload }: any) {
   if (active && payload && payload.length) {
     const item = payload[0].payload as RadarSkill;
     return (
-      <div className="glass-panel p-2.5 rounded-xl border border-white/[0.15] shadow-2xl text-xs space-y-1">
-        <span className="font-bold text-white block">{item.subject}</span>
-        <p className="text-zinc-300">
+      <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-xl text-xs space-y-1">
+        <span className="font-extrabold text-slate-900 block">{item.subject}</span>
+        <p className="text-slate-600">
           Proficiency:{" "}
-          <strong className="text-indigo-400 font-extrabold">{item.proficiency}</strong>
-          <span className="text-zinc-500">/100</span>
+          <strong className="text-sky-600 font-black">{item.proficiency}</strong>
+          <span className="text-slate-400">/100</span>
         </p>
       </div>
     );

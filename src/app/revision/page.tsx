@@ -95,14 +95,14 @@ export default function RevisionPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-black text-white tracking-tight">
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight">
               Spaced Revision Engine
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300 shadow-xs">
               SM-2 Algorithm
             </span>
           </div>
-          <p className="text-xs text-zinc-400 mt-1">
+          <p className="text-xs text-slate-500 mt-1">
             Active recall problem scheduler engineered to counteract the Ebbinghaus forgetting curve through calibrated spaced repetitions.
           </p>
         </div>
@@ -114,7 +114,7 @@ export default function RevisionPage() {
               setShowAnswer(false);
               setFeedback(null);
             }}
-            className="px-4 py-2.5 rounded-xl text-xs font-bold bg-amber-600 hover:bg-amber-500 text-white transition-all flex items-center gap-2 shadow-lg shadow-amber-600/25 self-start sm:self-auto"
+            className="px-4 py-2.5 rounded-xl text-xs font-bold bg-amber-600 hover:bg-amber-500 text-white transition-all flex items-center gap-2 shadow-sm self-start sm:self-auto"
           >
             <Sparkles className="w-4 h-4" />
             <span>Start Active Recall Session ({queue.dueCards.length} Due)</span>
@@ -124,47 +124,47 @@ export default function RevisionPage() {
 
       {/* Metric Stat Chips */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="p-4 rounded-2xl glass-panel border border-amber-500/20 bg-amber-500/[0.02]">
-          <span className="text-[10px] text-amber-400 font-semibold uppercase tracking-wider flex items-center gap-1">
-            <Clock className="w-3.5 h-3.5" />
+        <div className="p-4 rounded-2xl bg-amber-50/60 border border-amber-200 shadow-sm">
+          <span className="text-[10px] text-amber-800 font-bold uppercase tracking-wider flex items-center gap-1">
+            <Clock className="w-3.5 h-3.5 text-amber-600" />
             <span>Due for Drill Today</span>
           </span>
-          <p className="text-2xl font-black text-amber-300 mt-1">
+          <p className="text-2xl font-black text-amber-800 mt-1">
             {queue?.dueTodayCount ?? 3}
           </p>
-          <span className="text-[10px] text-zinc-400 mt-0.5 block">Requires active recall</span>
+          <span className="text-[10px] text-amber-700/80 mt-0.5 block font-medium">Requires active recall</span>
         </div>
 
-        <div className="p-4 rounded-2xl glass-panel border border-indigo-500/20 bg-indigo-500/[0.02]">
-          <span className="text-[10px] text-indigo-400 font-semibold uppercase tracking-wider flex items-center gap-1">
-            <Repeat className="w-3.5 h-3.5" />
+        <div className="p-4 rounded-2xl bg-sky-50/60 border border-sky-200 shadow-sm">
+          <span className="text-[10px] text-sky-800 font-bold uppercase tracking-wider flex items-center gap-1">
+            <Repeat className="w-3.5 h-3.5 text-sky-600" />
             <span>Upcoming in 7 Days</span>
           </span>
-          <p className="text-2xl font-black text-indigo-300 mt-1">
+          <p className="text-2xl font-black text-sky-800 mt-1">
             {queue?.upcomingWeekCount ?? 2}
           </p>
-          <span className="text-[10px] text-zinc-400 mt-0.5 block">On spaced track</span>
+          <span className="text-[10px] text-sky-600/80 mt-0.5 block font-medium">On spaced track</span>
         </div>
 
-        <div className="p-4 rounded-2xl glass-panel border border-emerald-500/20 bg-emerald-500/[0.02]">
-          <span className="text-[10px] text-emerald-400 font-semibold uppercase tracking-wider flex items-center gap-1">
-            <Award className="w-3.5 h-3.5" />
+        <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200 shadow-sm">
+          <span className="text-[10px] text-emerald-800 font-bold uppercase tracking-wider flex items-center gap-1">
+            <Award className="w-3.5 h-3.5 text-emerald-600" />
             <span>Mastered Archetypes</span>
           </span>
-          <p className="text-2xl font-black text-emerald-400 mt-1">
+          <p className="text-2xl font-black text-emerald-700 mt-1">
             {queue?.masteredCardsCount ?? 2}
           </p>
-          <span className="text-[10px] text-zinc-400 mt-0.5 block">&gt;= 4 consecutive passes</span>
+          <span className="text-[10px] text-emerald-600/80 mt-0.5 block font-medium">&gt;= 4 consecutive passes</span>
         </div>
 
-        <div className="p-4 rounded-2xl glass-panel border border-white/[0.08]">
-          <span className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider">
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+          <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
             Retention Stability
           </span>
-          <p className="text-2xl font-black text-white mt-1">
+          <p className="text-2xl font-black text-slate-900 mt-1">
             {queue?.retentionRate ?? 91}%
           </p>
-          <span className="text-[10px] text-zinc-400 mt-0.5 block">
+          <span className="text-[10px] text-slate-400 mt-0.5 block font-medium">
             Avg EF: {queue?.averageEaseFactor ?? 2.55}
           </span>
         </div>
@@ -172,18 +172,18 @@ export default function RevisionPage() {
 
       {/* Active Recall Drill Card Modal / Mode */}
       {activeDrillCard && (
-        <div className="p-6 rounded-2xl glass-panel border-2 border-amber-500/40 bg-amber-500/[0.03] space-y-5 shadow-2xl shadow-amber-500/10 relative overflow-hidden">
-          <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+        <div className="p-6 rounded-2xl bg-white border-2 border-amber-400 shadow-md space-y-5 relative overflow-hidden">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded text-[10px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/30 animate-pulse">
+              <span className="px-2.5 py-0.5 rounded text-[10px] font-black bg-amber-100 text-amber-900 border border-amber-300">
                 ACTIVE RECALL CARD #{(activeDrillIndex ?? 0) + 1} OF {queue?.dueCards.length}
               </span>
-              <span className="text-xs font-bold text-white">{activeDrillCard.conceptName}</span>
+              <span className="text-xs font-bold text-slate-900">{activeDrillCard.conceptName}</span>
             </div>
 
             <button
               onClick={() => setActiveDrillIndex(null)}
-              className="text-xs text-zinc-400 hover:text-white"
+              className="text-xs text-slate-400 hover:text-slate-800 font-bold"
             >
               Exit Drill
             </button>
@@ -191,11 +191,11 @@ export default function RevisionPage() {
 
           {/* Question / Prompt */}
           <div className="space-y-2">
-            <div className="flex items-center gap-2 text-xs font-bold text-indigo-400">
-              <HelpCircle className="w-4 h-4" />
+            <div className="flex items-center gap-2 text-xs font-bold text-sky-700">
+              <HelpCircle className="w-4 h-4 text-sky-600" />
               <span>Problem Archetype: {activeDrillCard.problemName}</span>
             </div>
-            <p className="text-sm font-semibold text-white leading-relaxed">
+            <p className="text-sm font-bold text-slate-900 leading-relaxed">
               {activeDrillCard.questionPrompt}
             </p>
           </div>
@@ -205,9 +205,9 @@ export default function RevisionPage() {
             <div className="pt-2">
               <button
                 onClick={() => setShowAnswer(true)}
-                className="px-4 py-2 rounded-xl text-xs font-bold bg-white/[0.06] hover:bg-white/[0.12] text-white border border-white/[0.1] transition-all flex items-center gap-2"
+                className="px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 transition-all flex items-center gap-2 shadow-xs"
               >
-                <Eye className="w-4 h-4 text-indigo-400" />
+                <Eye className="w-4 h-4 text-sky-600" />
                 <span>Show Solution Invariant & Takeaway</span>
               </button>
             </div>
@@ -216,30 +216,30 @@ export default function RevisionPage() {
           {/* Answer Key & Grading Options */}
           {showAnswer && (
             <div className="space-y-4 pt-2 animate-in fade-in-50 duration-200">
-              <div className="p-4 rounded-xl bg-slate-900/80 border border-indigo-500/30 space-y-1.5">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 block">
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5 shadow-xs">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-sky-800 block">
                   Core Invariant & Pattern
                 </span>
-                <p className="text-xs text-zinc-200 whitespace-pre-line leading-relaxed font-mono">
+                <p className="text-xs text-slate-800 whitespace-pre-line leading-relaxed font-mono">
                   {activeDrillCard.answerKey}
                 </p>
               </div>
 
               {/* Textbook Chapter Link */}
               {activeDrillCard.textbookCitation && (
-                <div className="p-3 rounded-xl bg-indigo-950/20 border border-indigo-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                <div className="p-3 rounded-xl bg-indigo-50/70 border border-indigo-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
                   <div className="space-y-0.5">
-                    <div className="flex items-center gap-1.5 text-indigo-300 font-bold text-[11px]">
-                      <BookOpen className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                    <div className="flex items-center gap-1.5 text-indigo-800 font-bold text-[11px]">
+                      <BookOpen className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
                       <span>Textbook Source: {activeDrillCard.textbookCitation.book}</span>
                     </div>
-                    <p className="text-[10px] text-zinc-400">
-                      Chapter: <strong>{activeDrillCard.textbookCitation.chapter}</strong>
+                    <p className="text-[10px] text-slate-600">
+                      Chapter: <strong className="text-slate-800">{activeDrillCard.textbookCitation.chapter}</strong>
                     </p>
                   </div>
                   <Link
                     href={`/learn/${activeDrillCard.textbookCitation.learnSlug}`}
-                    className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/30 flex items-center gap-1 shrink-0 self-start sm:self-auto transition-colors"
+                    className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-indigo-100 hover:bg-indigo-200 text-indigo-800 border border-indigo-300 flex items-center gap-1 shrink-0 self-start sm:self-auto transition-colors"
                   >
                     <span>Read Theory Chapter</span>
                     <ArrowRight className="w-3 h-3" />
@@ -249,53 +249,53 @@ export default function RevisionPage() {
 
               {/* Feedback Alert if submitted */}
               {feedback ? (
-                <div className="p-3 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold flex items-center gap-2">
-                  <Check className="w-4 h-4" />
+                <div className="p-3 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-300 text-xs font-bold flex items-center gap-2 shadow-xs">
+                  <Check className="w-4 h-4 text-emerald-600" />
                   <span>{feedback}</span>
                 </div>
               ) : (
                 /* SM-2 Recall Feedback Buttons */
                 <div className="space-y-2">
-                  <span className="text-[10px] text-zinc-400 font-semibold uppercase tracking-wider block">
+                  <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">
                     How well did you recall this solution pattern?
                   </span>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     <button
                       onClick={() => handleReviewSubmission(activeDrillCard.id, 1)}
-                      className="p-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 text-left transition-all group"
+                      className="p-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 text-left transition-all group shadow-xs"
                     >
                       <span className="text-xs font-extrabold block">Again</span>
-                      <span className="text-[10px] text-zinc-400 group-hover:text-zinc-300">
+                      <span className="text-[10px] text-rose-600/80">
                         Forgot / 1 day
                       </span>
                     </button>
 
                     <button
                       onClick={() => handleReviewSubmission(activeDrillCard.id, 3)}
-                      className="p-3 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-left transition-all group"
+                      className="p-3 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-left transition-all group shadow-xs"
                     >
                       <span className="text-xs font-extrabold block">Hard</span>
-                      <span className="text-[10px] text-zinc-400 group-hover:text-zinc-300">
+                      <span className="text-[10px] text-amber-600/80">
                         Strained recall
                       </span>
                     </button>
 
                     <button
                       onClick={() => handleReviewSubmission(activeDrillCard.id, 4)}
-                      className="p-3 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border border-blue-500/30 text-left transition-all group"
+                      className="p-3 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 text-left transition-all group shadow-xs"
                     >
                       <span className="text-xs font-extrabold block">Good</span>
-                      <span className="text-[10px] text-zinc-400 group-hover:text-zinc-300">
+                      <span className="text-[10px] text-sky-600/80">
                         Smooth recall
                       </span>
                     </button>
 
                     <button
                       onClick={() => handleReviewSubmission(activeDrillCard.id, 5)}
-                      className="p-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-left transition-all group"
+                      className="p-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-left transition-all group shadow-xs"
                     >
                       <span className="text-xs font-extrabold block">Easy</span>
-                      <span className="text-[10px] text-zinc-400 group-hover:text-zinc-300">
+                      <span className="text-[10px] text-emerald-600/80">
                         Instant mastery
                       </span>
                     </button>
@@ -308,7 +308,7 @@ export default function RevisionPage() {
       )}
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-1.5 p-1 rounded-xl glass-panel border border-white/[0.08] self-start">
+      <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100 border border-slate-200 self-start shadow-xs">
         {[
           { key: "DUE", label: `Due Today (${queue?.dueTodayCount ?? 0})` },
           { key: "UPCOMING", label: `Upcoming (${queue?.upcomingWeekCount ?? 0})` },
@@ -317,10 +317,10 @@ export default function RevisionPage() {
           <button
             key={tab.key}
             onClick={() => setFilterTab(tab.key as any)}
-            className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+            className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all ${
               filterTab === tab.key
-                ? "bg-indigo-600 text-white shadow-sm shadow-indigo-500/20"
-                : "text-zinc-400 hover:text-white hover:bg-white/[0.04]"
+                ? "bg-white text-slate-900 shadow-sm"
+                : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
             }`}
           >
             {tab.label}
@@ -336,55 +336,55 @@ export default function RevisionPage() {
           return (
             <div
               key={item.id}
-              className={`p-5 rounded-2xl glass-panel border transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 ${
+              className={`p-5 rounded-2xl bg-white border transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm ${
                 isDue
-                  ? "border-amber-500/30 bg-amber-500/[0.02]"
-                  : "border-white/[0.08] hover:border-white/[0.15]"
+                  ? "border-amber-300 hover:border-amber-400 bg-amber-50/20"
+                  : "border-slate-200/90 hover:border-sky-300"
               }`}
             >
               <div className="space-y-1.5">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-xs font-bold text-white">{item.conceptName}</span>
+                  <span className="text-xs font-extrabold text-slate-900">{item.conceptName}</span>
                   {isDue ? (
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300 shadow-xs">
                       DUE FOR DRILL
                     </span>
                   ) : (
-                    <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-zinc-800 text-zinc-400 border border-white/[0.06]">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
                       Next in {item.intervalDays}d
                     </span>
                   )}
                 </div>
 
-                <p className="text-sm text-indigo-300 font-semibold">{item.problemName}</p>
-                <p className="text-xs text-zinc-400 leading-relaxed line-clamp-2">
+                <p className="text-sm text-sky-700 font-bold">{item.problemName}</p>
+                <p className="text-xs text-slate-600 leading-relaxed line-clamp-2 font-medium">
                   {item.questionPrompt}
                 </p>
 
                 {item.textbookCitation && (
-                  <div className="flex items-center gap-2 pt-1 text-[11px] text-zinc-400">
-                    <BookOpen className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                  <div className="flex items-center gap-2 pt-1 text-[11px] text-slate-500">
+                    <BookOpen className="w-3.5 h-3.5 text-sky-600 shrink-0" />
                     <span>{item.textbookCitation.book}</span>
                     <Link
                       href={`/learn/${item.textbookCitation.learnSlug}`}
-                      className="text-indigo-400 hover:text-indigo-300 font-semibold underline underline-offset-2 ml-1"
+                      className="text-sky-700 hover:text-sky-800 font-bold underline underline-offset-2 ml-1"
                     >
                       Read Guide
                     </Link>
                   </div>
                 )}
 
-                <div className="flex items-center gap-3 text-[11px] text-zinc-500 pt-1">
+                <div className="flex items-center gap-3 text-[11px] text-slate-400 pt-1 font-medium">
                   <span>
-                    Current Interval: <strong className="text-zinc-300">{item.intervalDays} days</strong>
+                    Current Interval: <strong className="text-slate-700">{item.intervalDays} days</strong>
                   </span>
                   <span>•</span>
                   <span>
-                    Ease Factor: <strong className="text-zinc-300">{item.easeFactor}</strong>
+                    Ease Factor: <strong className="text-slate-700">{item.easeFactor}</strong>
                   </span>
                   <span>•</span>
                   <span>
-                    Reps: <strong className="text-zinc-300">{item.repetitions}</strong>
+                    Reps: <strong className="text-slate-700">{item.repetitions}</strong>
                   </span>
                 </div>
               </div>
@@ -405,8 +405,8 @@ export default function RevisionPage() {
                   }}
                   className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
                     isDue
-                      ? "bg-amber-600 hover:bg-amber-500 text-white shadow-md shadow-amber-600/20"
-                      : "bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 border border-white/[0.08]"
+                      ? "bg-amber-600 hover:bg-amber-500 text-white shadow-sm"
+                      : "bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 shadow-xs"
                   }`}
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
@@ -417,10 +417,10 @@ export default function RevisionPage() {
                   href={item.problemUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-white border border-white/[0.08] transition-all flex items-center gap-1"
+                  className="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 transition-all flex items-center gap-1 shadow-xs"
                 >
                   <span>Codeforces</span>
-                  <ExternalLink className="w-3.5 h-3.5 text-zinc-400" />
+                  <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
                 </a>
               </div>
             </div>

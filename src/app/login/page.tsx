@@ -103,21 +103,21 @@ export default function LoginPage() {
 
       const data = await res.json();
 
-      if (!res.ok) {
-        throw new Error(data.error ?? "Authentication failed");
+      if (!res.ok || data.error) {
+        setFormError(data.error || "Authentication failed");
+      } else {
+        setSuccessMessage(
+          mode === "REGISTER"
+            ? "Account created successfully! Redirecting..."
+            : "Signed in successfully! Redirecting..."
+        );
+        setTimeout(() => {
+          router.push("/");
+          router.refresh();
+        }, 1000);
       }
-
-      setSuccessMessage(
-        mode === "REGISTER"
-          ? "Account created and Codeforces profile linked! Redirecting..."
-          : "Signed in successfully! Redirecting..."
-      );
-
-      setTimeout(() => {
-        router.push("/");
-      }, 1000);
-    } catch (err: any) {
-      setFormError(err.message ?? "An error occurred");
+    } catch {
+      setFormError("A network error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -126,19 +126,17 @@ export default function LoginPage() {
   const rankInfo = verifiedUser ? getCodeforcesRank(verifiedUser.rating) : null;
 
   return (
-    <div className="min-h-[85vh] flex items-center justify-center py-12 px-4 select-none">
+    <div className="min-h-[80vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-md space-y-6">
-        {/* Brand Header */}
+        {/* Brand / Logo */}
         <div className="text-center space-y-2">
-          <div className="inline-flex w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 p-[1px] items-center justify-center shadow-xl shadow-indigo-500/20 mb-2">
-            <div className="w-full h-full bg-[#090d16] rounded-[15px] flex items-center justify-center">
-              <Terminal className="w-6 h-6 text-indigo-400" />
-            </div>
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-sky-600 text-white shadow-md shadow-sky-600/20 mx-auto">
+            <Terminal className="w-6 h-6" />
           </div>
-          <h1 className="text-2xl font-black text-white tracking-tight">
-            {mode === "LOGIN" ? "Welcome Back" : "Join CP Intelligence"}
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+            {mode === "LOGIN" ? "Welcome Back to CP Intelligence" : "Create Intelligence Account"}
           </h1>
-          <p className="text-xs text-zinc-400 max-w-xs mx-auto">
+          <p className="text-xs text-slate-500 max-w-xs mx-auto">
             {mode === "LOGIN"
               ? "Access your synchronized contest history, topic models, and personalized problem recommendations."
               : "Connect your Codeforces handle to unlock automated contest diagnostics and adaptive training plans."}
@@ -146,7 +144,7 @@ export default function LoginPage() {
         </div>
 
         {/* Tab Toggle */}
-        <div className="p-1 rounded-xl glass-panel border border-white/[0.08] grid grid-cols-2 gap-1 text-xs font-semibold">
+        <div className="p-1 rounded-xl bg-slate-100 border border-slate-200 grid grid-cols-2 gap-1 text-xs font-bold shadow-xs">
           <button
             type="button"
             onClick={() => {
@@ -156,8 +154,8 @@ export default function LoginPage() {
             className={cn(
               "py-2 rounded-lg transition-all",
               mode === "LOGIN"
-                ? "bg-indigo-600 text-white shadow-md shadow-indigo-500/20"
-                : "text-zinc-400 hover:text-white"
+                ? "bg-white text-slate-900 shadow-sm"
+                : "text-slate-600 hover:text-slate-900"
             )}
           >
             Sign In
@@ -171,8 +169,8 @@ export default function LoginPage() {
             className={cn(
               "py-2 rounded-lg transition-all",
               mode === "REGISTER"
-                ? "bg-indigo-600 text-white shadow-md shadow-indigo-500/20"
-                : "text-zinc-400 hover:text-white"
+                ? "bg-white text-slate-900 shadow-sm"
+                : "text-slate-600 hover:text-slate-900"
             )}
           >
             Create Account
@@ -180,18 +178,18 @@ export default function LoginPage() {
         </div>
 
         {/* Main Card */}
-        <div className="rounded-2xl glass-panel p-6 border border-white/[0.08] shadow-2xl relative overflow-hidden">
+        <div className="rounded-2xl glass-panel p-6 border border-slate-200 bg-white shadow-lg relative overflow-hidden">
           {/* Status Banners */}
           {formError && (
-            <div className="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-300 flex items-start gap-2.5">
-              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+            <div className="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-start gap-2.5">
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
               <span>{formError}</span>
             </div>
           )}
 
           {successMessage && (
-            <div className="mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-300 flex items-start gap-2.5">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+            <div className="mb-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-start gap-2.5">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
               <span>{successMessage}</span>
             </div>
           )}
@@ -199,16 +197,16 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Username */}
             <div className="space-y-1">
-              <label className="text-xs font-medium text-zinc-300">Username</label>
+              <label className="text-xs font-bold text-slate-700">Username</label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   type="text"
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="e.g. coder_pro"
-                  className="w-full h-10 pl-9 pr-3 bg-slate-900/60 border border-white/[0.08] rounded-xl text-xs text-white placeholder-zinc-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all"
+                  className="w-full h-10 pl-9 pr-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:border-sky-500 focus:bg-white outline-none transition-all font-medium"
                 />
               </div>
             </div>
@@ -217,17 +215,17 @@ export default function LoginPage() {
             {mode === "REGISTER" && (
               <div className="space-y-1">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-medium text-zinc-300">Email Address</label>
-                  <span className="text-[10px] text-zinc-500">Optional</span>
+                  <label className="text-xs font-bold text-slate-700">Email Address</label>
+                  <span className="text-[10px] text-slate-400">Optional</span>
                 </div>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@domain.com"
-                    className="w-full h-10 pl-9 pr-3 bg-slate-900/60 border border-white/[0.08] rounded-xl text-xs text-white placeholder-zinc-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all"
+                    className="w-full h-10 pl-9 pr-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:border-sky-500 focus:bg-white outline-none transition-all font-medium"
                   />
                 </div>
               </div>
@@ -237,16 +235,16 @@ export default function LoginPage() {
             {mode === "REGISTER" && (
               <div className="space-y-1">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-medium text-zinc-300">Codeforces Handle</label>
+                  <label className="text-xs font-bold text-slate-700">Codeforces Handle</label>
                   {verifyingHandle && (
-                    <span className="text-[10px] text-indigo-400 flex items-center gap-1">
+                    <span className="text-[10px] text-sky-600 flex items-center gap-1 font-bold">
                       <RefreshCw className="w-2.5 h-2.5 animate-spin" />
                       <span>Verifying on Codeforces...</span>
                     </span>
                   )}
                 </div>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 font-bold text-xs">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">
                     CF
                   </span>
                   <input
@@ -255,15 +253,15 @@ export default function LoginPage() {
                     value={codeforcesHandle}
                     onChange={(e) => setCodeforcesHandle(e.target.value)}
                     placeholder="e.g. tourist, Benq, or your handle"
-                    className="w-full h-10 pl-9 pr-3 bg-slate-900/60 border border-white/[0.08] rounded-xl text-xs text-white placeholder-zinc-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all"
+                    className="w-full h-10 pl-9 pr-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:border-sky-500 focus:bg-white outline-none transition-all font-medium"
                   />
                 </div>
 
                 {/* Live Handle Verification Preview Card */}
                 {verifiedUser && rankInfo && (
-                  <div className="mt-2 p-3 rounded-xl bg-slate-900/80 border border-indigo-500/30 flex items-center justify-between animate-in fade-in-50 duration-200">
+                  <div className="mt-2 p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between animate-in fade-in-50 duration-200">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-7 h-7 rounded-lg overflow-hidden bg-slate-800 flex items-center justify-center font-bold text-xs text-white">
+                      <div className="w-7 h-7 rounded-lg overflow-hidden bg-slate-200 flex items-center justify-center font-bold text-xs text-slate-800">
                         {verifiedUser.avatar ? (
                           <img
                             src={verifiedUser.avatar}
@@ -275,16 +273,16 @@ export default function LoginPage() {
                         )}
                       </div>
                       <div>
-                        <span className={cn("text-xs font-extrabold", rankInfo.textColor)}>
+                        <span className={cn("text-xs font-black", rankInfo.textColor)}>
                           {verifiedUser.handle}
                         </span>
-                        <p className="text-[10px] text-zinc-400">{rankInfo.name}</p>
+                        <p className="text-[10px] text-slate-500 font-medium">{rankInfo.name}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <span
                         className={cn(
-                          "px-2 py-0.5 rounded text-[11px] font-bold border",
+                          "px-2 py-0.5 rounded text-[11px] font-bold border shadow-xs",
                           rankInfo.bgColor,
                           rankInfo.borderColor,
                           rankInfo.textColor
@@ -292,13 +290,13 @@ export default function LoginPage() {
                       >
                         {verifiedUser.rating}
                       </span>
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                     </div>
                   </div>
                 )}
 
                 {handleError && (
-                  <p className="text-[11px] text-rose-400 flex items-center gap-1 pt-1">
+                  <p className="text-[11px] text-rose-600 flex items-center gap-1 pt-1 font-medium">
                     <AlertCircle className="w-3 h-3" />
                     <span>{handleError}</span>
                   </p>
@@ -308,16 +306,16 @@ export default function LoginPage() {
 
             {/* Password */}
             <div className="space-y-1">
-              <label className="text-xs font-medium text-zinc-300">Password</label>
+              <label className="text-xs font-bold text-slate-700">Password</label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   type="password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full h-10 pl-9 pr-3 bg-slate-900/60 border border-white/[0.08] rounded-xl text-xs text-white placeholder-zinc-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all"
+                  className="w-full h-10 pl-9 pr-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:border-sky-500 focus:bg-white outline-none transition-all font-medium"
                 />
               </div>
             </div>
@@ -326,7 +324,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full h-10 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:via-indigo-500 hover:to-purple-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/25 transition-all disabled:opacity-60"
+              className="w-full h-10 rounded-xl bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all disabled:opacity-60"
             >
               {loading ? (
                 <>
@@ -343,10 +341,10 @@ export default function LoginPage() {
           </form>
 
           {/* Guest / Demo Explorer Callout */}
-          <div className="mt-5 pt-4 border-t border-white/[0.06] text-center">
+          <div className="mt-5 pt-4 border-t border-slate-100 text-center">
             <Link
               href="/"
-              className="text-xs text-zinc-400 hover:text-indigo-300 font-medium inline-flex items-center gap-1 transition-colors"
+              className="text-xs text-sky-600 hover:text-sky-700 font-bold inline-flex items-center gap-1 transition-colors"
             >
               <span>Explore Platform with Demo Profile</span>
               <ArrowRight className="w-3 h-3" />

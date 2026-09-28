@@ -182,8 +182,8 @@ export default function VirtualContestArena({ params }: PageProps) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-xs text-zinc-400">Loading virtual contest arena...</p>
+          <div className="w-8 h-8 border-2 border-sky-600 border-t-transparent rounded-full animate-spin" />
+          <p className="text-xs text-slate-500">Loading virtual contest arena...</p>
         </div>
       </div>
     );
@@ -192,8 +192,8 @@ export default function VirtualContestArena({ params }: PageProps) {
   if (!session) {
     return (
       <div className="text-center py-16">
-        <h2 className="text-lg font-bold text-white">Contest session not found</h2>
-        <Link href="/virtual" className="mt-4 inline-block text-xs text-orange-400 hover:underline">
+        <h2 className="text-lg font-bold text-slate-900">Contest session not found</h2>
+        <Link href="/virtual" className="mt-4 inline-block text-xs text-sky-600 font-bold hover:underline">
           Return to Virtual Contest Lobby
         </Link>
       </div>
@@ -213,98 +213,98 @@ export default function VirtualContestArena({ params }: PageProps) {
   };
 
   return (
-    <div className="space-y-6 pb-12 animate-fade-in">
+    <div className="space-y-6 pb-12 animate-in fade-in-50 duration-300">
       {/* Sticky Contest Arena HUD Header */}
-      <div className="glass-panel border border-white/[0.08] rounded-2xl p-5 sticky top-20 z-30 shadow-2xl backdrop-blur-2xl">
+      <div className="glass-panel border border-slate-200/90 rounded-2xl p-5 sticky top-20 z-30 shadow-md backdrop-blur-xl bg-white/90">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           {/* Contest Info */}
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-400 border border-orange-500/20 font-semibold">
+              <span className="text-xs px-2.5 py-0.5 rounded-full bg-sky-50 text-sky-800 border border-sky-200 font-bold">
                 {session.division}
               </span>
-              <span className="text-xs text-zinc-400 font-medium">Scoring: {session.scoringMode}</span>
+              <span className="text-xs text-slate-500 font-medium">Scoring: {session.scoringMode}</span>
             </div>
-            <h1 className="text-xl font-bold text-white tracking-tight mt-1">{session.contestTitle}</h1>
+            <h1 className="text-xl font-black text-slate-900 tracking-tight mt-1">{session.contestTitle}</h1>
           </div>
 
           {/* Metrics & Countdown Clock */}
           <div className="flex flex-wrap items-center gap-3 md:gap-5">
             {/* Rank Badge */}
-            <div className="px-3.5 py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.06] flex items-center gap-2">
-              <Trophy className="w-4 h-4 text-amber-400" />
+            <div className="px-3.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 shadow-xs">
+              <Trophy className="w-4 h-4 text-amber-600" />
               <div>
-                <div className="text-[10px] text-zinc-400 uppercase font-semibold">Rank</div>
-                <div className="text-sm font-bold text-white">
-                  #{user?.rank || 1} <span className="text-xs text-zinc-400 font-normal">/ {session.participants.length}</span>
+                <div className="text-[10px] text-slate-400 uppercase font-semibold">Rank</div>
+                <div className="text-sm font-black text-slate-900">
+                  #{user?.rank || 1} <span className="text-xs text-slate-400 font-normal">/ {session.participants.length}</span>
                 </div>
               </div>
             </div>
 
             {/* Solved Count */}
-            <div className="px-3.5 py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.06] flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+            <div className="px-3.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 shadow-xs">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
               <div>
-                <div className="text-[10px] text-zinc-400 uppercase font-semibold">Solved</div>
-                <div className="text-sm font-bold text-emerald-400">
+                <div className="text-[10px] text-slate-400 uppercase font-semibold">Solved</div>
+                <div className="text-sm font-black text-emerald-700">
                   {user?.solvedCount || 0}{" "}
-                  <span className="text-xs text-zinc-400 font-normal">/ {session.problems.length}</span>
+                  <span className="text-xs text-slate-400 font-normal">/ {session.problems.length}</span>
                 </div>
               </div>
             </div>
 
             {/* Penalty or Points */}
-            <div className="px-3.5 py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.06] flex items-center gap-2">
-              <Clock className="w-4 h-4 text-indigo-400" />
+            <div className="px-3.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2 shadow-xs">
+              <Clock className="w-4 h-4 text-sky-600" />
               <div>
-                <div className="text-[10px] text-zinc-400 uppercase font-semibold">
+                <div className="text-[10px] text-slate-400 uppercase font-semibold">
                   {session.scoringMode === "CF" ? "Points" : "Penalty"}
                 </div>
-                <div className="text-sm font-bold text-indigo-300">
+                <div className="text-sm font-black text-sky-800">
                   {session.scoringMode === "CF" ? user?.totalPoints || 0 : `${user?.totalPenaltyMinutes || 0}m`}
                 </div>
               </div>
             </div>
 
             {/* Countdown Clock */}
-            <div className="px-4 py-1.5 rounded-xl bg-gradient-to-r from-orange-500/10 to-amber-500/10 border border-orange-500/30 flex items-center gap-3">
-              <Timer className="w-5 h-5 text-orange-400 animate-pulse" />
+            <div className="px-4 py-1.5 rounded-xl bg-amber-50 border border-amber-200 flex items-center gap-3 shadow-xs">
+              <Timer className="w-5 h-5 text-amber-600 animate-pulse" />
               <div>
-                <div className="text-[10px] text-orange-400/80 uppercase font-bold tracking-wider">
+                <div className="text-[10px] text-amber-800 uppercase font-bold tracking-wider">
                   {session.status === "COMPLETED" ? "Contest Finished" : "Time Remaining"}
                 </div>
-                <div className="text-base font-mono font-bold text-orange-300">
+                <div className="text-base font-mono font-black text-amber-900">
                   {formatTime(remainingSeconds)}
                 </div>
               </div>
             </div>
 
             {/* Simulation Controls */}
-            <div className="flex items-center gap-1.5 border-l border-white/[0.08] pl-3">
+            <div className="flex items-center gap-1.5 border-l border-slate-200 pl-3">
               <button
                 onClick={() => setIsPaused(!isPaused)}
                 title={isPaused ? "Resume simulation" : "Pause simulation"}
-                className="p-2 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 border border-white/[0.06] transition-colors"
+                className="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-colors shadow-xs"
               >
                 {isPaused ? <Play className="w-3.5 h-3.5 fill-current" /> : <Pause className="w-3.5 h-3.5" />}
               </button>
               <button
                 onClick={() => handleFastForward(5)}
                 title="Fast forward 5 minutes"
-                className="px-2 py-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-[11px] font-semibold text-zinc-300 border border-white/[0.06] flex items-center gap-1 transition-colors"
+                className="px-2 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-[11px] font-bold text-slate-700 border border-slate-200 flex items-center gap-1 transition-colors shadow-xs"
               >
                 <FastForward className="w-3 h-3" /> +5m
               </button>
               <button
                 onClick={() => handleFastForward(15)}
                 title="Fast forward 15 minutes"
-                className="px-2 py-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-[11px] font-semibold text-zinc-300 border border-white/[0.06] flex items-center gap-1 transition-colors"
+                className="px-2 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-[11px] font-bold text-slate-700 border border-slate-200 flex items-center gap-1 transition-colors shadow-xs"
               >
                 <FastForward className="w-3 h-3" /> +15m
               </button>
               <button
                 onClick={handleFinishContest}
-                className="px-3 py-1.5 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 text-xs font-semibold flex items-center gap-1.5 transition-colors ml-1"
+                className="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold flex items-center gap-1.5 transition-colors ml-1 shadow-xs"
               >
                 <Flag className="w-3 h-3" /> Finish
               </button>
@@ -313,23 +313,23 @@ export default function VirtualContestArena({ params }: PageProps) {
         </div>
 
         {/* Progress Bar */}
-        <div className="w-full bg-white/[0.06] h-1.5 rounded-full mt-4 overflow-hidden">
+        <div className="w-full bg-slate-100 h-1.5 rounded-full mt-4 overflow-hidden border border-slate-200/80">
           <div
-            className="bg-gradient-to-r from-orange-500 via-amber-400 to-emerald-400 h-full transition-all duration-300"
+            className="bg-gradient-to-r from-sky-500 via-emerald-400 to-emerald-500 h-full transition-all duration-300"
             style={{ width: `${progressPercent}%` }}
           />
         </div>
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-white/[0.08] pb-3">
+      <div className="flex items-center gap-2 border-b border-slate-200 pb-3">
         <button
           onClick={() => setActiveTab("problems")}
           className={cn(
-            "px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-2",
+            "px-4 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-2",
             activeTab === "problems"
-              ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30"
-              : "text-zinc-400 hover:text-white bg-white/[0.02]"
+              ? "bg-sky-600 text-white shadow-sm"
+              : "text-slate-600 hover:text-slate-900 bg-white border border-slate-200 shadow-xs"
           )}
         >
           <FileText className="w-3.5 h-3.5" />
@@ -338,10 +338,10 @@ export default function VirtualContestArena({ params }: PageProps) {
         <button
           onClick={() => setActiveTab("standings")}
           className={cn(
-            "px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-2",
+            "px-4 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-2",
             activeTab === "standings"
-              ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30"
-              : "text-zinc-400 hover:text-white bg-white/[0.02]"
+              ? "bg-sky-600 text-white shadow-sm"
+              : "text-slate-600 hover:text-slate-900 bg-white border border-slate-200 shadow-xs"
           )}
         >
           <Trophy className="w-3.5 h-3.5" />
@@ -350,10 +350,10 @@ export default function VirtualContestArena({ params }: PageProps) {
         <button
           onClick={() => setActiveTab("submissions")}
           className={cn(
-            "px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-2",
+            "px-4 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-2",
             activeTab === "submissions"
-              ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30"
-              : "text-zinc-400 hover:text-white bg-white/[0.02]"
+              ? "bg-sky-600 text-white shadow-sm"
+              : "text-slate-600 hover:text-slate-900 bg-white border border-slate-200 shadow-xs"
           )}
         >
           <Code2 className="w-3.5 h-3.5" />
@@ -374,12 +374,12 @@ export default function VirtualContestArena({ params }: PageProps) {
                 <div
                   key={prob.index}
                   className={cn(
-                    "glass-panel border rounded-2xl p-5 transition-all",
+                    "glass-panel border rounded-2xl p-5 transition-all bg-white shadow-sm",
                     isSolved
-                      ? "border-emerald-500/30 bg-emerald-950/10"
+                      ? "border-emerald-300 bg-emerald-50/40"
                       : hasTried
-                      ? "border-amber-500/30 bg-amber-950/10"
-                      : "border-white/[0.08]"
+                      ? "border-amber-300 bg-amber-50/40"
+                      : "border-slate-200"
                   )}
                 >
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -387,24 +387,24 @@ export default function VirtualContestArena({ params }: PageProps) {
                       <div className="flex items-center gap-3">
                         <div
                           className={cn(
-                            "w-8 h-8 rounded-xl font-bold flex items-center justify-center text-sm",
+                            "w-8 h-8 rounded-xl font-black flex items-center justify-center text-sm shadow-xs",
                             isSolved
-                              ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                              : "bg-white/[0.06] text-white border border-white/[0.08]"
+                              ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                              : "bg-sky-100 text-sky-800 border border-sky-200"
                           )}
                         >
                           {prob.index}
                         </div>
-                        <h3 className="text-base font-bold text-white hover:text-orange-400 transition-colors">
+                        <h3 className="text-base font-bold text-slate-900 hover:text-sky-600 transition-colors">
                           {prob.name}
                         </h3>
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-white/[0.05] border border-white/[0.08] text-zinc-300 font-medium">
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-700 font-bold">
                           {prob.rating} Rating
                         </span>
-                        <span className="text-xs text-zinc-400">{prob.points} pts</span>
+                        <span className="text-xs text-slate-500 font-medium">{prob.points} pts</span>
                       </div>
 
-                      <p className="text-xs text-zinc-300 pt-1 leading-relaxed">
+                      <p className="text-xs text-slate-600 pt-1 leading-relaxed">
                         {prob.statementSummary}
                       </p>
 
@@ -412,7 +412,7 @@ export default function VirtualContestArena({ params }: PageProps) {
                         {prob.tags.map((t) => (
                           <span
                             key={t}
-                            className="text-[10px] px-2 py-0.5 rounded bg-white/[0.03] text-zinc-400 border border-white/[0.05]"
+                            className="text-[10px] px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200 font-medium"
                           >
                             #{t}
                           </span>
@@ -424,21 +424,21 @@ export default function VirtualContestArena({ params }: PageProps) {
                     <div className="flex items-center gap-3 self-end md:self-auto shrink-0">
                       {isSolved ? (
                         <div className="text-right">
-                          <span className="px-3 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-semibold flex items-center gap-1.5">
-                            <CheckCircle2 className="w-3.5 h-3.5" /> Solved (+{res.solveTimeMinutes}m)
+                          <span className="px-3 py-1 rounded-lg bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-bold flex items-center gap-1.5 shadow-xs">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Solved (+{res.solveTimeMinutes}m)
                           </span>
                           {res.rejectedAttempts > 0 && (
-                            <div className="text-[10px] text-zinc-400 mt-1">
+                            <div className="text-[10px] text-slate-500 mt-1 font-medium">
                               {res.rejectedAttempts} failed attempts
                             </div>
                           )}
                         </div>
                       ) : hasTried ? (
-                        <span className="px-3 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-semibold">
+                        <span className="px-3 py-1 rounded-lg bg-amber-100 text-amber-800 border border-amber-300 text-xs font-bold shadow-xs">
                           Tried ({res?.rejectedAttempts || 0} WA)
                         </span>
                       ) : (
-                        <span className="text-xs text-zinc-400 font-medium">Not attempted</span>
+                        <span className="text-xs text-slate-400 font-medium">Not attempted</span>
                       )}
 
                       <button
@@ -446,7 +446,7 @@ export default function VirtualContestArena({ params }: PageProps) {
                           setSelectedProblem(prob.index);
                           setShowSubmitModal(true);
                         }}
-                        className="px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-medium text-xs rounded-xl shadow-lg shadow-orange-500/20 flex items-center gap-1.5 transition-all"
+                        className="px-4 py-2 bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold text-xs rounded-xl shadow-sm flex items-center gap-1.5 transition-all"
                       >
                         <Send className="w-3 h-3" /> Submit
                       </button>
@@ -461,11 +461,11 @@ export default function VirtualContestArena({ params }: PageProps) {
 
       {/* TAB 2: LIVE STANDINGS / SCOREBOARD */}
       {activeTab === "standings" && (
-        <div className="glass-panel border border-white/[0.08] rounded-2xl overflow-hidden">
+        <div className="glass-panel border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-white/[0.08] bg-white/[0.02] text-zinc-400 uppercase font-semibold">
+                <tr className="border-b border-slate-200 bg-slate-50 text-slate-500 uppercase font-bold">
                   <th className="py-3 px-4">#</th>
                   <th className="py-3 px-4">Participant</th>
                   <th className="py-3 px-4 text-center">Solved</th>
@@ -479,7 +479,7 @@ export default function VirtualContestArena({ params }: PageProps) {
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/[0.04]">
+              <tbody className="divide-y divide-slate-100">
                 {session.participants.map((p) => {
                   const isCurrentUser = p.isUser;
                   return (
@@ -487,26 +487,26 @@ export default function VirtualContestArena({ params }: PageProps) {
                       key={p.id}
                       className={cn(
                         "transition-colors",
-                        isCurrentUser ? "bg-indigo-950/20 font-semibold" : "hover:bg-white/[0.02]"
+                        isCurrentUser ? "bg-sky-50/70 font-semibold" : "hover:bg-slate-50/80"
                       )}
                     >
-                      <td className="py-3.5 px-4 font-bold text-white">#{p.rank}</td>
+                      <td className="py-3.5 px-4 font-black text-slate-900">#{p.rank}</td>
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-2">
-                          <span className={cn("font-medium", getCodeforcesRank(p.rating).textColor)}>
+                          <span className={cn("font-bold", getCodeforcesRank(p.rating).textColor)}>
                             {p.handle}
                           </span>
                           {isCurrentUser && (
-                            <span className="px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-bold">
+                            <span className="px-1.5 py-0.2 rounded bg-sky-100 text-sky-800 border border-sky-300 text-[10px] font-bold">
                               YOU
                             </span>
                           )}
                         </div>
                       </td>
-                      <td className="py-3.5 px-4 text-center font-bold text-emerald-400">
+                      <td className="py-3.5 px-4 text-center font-bold text-emerald-600">
                         {p.solvedCount}
                       </td>
-                      <td className="py-3.5 px-4 text-center text-zinc-300 font-mono">
+                      <td className="py-3.5 px-4 text-center text-slate-700 font-mono">
                         {session.scoringMode === "CF" ? p.totalPoints : `${p.totalPenaltyMinutes}m`}
                       </td>
                       {session.problems.map((prob) => {
@@ -514,7 +514,7 @@ export default function VirtualContestArena({ params }: PageProps) {
                         if (res?.isSolved) {
                           return (
                             <td key={prob.index} className="py-3 px-2 text-center">
-                              <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[11px] font-bold">
+                              <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[11px] font-bold border border-emerald-200">
                                 +{res.rejectedAttempts > 0 ? res.rejectedAttempts : ""}
                               </span>
                             </td>
@@ -522,15 +522,15 @@ export default function VirtualContestArena({ params }: PageProps) {
                         } else if ((res?.rejectedAttempts || 0) > 0) {
                           return (
                             <td key={prob.index} className="py-3 px-2 text-center">
-                              <span className="px-2 py-0.5 rounded bg-red-500/20 text-red-300 text-[11px] font-bold">
+                              <span className="px-2 py-0.5 rounded bg-rose-100 text-rose-800 text-[11px] font-bold border border-rose-200">
                                 -{res.rejectedAttempts}
                               </span>
                             </td>
                           );
                         }
                         return (
-                          <td key={prob.index} className="py-3 px-2 text-center text-zinc-400">
-                            .
+                          <td key={prob.index} className="py-3 px-2 text-center text-slate-300">
+                            •
                           </td>
                         );
                       })}
@@ -545,16 +545,16 @@ export default function VirtualContestArena({ params }: PageProps) {
 
       {/* TAB 3: SUBMISSIONS */}
       {activeTab === "submissions" && (
-        <div className="glass-panel border border-white/[0.08] rounded-2xl overflow-hidden">
+        <div className="glass-panel border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-sm">
           {session.submissions.length === 0 ? (
-            <div className="text-center py-12 text-zinc-400 text-xs">
+            <div className="text-center py-12 text-slate-400 text-xs">
               No submissions yet. Solve problems to record submission verdicts!
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="border-b border-white/[0.08] bg-white/[0.02] text-zinc-400 uppercase font-semibold">
+                  <tr className="border-b border-slate-200 bg-slate-50 text-slate-500 uppercase font-bold">
                     <th className="py-3 px-4">Time</th>
                     <th className="py-3 px-4">Problem</th>
                     <th className="py-3 px-4">Verdict</th>
@@ -563,33 +563,33 @@ export default function VirtualContestArena({ params }: PageProps) {
                     <th className="py-3 px-4">Language</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/[0.04]">
+                <tbody className="divide-y divide-slate-100">
                   {session.submissions.map((sub) => {
                     const isOk = sub.verdict === "OK";
                     return (
-                      <tr key={sub.id} className="hover:bg-white/[0.02] transition-colors">
-                        <td className="py-3.5 px-4 font-mono text-zinc-400">
+                      <tr key={sub.id} className="hover:bg-slate-50/80 transition-colors">
+                        <td className="py-3.5 px-4 font-mono text-slate-500">
                           +{Math.floor(sub.submittedAtSeconds / 60)}m
                         </td>
-                        <td className="py-3.5 px-4 font-bold text-white">
+                        <td className="py-3.5 px-4 font-bold text-slate-900">
                           Problem {sub.problemIndex}
                         </td>
                         <td className="py-3.5 px-4">
                           <span
                             className={cn(
-                              "px-2.5 py-1 rounded-lg text-xs font-semibold inline-flex items-center gap-1.5",
+                              "px-2.5 py-1 rounded-lg text-xs font-bold inline-flex items-center gap-1.5 shadow-xs border",
                               isOk
-                                ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                                : "bg-red-500/20 text-red-300 border border-red-500/30"
+                                ? "bg-emerald-50 text-emerald-800 border-emerald-300"
+                                : "bg-rose-50 text-rose-800 border-rose-300"
                             )}
                           >
-                            {isOk ? <CheckCircle2 className="w-3.5 h-3.5" /> : <XCircle className="w-3.5 h-3.5" />}
+                            {isOk ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> : <XCircle className="w-3.5 h-3.5 text-rose-600" />}
                             {sub.verdict === "OK" ? "Accepted" : sub.verdict.replace(/_/g, " ")}
                           </span>
                         </td>
-                        <td className="py-3.5 px-4 text-zinc-300">{sub.passedCount} tests</td>
-                        <td className="py-3.5 px-4 text-zinc-400 font-mono">{sub.timeConsumedMs} ms</td>
-                        <td className="py-3.5 px-4 text-zinc-400">{sub.language}</td>
+                        <td className="py-3.5 px-4 text-slate-700">{sub.passedCount} tests</td>
+                        <td className="py-3.5 px-4 text-slate-500 font-mono">{sub.timeConsumedMs} ms</td>
+                        <td className="py-3.5 px-4 text-slate-500">{sub.language}</td>
                       </tr>
                     );
                   })}
@@ -602,26 +602,26 @@ export default function VirtualContestArena({ params }: PageProps) {
 
       {/* SUBMISSION MODAL */}
       {showSubmitModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fade-in">
-          <div className="glass-panel border border-white/[0.12] rounded-2xl w-full max-w-xl p-6 shadow-2xl relative">
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <Send className="w-4 h-4 text-orange-400" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="glass-panel border border-slate-200 rounded-2xl w-full max-w-xl p-6 shadow-2xl relative bg-white">
+            <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <Send className="w-4 h-4 text-sky-600" />
               Submit Solution — Problem {selectedProblem}
             </h3>
-            <p className="text-xs text-zinc-400 mt-1">
+            <p className="text-xs text-slate-500 mt-1">
               Select problem verdict and language to record virtual contest submission.
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-4 mt-5">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[11px] font-semibold text-zinc-300 uppercase block mb-1">
+                  <label className="text-[11px] font-bold text-slate-700 uppercase block mb-1">
                     Problem
                   </label>
                   <select
                     value={selectedProblem}
                     onChange={(e) => setSelectedProblem(e.target.value)}
-                    className="w-full bg-[#0a0f1d] border border-white/[0.1] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-sky-500 font-medium"
                   >
                     {session.problems.map((p) => (
                       <option key={p.index} value={p.index}>
@@ -632,13 +632,13 @@ export default function VirtualContestArena({ params }: PageProps) {
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-semibold text-zinc-300 uppercase block mb-1">
+                  <label className="text-[11px] font-bold text-slate-700 uppercase block mb-1">
                     Target Verdict
                   </label>
                   <select
                     value={verdict}
                     onChange={(e) => setVerdict(e.target.value as SubmissionVerdict)}
-                    className="w-full bg-[#0a0f1d] border border-white/[0.1] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-sky-500 font-medium"
                   >
                     <option value="OK">Accepted (OK)</option>
                     <option value="WRONG_ANSWER">Wrong Answer (WA)</option>
@@ -650,13 +650,13 @@ export default function VirtualContestArena({ params }: PageProps) {
               </div>
 
               <div>
-                <label className="text-[11px] font-semibold text-zinc-300 uppercase block mb-1">
+                <label className="text-[11px] font-bold text-slate-700 uppercase block mb-1">
                   Language
                 </label>
                 <select
                   value={language}
                   onChange={(e) => setLanguage(e.target.value)}
-                  className="w-full bg-[#0a0f1d] border border-white/[0.1] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-sky-500 font-medium"
                 >
                   <option value="GNU C++20">GNU C++20 (64 bit)</option>
                   <option value="Python 3">Python 3.10</option>
@@ -666,14 +666,14 @@ export default function VirtualContestArena({ params }: PageProps) {
               </div>
 
               <div>
-                <label className="text-[11px] font-semibold text-zinc-300 uppercase block mb-1">
+                <label className="text-[11px] font-bold text-slate-700 uppercase block mb-1">
                   Source Code
                 </label>
                 <textarea
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
                   rows={6}
-                  className="w-full bg-[#070b14] border border-white/[0.08] rounded-xl p-3 text-xs font-mono text-zinc-300 focus:outline-none focus:border-orange-500"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs font-mono text-slate-100 focus:outline-none focus:border-sky-500"
                 />
               </div>
 
@@ -681,14 +681,14 @@ export default function VirtualContestArena({ params }: PageProps) {
                 <button
                   type="button"
                   onClick={() => setShowSubmitModal(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white transition-colors"
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-800 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-medium text-xs rounded-xl shadow-lg shadow-orange-500/20 flex items-center gap-1.5 transition-all disabled:opacity-50"
+                  className="px-5 py-2.5 bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-bold text-xs rounded-xl shadow-sm flex items-center gap-1.5 transition-all disabled:opacity-50"
                 >
                   {submitting ? "Judging..." : "Submit Solution"}
                 </button>

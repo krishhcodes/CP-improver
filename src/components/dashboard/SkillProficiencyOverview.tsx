@@ -15,26 +15,26 @@ export function SkillProficiencyOverview({ topics }: SkillProficiencyOverviewPro
   const criticalCount = topics.filter((t) => t.status === "CRITICAL").length;
 
   return (
-    <div className="rounded-2xl glass-panel p-6 border border-white/[0.08] flex flex-col justify-between h-full">
+    <div className="rounded-2xl glass-panel p-6 border border-slate-200/90 flex flex-col justify-between h-full bg-white shadow-sm">
       <div>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <h2 className="text-base font-bold text-white tracking-tight">Estimated Skill Vector</h2>
+            <h2 className="text-base font-extrabold text-slate-900 tracking-tight">Estimated Skill Vector</h2>
             {criticalCount > 0 && (
-              <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-rose-500/20 text-rose-300 border border-rose-500/30">
+              <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-rose-100 text-rose-800 border border-rose-200 shadow-sm">
                 {criticalCount} Acute Weaknesses
               </span>
             )}
           </div>
           <Link
             href="/topics"
-            className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 flex items-center gap-0.5 transition-colors"
+            className="text-xs font-bold text-sky-600 hover:text-sky-700 flex items-center gap-0.5 transition-colors"
           >
             <span>Full Matrix</span>
             <ChevronRight className="w-3.5 h-3.5" />
           </Link>
         </div>
-        <p className="text-xs text-zinc-400 mt-0.5">
+        <p className="text-xs text-slate-500 mt-0.5">
           Model-derived training proficiency across core Codeforces tags [0 - 100].
         </p>
       </div>
@@ -51,17 +51,17 @@ export function SkillProficiencyOverview({ topics }: SkillProficiencyOverviewPro
             ? "bg-amber-500"
             : topic.proficiencyScore >= 75
             ? "bg-emerald-500"
-            : "bg-indigo-500";
+            : "bg-sky-500";
 
           const statusBadge = isCritical ? (
-            <span className="text-[10px] font-bold text-rose-400 flex items-center gap-1">
+            <span className="text-[10px] font-bold text-rose-600 flex items-center gap-1">
               <AlertCircle className="w-3 h-3" />
               <span>Needs Drill</span>
             </span>
           ) : isNeedsWork ? (
-            <span className="text-[10px] font-bold text-amber-400">Moderate</span>
+            <span className="text-[10px] font-bold text-amber-600">Moderate</span>
           ) : (
-            <span className="text-[10px] font-bold text-emerald-400 flex items-center gap-1">
+            <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-1">
               <CheckCircle2 className="w-3 h-3" />
               <span>Proficient</span>
             </span>
@@ -71,19 +71,19 @@ export function SkillProficiencyOverview({ topics }: SkillProficiencyOverviewPro
             <div key={topic.tag} className="space-y-1.5">
               <div className="flex items-center justify-between text-xs">
                 <div className="flex items-center gap-2">
-                  <span className="font-bold text-white capitalize">{topic.tag}</span>
-                  <span className="text-[10px] text-zinc-500">
+                  <span className="font-bold text-slate-900 capitalize">{topic.tag}</span>
+                  <span className="text-[10px] text-slate-400">
                     ({topic.solvedCount} solved / {topic.failedCount} failed)
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   {statusBadge}
-                  <span className="font-extrabold text-white text-xs">{topic.proficiencyScore}%</span>
+                  <span className="font-black text-slate-900 text-xs">{topic.proficiencyScore}%</span>
                 </div>
               </div>
 
               {/* Progress Track */}
-              <div className="w-full h-2 rounded-full bg-slate-800/80 overflow-hidden relative">
+              <div className="w-full h-2 rounded-full bg-slate-100 border border-slate-200/80 overflow-hidden relative">
                 <div
                   className={`h-full rounded-full transition-all duration-500 ${barColor}`}
                   style={{ width: `${topic.proficiencyScore}%` }}
@@ -91,7 +91,7 @@ export function SkillProficiencyOverview({ topics }: SkillProficiencyOverviewPro
               </div>
 
               {isCritical && (
-                <p className="text-[11px] text-zinc-400 italic pt-0.5 line-clamp-1">
+                <p className="text-[11px] text-slate-500 italic pt-0.5 line-clamp-1">
                   💡 {topic.actionRecommendation}
                 </p>
               )}
@@ -110,26 +110,26 @@ export function SkillProficiencyOverview({ topics }: SkillProficiencyOverviewPro
         const guide = findCurriculumGuideForTopic(targetTag);
 
         return (
-          <div className="p-3.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-xs text-indigo-300 space-y-2">
+          <div className="p-3.5 rounded-xl bg-gradient-to-r from-sky-50 via-indigo-50/40 to-slate-50 border border-sky-200 text-xs text-slate-700 space-y-2 shadow-sm">
             <div className="flex items-start gap-2.5">
-              <Sparkles className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
+              <Sparkles className="w-4 h-4 text-sky-600 shrink-0 mt-0.5" />
               <div>
-                <span className="font-bold text-white">Algorithm Recommendation: </span>
+                <span className="font-bold text-slate-900">Algorithm Recommendation: </span>
                 <span>
-                  Practice 3 targeted problems on <strong className="capitalize text-white">{targetTag}</strong> (Rating {targetRating}–{targetRating + 100}) to accelerate your rating climb.
+                  Practice 3 targeted problems on <strong className="capitalize text-sky-800 font-bold">{targetTag}</strong> (Rating {targetRating}–{targetRating + 100}) to accelerate your rating climb.
                 </span>
               </div>
             </div>
 
             {guide && (
-              <div className="pt-2 border-t border-indigo-500/20 flex items-center justify-between text-[11px]">
-                <div className="flex items-center gap-1.5 text-zinc-300 truncate">
-                  <BookOpen className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+              <div className="pt-2 border-t border-sky-200/60 flex items-center justify-between text-[11px]">
+                <div className="flex items-center gap-1.5 text-slate-600 truncate">
+                  <BookOpen className="w-3.5 h-3.5 text-sky-600 shrink-0" />
                   <span className="truncate">Textbook: {guide.name} ({guide.primaryBookCitation})</span>
                 </div>
                 <Link
                   href={`/learn/${guide.slug}`}
-                  className="text-indigo-400 hover:text-white font-bold underline underline-offset-2 shrink-0 ml-2"
+                  className="text-sky-600 hover:text-sky-800 font-bold underline underline-offset-2 shrink-0 ml-2"
                 >
                   Read Guide &rarr;
                 </Link>

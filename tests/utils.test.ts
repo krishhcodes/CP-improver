@@ -10,37 +10,37 @@ describe("Codeforces Rank Helper", () => {
   it("correctly identifies Legendary Grandmaster", () => {
     const rank = getCodeforcesRank(3150);
     expect(rank.name).toBe("Legendary Grandmaster");
-    expect(rank.textColor).toContain("text-red-500");
+    expect(rank.textColor).toContain("text-rose-700");
   });
 
   it("correctly identifies Grandmaster", () => {
     const rank = getCodeforcesRank(2450);
     expect(rank.name).toBe("Grandmaster");
-    expect(rank.textColor).toContain("text-red-500");
+    expect(rank.textColor).toContain("text-rose-700");
   });
 
   it("correctly identifies Candidate Master", () => {
     const rank = getCodeforcesRank(1950);
     expect(rank.name).toBe("Candidate Master");
-    expect(rank.textColor).toContain("text-purple-400");
+    expect(rank.textColor).toContain("text-purple-700");
   });
 
   it("correctly identifies Expert", () => {
     const rank = getCodeforcesRank(1750);
     expect(rank.name).toBe("Expert");
-    expect(rank.textColor).toContain("text-blue-400");
+    expect(rank.textColor).toContain("text-blue-700");
   });
 
   it("correctly identifies Specialist", () => {
     const rank = getCodeforcesRank(1450);
     expect(rank.name).toBe("Specialist");
-    expect(rank.textColor).toContain("text-cyan-400");
+    expect(rank.textColor).toContain("text-teal-700");
   });
 
   it("correctly identifies Pupil", () => {
     const rank = getCodeforcesRank(1250);
     expect(rank.name).toBe("Pupil");
-    expect(rank.textColor).toContain("text-emerald-400");
+    expect(rank.textColor).toContain("text-emerald-700");
   });
 
   it("correctly handles unrated and edge cases", () => {
@@ -78,20 +78,20 @@ describe("Verdict Style Helper", () => {
     const style = getVerdictStyle("OK");
     expect(style.label).toBe("Accepted");
     expect(style.shortLabel).toBe("AC");
-    expect(style.textColor).toContain("text-emerald-400");
+    expect(style.textColor).toContain("text-emerald-700");
   });
 
   it("returns Wrong Answer for WRONG_ANSWER", () => {
     const style = getVerdictStyle("WRONG_ANSWER");
     expect(style.label).toBe("Wrong Answer");
     expect(style.shortLabel).toBe("WA");
-    expect(style.textColor).toContain("text-rose-400");
+    expect(style.textColor).toContain("text-rose-700");
   });
 
   it("returns TLE for TIME_LIMIT_EXCEEDED", () => {
     const style = getVerdictStyle("TIME_LIMIT_EXCEEDED");
     expect(style.shortLabel).toBe("TLE");
-    expect(style.textColor).toContain("text-amber-400");
+    expect(style.textColor).toContain("text-amber-800");
   });
 });
 

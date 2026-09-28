@@ -12,10 +12,10 @@ export function VerdictDistributionChart({ verdicts }: VerdictDistributionChartP
   const totalSubmissions = verdicts.reduce((acc, v) => acc + v.count, 0);
 
   return (
-    <div className="rounded-2xl glass-panel p-6 border border-white/[0.08] flex flex-col justify-between h-full">
+    <div className="rounded-2xl glass-panel p-6 border border-slate-200/90 shadow-sm bg-white flex flex-col justify-between h-full">
       <div>
-        <h2 className="text-base font-bold text-white tracking-tight">Verdict Distribution</h2>
-        <p className="text-xs text-zinc-400 mt-0.5">
+        <h2 className="text-base font-extrabold text-slate-900 tracking-tight">Verdict Distribution</h2>
+        <p className="text-xs text-slate-500 mt-0.5">
           Submission outcomes breakdown across all practice and contest problems.
         </p>
       </div>
@@ -33,7 +33,7 @@ export function VerdictDistributionChart({ verdicts }: VerdictDistributionChartP
               innerRadius={55}
               outerRadius={80}
               paddingAngle={3}
-              stroke="rgba(0,0,0,0.4)"
+              stroke="#ffffff"
               strokeWidth={2}
             >
               {verdicts.map((entry, index) => (
@@ -46,28 +46,28 @@ export function VerdictDistributionChart({ verdicts }: VerdictDistributionChartP
 
         {/* Center Text inside Donut */}
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-          <span className="text-2xl font-black text-white">{totalSubmissions.toLocaleString()}</span>
-          <span className="text-[10px] uppercase tracking-wider font-semibold text-zinc-400">Total</span>
+          <span className="text-2xl font-black text-slate-900">{totalSubmissions.toLocaleString()}</span>
+          <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400">Total</span>
         </div>
       </div>
 
       {/* Verdict Items Legend */}
-      <div className="grid grid-cols-2 gap-2 pt-3 border-t border-white/[0.06]">
+      <div className="grid grid-cols-2 gap-2 pt-3 border-t border-slate-200">
         {verdicts.map((v) => (
           <div
             key={v.verdict}
-            className="flex items-center justify-between p-2 rounded-lg glass-panel-subtle border border-white/[0.04]"
+            className="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-200/80 shadow-xs"
           >
             <div className="flex items-center gap-2 overflow-hidden">
               <span
-                className="w-2.5 h-2.5 rounded-full shrink-0"
+                className="w-2.5 h-2.5 rounded-full shrink-0 shadow-xs"
                 style={{ backgroundColor: v.color }}
               />
-              <span className="text-xs text-zinc-300 font-medium truncate">{v.verdict}</span>
+              <span className="text-xs text-slate-700 font-bold truncate">{v.verdict}</span>
             </div>
             <div className="text-right shrink-0">
-              <span className="text-xs font-bold text-white">{v.count}</span>
-              <span className="text-[10px] text-zinc-500 ml-1">({v.percentage}%)</span>
+              <span className="text-xs font-bold text-slate-900">{v.count}</span>
+              <span className="text-[10px] text-slate-400 ml-1 font-medium">({v.percentage}%)</span>
             </div>
           </div>
         ))}
@@ -80,13 +80,13 @@ function VerdictTooltip({ active, payload }: any) {
   if (active && payload && payload.length) {
     const data: VerdictCount = payload[0].payload;
     return (
-      <div className="glass-panel p-2.5 rounded-lg border border-white/[0.15] shadow-xl text-xs space-y-1">
-        <div className="flex items-center gap-1.5 font-bold text-white">
-          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: data.color }} />
+      <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-xl text-xs space-y-1">
+        <div className="flex items-center gap-1.5 font-bold text-slate-900">
+          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: data.color }} />
           <span>{data.verdict}</span>
         </div>
-        <p className="text-zinc-300 text-[11px]">
-          Count: <strong className="text-white">{data.count.toLocaleString()}</strong> ({data.percentage}%)
+        <p className="text-slate-600 text-[11px]">
+          Count: <strong className="text-slate-900">{data.count.toLocaleString()}</strong> ({data.percentage}%)
         </p>
       </div>
     );

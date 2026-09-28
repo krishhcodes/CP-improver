@@ -28,24 +28,24 @@ export default function DashboardPage() {
 
   if (error) {
     return (
-      <div className="rounded-2xl glass-panel p-8 border border-rose-500/20 text-center space-y-4 max-w-xl mx-auto my-12">
-        <div className="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center mx-auto text-rose-400">
+      <div className="rounded-2xl bg-white p-8 border border-rose-200 text-center space-y-4 max-w-xl mx-auto my-12 shadow-md">
+        <div className="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-center mx-auto text-rose-600">
           <AlertCircle className="w-6 h-6" />
         </div>
         <div>
-          <h2 className="text-lg font-bold text-white">Could not load Codeforces Profile</h2>
-          <p className="text-xs text-zinc-400 mt-1">{error}</p>
+          <h2 className="text-lg font-extrabold text-slate-900">Could not load Codeforces Profile</h2>
+          <p className="text-xs text-slate-500 mt-1">{error}</p>
         </div>
         <div className="flex items-center justify-center gap-3 pt-2">
           <button
             onClick={() => switchHandle("AC_on_first_TRY")}
-            className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition-all shadow-md shadow-indigo-500/20"
+            className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs transition-all shadow-md shadow-sky-600/20"
           >
             Load My ID (AC_on_first_TRY)
           </button>
           <button
             onClick={() => switchHandle("Alex_Algo")}
-            className="px-4 py-2 rounded-xl glass-panel-subtle hover:bg-white/[0.08] text-zinc-300 font-semibold text-xs border border-white/[0.08] transition-all"
+            className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs border border-slate-200 transition-all shadow-xs"
           >
             Use Demo Profile
           </button>
@@ -58,39 +58,39 @@ export default function DashboardPage() {
     return (
       <div className="space-y-8 animate-pulse">
         {/* Profile Header Skeleton */}
-        <div className="h-44 rounded-2xl glass-panel border border-white/[0.06] bg-slate-900/40 p-6 flex items-center justify-between">
+        <div className="h-44 rounded-2xl bg-white border border-slate-200 p-6 flex items-center justify-between shadow-sm">
           <div className="flex items-center gap-5">
-            <div className="w-20 h-20 rounded-2xl bg-slate-800/80" />
+            <div className="w-20 h-20 rounded-2xl bg-slate-200" />
             <div className="space-y-2.5">
-              <div className="h-7 w-48 rounded-lg bg-slate-800/80" />
-              <div className="h-4 w-72 rounded-md bg-slate-800/60" />
+              <div className="h-7 w-48 rounded-lg bg-slate-200" />
+              <div className="h-4 w-72 rounded-md bg-slate-100" />
             </div>
           </div>
           <div className="hidden sm:flex items-center gap-3">
-            <div className="h-16 w-24 rounded-xl bg-slate-800/50" />
-            <div className="h-16 w-24 rounded-xl bg-slate-800/50" />
+            <div className="h-16 w-24 rounded-xl bg-slate-100" />
+            <div className="h-16 w-24 rounded-xl bg-slate-100" />
           </div>
         </div>
 
         {/* Performance Cards Skeleton */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-28 rounded-2xl glass-panel border border-white/[0.06] bg-slate-900/30 p-5 space-y-3">
-              <div className="h-4 w-28 rounded bg-slate-800/60" />
-              <div className="h-8 w-16 rounded bg-slate-800/80" />
+            <div key={i} className="h-28 rounded-2xl bg-white border border-slate-200 p-5 space-y-3 shadow-sm">
+              <div className="h-4 w-28 rounded bg-slate-100" />
+              <div className="h-8 w-16 rounded bg-slate-200" />
             </div>
           ))}
         </div>
 
         {/* Charts Skeleton */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 h-96 rounded-2xl glass-panel border border-white/[0.06] bg-slate-900/30 p-6 space-y-4">
-            <div className="h-5 w-40 rounded bg-slate-800/60" />
-            <div className="h-72 rounded-xl bg-slate-800/30" />
+          <div className="lg:col-span-2 h-96 rounded-2xl bg-white border border-slate-200 p-6 space-y-4 shadow-sm">
+            <div className="h-5 w-40 rounded bg-slate-100" />
+            <div className="h-72 rounded-xl bg-slate-50" />
           </div>
-          <div className="h-96 rounded-2xl glass-panel border border-white/[0.06] bg-slate-900/30 p-6 space-y-4">
-            <div className="h-5 w-36 rounded bg-slate-800/60" />
-            <div className="h-60 rounded-full w-60 mx-auto bg-slate-800/30" />
+          <div className="h-96 rounded-2xl bg-white border border-slate-200 p-6 space-y-4 shadow-sm">
+            <div className="h-5 w-36 rounded bg-slate-100" />
+            <div className="h-60 rounded-full w-60 mx-auto bg-slate-100" />
           </div>
         </div>
       </div>

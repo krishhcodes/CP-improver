@@ -46,6 +46,10 @@ export async function GET(request: NextRequest) {
     const queryRating = request.nextUrl.searchParams.get("rating");
     const parsedQueryRating = queryRating ? parseInt(queryRating, 10) : null;
     let userRating = parsedQueryRating && !isNaN(parsedQueryRating) ? parsedQueryRating : 1000;
+    const queryWeek = request.nextUrl.searchParams.get("week");
+    const parsedWeek = queryWeek ? parseInt(queryWeek, 10) : 1;
+    const weekNumber = !isNaN(parsedWeek) && parsedWeek >= 1 && parsedWeek <= 4 ? parsedWeek : 1;
+
     const userSolvedKeys = new Set<string>();
     let candidateProblems = CALIBRATED_TRAINING_PROBLEMS;
 
@@ -89,11 +93,10 @@ export async function GET(request: NextRequest) {
 
     const plan = generateAdaptiveTrainingPlan({
       userRating,
-      criticalWeaknesses: ["dp", "strings"],
-      strongTopics: ["graphs", "greedy"],
+      weekNumber,
+      startDate: new Date(),
       candidateProblems,
       userSolvedKeys,
-      currentDayIndex: 2, // Wednesday
     });
 
     return NextResponse.json({

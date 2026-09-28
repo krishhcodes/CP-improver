@@ -136,24 +136,19 @@ describe("Explainable Recommendation Engine", () => {
   });
 
   describe("generateAdaptiveTrainingPlan", () => {
-    it("generates a complete 7-day adaptive schedule with tasks", () => {
+    it("generates a complete 7-day adaptive schedule with tasks starting today", () => {
       const plan = generateAdaptiveTrainingPlan({
         userRating: 1650,
-        criticalWeaknesses: ["dp", "strings"],
-        strongTopics: ["graphs", "greedy"],
-        currentDayIndex: 2,
+        weekNumber: 1,
+        startDate: new Date("2026-09-28T00:00:00Z"),
       });
 
       expect(plan.days).toHaveLength(7);
-      expect(plan.days[0].dayName).toBe("Monday");
-      expect(plan.days[0].focusTopic).toBe("dp");
-      expect(plan.days[1].dayName).toBe("Tuesday");
-      expect(plan.days[1].focusTopic).toBe("strings");
-      expect(plan.days[2].dayName).toBe("Wednesday");
-      expect(plan.days[2].status).toBe("CURRENT");
-
+      expect(plan.days[0].dayName).toContain("Monday");
+      expect(plan.days[0].status).toBe("CURRENT");
+      expect(plan.days[1].status).toBe("UPCOMING");
       expect(plan.totalTasks).toBeGreaterThan(0);
-      expect(plan.completionPercentage).toBeGreaterThanOrEqual(0);
+      expect(plan.completionPercentage).toBe(0);
     });
   });
 });

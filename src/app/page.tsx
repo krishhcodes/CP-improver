@@ -58,17 +58,17 @@ export default function DashboardPage() {
     return (
       <div className="space-y-8 animate-pulse">
         {/* Profile Header Skeleton */}
-        <div className="h-44 rounded-2xl bg-white border border-slate-200 p-6 flex items-center justify-between shadow-sm">
+        <div className="h-44 rounded-2xl bg-slate-950 border border-slate-800 p-6 flex items-center justify-between shadow-xl">
           <div className="flex items-center gap-5">
-            <div className="w-20 h-20 rounded-2xl bg-slate-200" />
+            <div className="w-20 h-20 rounded-2xl bg-slate-850" />
             <div className="space-y-2.5">
-              <div className="h-7 w-48 rounded-lg bg-slate-200" />
-              <div className="h-4 w-72 rounded-md bg-slate-100" />
+              <div className="h-7 w-48 rounded-lg bg-slate-800" />
+              <div className="h-4 w-72 rounded-md bg-slate-900" />
             </div>
           </div>
           <div className="hidden sm:flex items-center gap-3">
-            <div className="h-16 w-24 rounded-xl bg-slate-100" />
-            <div className="h-16 w-24 rounded-xl bg-slate-100" />
+            <div className="h-16 w-24 rounded-xl bg-slate-900" />
+            <div className="h-16 w-24 rounded-xl bg-slate-900" />
           </div>
         </div>
 

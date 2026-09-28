@@ -42,6 +42,12 @@ export interface AutopsyUpsolveItem {
   tags: string[];
   yieldScore: number;
   reason: string;
+  curriculumGuide?: {
+    slug: string;
+    name: string;
+    bookCitation: string;
+    chapter: string;
+  };
 }
 
 export interface PostContestAutopsy {

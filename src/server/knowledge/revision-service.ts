@@ -21,6 +21,11 @@ export interface RevisionCard {
   nextReviewAtSeconds: number;
   lastReviewedAtSeconds?: number;
   status: "DUE" | "UPCOMING" | "FUTURE";
+  textbookCitation?: {
+    book: string;
+    chapter: string;
+    learnSlug: string;
+  };
 }
 
 export interface RevisionQueueSummary {
@@ -54,6 +59,11 @@ export const DEFAULT_REVISION_CARDS: RevisionCard[] = [
     repetitions: 3,
     nextReviewAtSeconds: now - 3600, // Due now
     status: "DUE",
+    textbookCitation: {
+      book: "USACO Guide Silver & Principles of Algorithmic Problem Solving (Sannemo)",
+      chapter: "Chapter 5: Monotonic Predicate Search",
+      learnSlug: "binary-search-answer",
+    },
   },
   {
     id: "rev-2",
@@ -71,6 +81,11 @@ export const DEFAULT_REVISION_CARDS: RevisionCard[] = [
     repetitions: 4,
     nextReviewAtSeconds: now - 1800, // Due now
     status: "DUE",
+    textbookCitation: {
+      book: "Competitive Programmer's Handbook (CPH) & CLRS",
+      chapter: "CPH Chapter 15 & CLRS Chapter 21: Disjoint Sets",
+      learnSlug: "dsu",
+    },
   },
   {
     id: "rev-3",
@@ -88,6 +103,11 @@ export const DEFAULT_REVISION_CARDS: RevisionCard[] = [
     repetitions: 2,
     nextReviewAtSeconds: now - 7200, // Due now
     status: "DUE",
+    textbookCitation: {
+      book: "USACO Guide Silver & CPH",
+      chapter: "CPH Chapter 8: Amortized Analysis & Two Pointers",
+      learnSlug: "two-pointers",
+    },
   },
   {
     id: "rev-4",
@@ -105,6 +125,11 @@ export const DEFAULT_REVISION_CARDS: RevisionCard[] = [
     repetitions: 5,
     nextReviewAtSeconds: now + 3 * 86400, // In 3 days
     status: "UPCOMING",
+    textbookCitation: {
+      book: "USACO Guide Silver & CPH",
+      chapter: "Chapter 12: Graph Traversals & Tree Diameters",
+      learnSlug: "bfs-dfs",
+    },
   },
   {
     id: "rev-5",
@@ -122,6 +147,11 @@ export const DEFAULT_REVISION_CARDS: RevisionCard[] = [
     repetitions: 3,
     nextReviewAtSeconds: now + 5 * 86400, // In 5 days
     status: "UPCOMING",
+    textbookCitation: {
+      book: "Introduction to Algorithms (CLRS) & CP4",
+      chapter: "CLRS Chapter 16: Classical Knapsack & Offset Transformations",
+      learnSlug: "knapsack",
+    },
   },
   {
     id: "rev-6",
@@ -139,6 +169,11 @@ export const DEFAULT_REVISION_CARDS: RevisionCard[] = [
     repetitions: 1,
     nextReviewAtSeconds: now - 100, // Due now
     status: "DUE",
+    textbookCitation: {
+      book: "Competitive Programming 4 (CP4) & CLRS",
+      chapter: "CP4 Book 1 Sec 2.4: Segment Trees & Range Bitmasks",
+      learnSlug: "segment-tree",
+    },
   },
 ];
 

@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { TopicWeakness } from "@/types";
-import { Target, AlertCircle, CheckCircle2, ChevronRight, Sparkles } from "lucide-react";
+import { Target, AlertCircle, CheckCircle2, ChevronRight, Sparkles, BookOpen } from "lucide-react";
+import { findCurriculumGuideForTopic } from "@/server/knowledge/curriculum-links";
 
 interface SkillProficiencyOverviewProps {
   topics: TopicWeakness[];
@@ -106,16 +107,34 @@ export function SkillProficiencyOverview({ topics }: SkillProficiencyOverviewPro
         const targetRating = weakest?.avgRating
           ? Math.max(800, Math.round(weakest.avgRating / 100) * 100)
           : 1000;
+        const guide = findCurriculumGuideForTopic(targetTag);
 
         return (
-          <div className="p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-xs text-indigo-300 flex items-start gap-2.5">
-            <Sparkles className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
-            <div>
-              <span className="font-bold text-white">Algorithm Recommendation: </span>
-              <span>
-                Practice 3 targeted problems on <strong className="capitalize text-white">{targetTag}</strong> (Rating {targetRating}–{targetRating + 100}) to accelerate your rating climb.
-              </span>
+          <div className="p-3.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-xs text-indigo-300 space-y-2">
+            <div className="flex items-start gap-2.5">
+              <Sparkles className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
+              <div>
+                <span className="font-bold text-white">Algorithm Recommendation: </span>
+                <span>
+                  Practice 3 targeted problems on <strong className="capitalize text-white">{targetTag}</strong> (Rating {targetRating}–{targetRating + 100}) to accelerate your rating climb.
+                </span>
+              </div>
             </div>
+
+            {guide && (
+              <div className="pt-2 border-t border-indigo-500/20 flex items-center justify-between text-[11px]">
+                <div className="flex items-center gap-1.5 text-zinc-300 truncate">
+                  <BookOpen className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                  <span className="truncate">Textbook: {guide.name} ({guide.primaryBookCitation})</span>
+                </div>
+                <Link
+                  href={`/learn/${guide.slug}`}
+                  className="text-indigo-400 hover:text-white font-bold underline underline-offset-2 shrink-0 ml-2"
+                >
+                  Read Guide &rarr;
+                </Link>
+              </div>
+            )}
           </div>
         );
       })()}

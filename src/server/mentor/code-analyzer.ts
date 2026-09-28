@@ -38,6 +38,12 @@ export function analyzeCPCode(
         "Using standard `std::cin` / `std::cout` without untying streams. For inputs with N >= 10^5, I/O bottlenecks can consume 0.4s to 1.0s, triggering unexpected TLE.",
       suggestedFix:
         "Add `ios::sync_with_stdio(false); cin.tie(nullptr);` at the top of your `main()` function.",
+      textbookCitation: {
+        book: "Competitive Programmer's Handbook (CPH)",
+        chapter: "Chapter 1: Input and Output Efficiency",
+        learnSlug: "prefix-sums",
+        invariant: "cin.tie(nullptr) unties cin from cout; sync_with_stdio(false) disables C/C++ buffer synchronization.",
+      },
     });
   } else if (hasFastIO) {
     positiveHighlights.push("Fast I/O enabled (`ios::sync_with_stdio(false); cin.tie(nullptr);`).");
@@ -52,6 +58,11 @@ export function analyzeCPCode(
       description:
         "`std::endl` forces a full stream buffer flush on every invocation. In tight loops or large outputs, this adds massive overhead.",
       suggestedFix: "Replace `std::endl` with `'\\n'` to allow stream buffering.",
+      textbookCitation: {
+        book: "Competitive Programming 4 (CP4)",
+        chapter: "Book 1 Section 1.3: Fast I/O in Competitive Programming",
+        learnSlug: "prefix-sums",
+      },
     });
   }
 
@@ -67,6 +78,12 @@ export function analyzeCPCode(
         "Multiplying two 32-bit signed integers before taking modulo can exceed 2 * 10^9 (overflowing into negative values) before `% MOD` is applied.",
       suggestedFix:
         "Cast to 64-bit: `(1LL * a * b) % MOD` or declare variables directly as `long long`.",
+      textbookCitation: {
+        book: "CPH by Antti Laaksonen",
+        chapter: "Chapter 2: Number Representation & 64-bit Modulo",
+        learnSlug: "prefix-sums",
+        invariant: "Intermediate product of two 10^9 values is 10^18, requiring 64-bit registers before modulo arithmetic.",
+      },
     });
   }
 
@@ -80,6 +97,12 @@ export function analyzeCPCode(
       description:
         "Accumulating array sums or costs using 32-bit signed `int` overflows if sum exceeds ~2 * 10^9. An array of 2 * 10^5 elements with values up to 10^9 sums to 2 * 10^14.",
       suggestedFix: "Change accumulator declaration from `int` to `long long` (`int64_t`).",
+      textbookCitation: {
+        book: "Competitive Programming 4 (CP4)",
+        chapter: "Book 1 Section 1.3: Data Types and Extreme Constraint Invariants",
+        learnSlug: "prefix-sums",
+        invariant: "Sum over N=2e5 with elements up to 1e9 yields 2e14 > 2^31 - 1; requires 64-bit long long.",
+      },
     });
   }
 
@@ -93,6 +116,12 @@ export function analyzeCPCode(
         "Using 32-bit `INT_MAX` for path distances or DP minimums risks overflow when adding edge weights: `dist[u] + weight` will wrap around to negative numbers.",
       suggestedFix:
         "Use 64-bit infinity: `const long long INF = 1e18;` and guard updates with `if (dist[u] != INF)`.",
+      textbookCitation: {
+        book: "Introduction to Algorithms (CLRS)",
+        chapter: "Chapter 24: Single-Source Shortest Paths & Relaxation Invariants",
+        learnSlug: "dijkstra",
+        invariant: "Relaxation step d[v] = min(d[v], d[u] + w) will overflow signed 32-bit infinity into negative numbers.",
+      },
     });
   }
 
@@ -118,6 +147,12 @@ export function analyzeCPCode(
       )} * 10^8 operations, which far exceeds the standard ~10^8 ops/sec budget for a ${timeLimit}s time limit.`,
       suggestedFix:
         "Optimize to O(N log N) using sorting/two pointers/binary search, or O(N) using prefix sums, frequency counting, or a monotonic queue.",
+      textbookCitation: {
+        book: "USACO Guide Silver & CPH",
+        chapter: "USACO Guide Silver: Two Pointers / CPH Chapter 8",
+        learnSlug: "two-pointers",
+        invariant: "Monotonic condition allows both window boundaries to advance in amortized O(N) rather than nested O(N^2).",
+      },
     });
   }
 
@@ -131,6 +166,12 @@ export function analyzeCPCode(
         "Default `std::unordered_map` in GCC is vulnerable to deterministic hash-collision attacks on Codeforces (crafted test cases degrading O(1) lookups to O(N), causing TLE).",
       suggestedFix:
         "Use `std::map` (O(log N)), `gp_hash_table` with `custom_hash` incorporating `chrono::steady_clock`, or direct array lookup if keys are bounded.",
+      textbookCitation: {
+        book: "Principles of Algorithmic Problem Solving (Sannemo)",
+        chapter: "Chapter 3: Hash Tables, Collisions, and Worst-Case Inputs",
+        learnSlug: "prefix-sums",
+        invariant: "Codeforces tests use anti-hash suites that force std::unordered_map into O(N) single-bucket degeneration.",
+      },
     });
   }
 
@@ -144,6 +185,11 @@ export function analyzeCPCode(
         "Calling `vector::erase()` shifts all subsequent elements in O(N) time. Doing this inside a loop yields O(N^2) complexity.",
       suggestedFix:
         "Use the erase-remove idiom `v.erase(remove(...), v.end())` for bulk removal, or maintain a boolean `deleted` array.",
+      textbookCitation: {
+        book: "Competitive Programmer's Handbook (CPH)",
+        chapter: "Chapter 4: Data Structures & Dynamic Arrays",
+        learnSlug: "prefix-sums",
+      },
     });
   }
 
@@ -157,6 +203,12 @@ export function analyzeCPCode(
         "Recursive DFS on an unconstrained graph with N >= 2 * 10^5 can generate a line-graph call stack of depth 200,000, risking standard 8MB stack overflow (SIGSEGV / RTE).",
       suggestedFix:
         "For tree algorithms, BFS is stack-safe. If DFS is required, ensure `#pragma comment(linker, \"/STACK:...\")` or use an explicit stack.",
+      textbookCitation: {
+        book: "USACO Guide Silver & CPH",
+        chapter: "USACO Guide Silver: Graph Traversals & Stack Depth Limits",
+        learnSlug: "bfs-dfs",
+        invariant: "Recursion depth >= 2e5 exceeds default 8MB thread stack size, triggering SIGSEGV on linear tree topologies.",
+      },
     });
   }
 
@@ -169,6 +221,11 @@ export function analyzeCPCode(
       description:
         "Vector declared with exact size `n`, but access pattern includes `[i + 1]`. On the last iteration `i = n - 1`, `a[i + 1]` triggers out-of-bounds memory access.",
       suggestedFix: "Declare array with padding: `vector<long long> a(n + 2);` or bound loop at `n - 1`.",
+      textbookCitation: {
+        book: "Principles of Algorithmic Problem Solving (Sannemo)",
+        chapter: "Chapter 1: Implementation Bugs & Array Boundaries",
+        learnSlug: "prefix-sums",
+      },
     });
   }
 

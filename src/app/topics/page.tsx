@@ -344,11 +344,34 @@ export default function TopicsPage() {
                 </div>
 
                 {/* Actionable Diagnostic Callout */}
-                <div className="p-3.5 rounded-xl bg-slate-900/60 border border-white/[0.04] text-xs">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 block mb-1">
-                    Diagnostic Analysis
-                  </span>
-                  <p className="text-zinc-300 leading-relaxed">{topic.actionRecommendation}</p>
+                <div className="p-3.5 rounded-xl bg-slate-900/60 border border-white/[0.04] text-xs space-y-2">
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 block mb-1">
+                      Diagnostic Analysis
+                    </span>
+                    <p className="text-zinc-300 leading-relaxed">{topic.actionRecommendation}</p>
+                  </div>
+
+                  {topic.curriculumRef && (
+                    <div className="pt-2 border-t border-white/[0.05] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="space-y-0.5">
+                        <div className="flex items-center gap-1.5 text-indigo-300 font-bold text-[11px]">
+                          <BookOpen className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                          <span>Literature: {topic.curriculumRef.bookCitation}</span>
+                        </div>
+                        <p className="text-[10px] text-zinc-400 line-clamp-1">
+                          {topic.curriculumRef.chapter} &bull; <span className="text-zinc-500">{topic.curriculumRef.keyInvariant}</span>
+                        </p>
+                      </div>
+                      <Link
+                        href={`/learn/${topic.curriculumRef.slug}`}
+                        className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/30 flex items-center gap-1 shrink-0 self-start sm:self-auto transition-colors"
+                      >
+                        <span>Read Chapter</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </Link>
+                    </div>
+                  )}
                 </div>
               </div>
 

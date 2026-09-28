@@ -17,6 +17,7 @@ import {
   Eye,
   Check,
   RotateCcw,
+  BookOpen,
 } from "lucide-react";
 import { RevisionCard, RevisionQueueSummary } from "@/server/knowledge/revision-service";
 
@@ -224,6 +225,28 @@ export default function RevisionPage() {
                 </p>
               </div>
 
+              {/* Textbook Chapter Link */}
+              {activeDrillCard.textbookCitation && (
+                <div className="p-3 rounded-xl bg-indigo-950/20 border border-indigo-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-1.5 text-indigo-300 font-bold text-[11px]">
+                      <BookOpen className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                      <span>Textbook Source: {activeDrillCard.textbookCitation.book}</span>
+                    </div>
+                    <p className="text-[10px] text-zinc-400">
+                      Chapter: <strong>{activeDrillCard.textbookCitation.chapter}</strong>
+                    </p>
+                  </div>
+                  <Link
+                    href={`/learn/${activeDrillCard.textbookCitation.learnSlug}`}
+                    className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/30 flex items-center gap-1 shrink-0 self-start sm:self-auto transition-colors"
+                  >
+                    <span>Read Theory Chapter</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </Link>
+                </div>
+              )}
+
               {/* Feedback Alert if submitted */}
               {feedback ? (
                 <div className="p-3 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold flex items-center gap-2">
@@ -337,6 +360,19 @@ export default function RevisionPage() {
                 <p className="text-xs text-zinc-400 leading-relaxed line-clamp-2">
                   {item.questionPrompt}
                 </p>
+
+                {item.textbookCitation && (
+                  <div className="flex items-center gap-2 pt-1 text-[11px] text-zinc-400">
+                    <BookOpen className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                    <span>{item.textbookCitation.book}</span>
+                    <Link
+                      href={`/learn/${item.textbookCitation.learnSlug}`}
+                      className="text-indigo-400 hover:text-indigo-300 font-semibold underline underline-offset-2 ml-1"
+                    >
+                      Read Guide
+                    </Link>
+                  </div>
+                )}
 
                 <div className="flex items-center gap-3 text-[11px] text-zinc-500 pt-1">
                   <span>

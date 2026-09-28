@@ -2,11 +2,19 @@ export type MentorPersona = "SOCRATIC" | "STRICT_COACH" | "DIAGNOSTICIAN";
 
 export type HintTierLevel = 1 | 2 | 3 | 4;
 
+export interface TextbookCitation {
+  book: string;
+  chapter: string;
+  learnSlug: string;
+  invariant?: string;
+}
+
 export interface ProgressiveHint {
   tier: HintTierLevel;
   title: string;
   category: "OBSERVATION" | "ALGORITHM_PARADIGM" | "INVARIANT_PROOF" | "EDGE_CASES";
   content: string;
+  textbookCitation?: TextbookCitation;
 }
 
 export type IssueSeverity = "CRITICAL" | "WARNING" | "INFO";
@@ -27,6 +35,7 @@ export interface CodeAnalysisIssue {
   description: string;
   codeSnippet?: string;
   suggestedFix: string;
+  textbookCitation?: TextbookCitation;
 }
 
 export interface CodeReviewReport {

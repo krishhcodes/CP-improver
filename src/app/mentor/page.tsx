@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { useUser } from "@/context/UserContext";
 import {
   Bot,
@@ -369,6 +370,21 @@ export default function MentorStudio() {
                       </span>
                     </div>
                     <p className="text-xs text-zinc-300 leading-relaxed">{h.content}</p>
+                    {h.textbookCitation && (
+                      <div className="mt-2 pt-2 border-t border-amber-500/10 flex items-center justify-between text-[11px]">
+                        <div className="flex items-center gap-1.5 text-amber-300/90">
+                          <BookOpen className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                          <span>{h.textbookCitation.book} ({h.textbookCitation.chapter})</span>
+                        </div>
+                        <Link
+                          href={`/learn/${h.textbookCitation.learnSlug}`}
+                          className="text-amber-400 hover:text-white font-semibold underline underline-offset-2 flex items-center gap-0.5 shrink-0 ml-2"
+                        >
+                          <span>Study Theory</span>
+                          <ChevronRight className="w-3 h-3" />
+                        </Link>
+                      </div>
+                    )}
                     <button
                       onClick={() =>
                         handleSendMessage(
@@ -497,6 +513,21 @@ export default function MentorStudio() {
                       <strong className="text-zinc-200">Suggested Fix: </strong>
                       {iss.suggestedFix}
                     </div>
+                    {iss.textbookCitation && (
+                      <div className="mt-2 pt-2 border-t border-white/[0.08] flex items-center justify-between text-[11px]">
+                        <div className="flex items-center gap-1.5 text-zinc-300">
+                          <BookOpen className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                          <span>{iss.textbookCitation.book} &bull; {iss.textbookCitation.chapter}</span>
+                        </div>
+                        <Link
+                          href={`/learn/${iss.textbookCitation.learnSlug}`}
+                          className="text-indigo-400 hover:text-indigo-300 font-semibold underline underline-offset-2 flex items-center gap-0.5 shrink-0 ml-2"
+                        >
+                          <span>Read Guide</span>
+                          <ChevronRight className="w-3 h-3" />
+                        </Link>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

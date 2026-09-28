@@ -6,6 +6,7 @@ import {
   StrategicFinding,
 } from "./autopsy-types";
 import { VirtualContestSession } from "./types";
+import { findCurriculumGuideForProblem } from "../knowledge/curriculum-links";
 
 /**
  * Pure computational engine for Post-Contest Autopsy
@@ -178,22 +179,22 @@ export function generatePostContestAutopsy(
   // Projected delta against current rating
   const ratingDeltaProjection = Math.round((virtualPerformanceRating - userCurrentRating) / 4.2);
 
-  // 5. Action Items
+  // 5. Action Items grounded in competitive programming literature
   const actionItems: string[] = [];
   if (opportunityCost.detected) {
     actionItems.push(
-      `Implement 25-Minute Pivot Rule: If no algorithmic invariant is proven on Problem ${timeSink?.problemIndex} after 25 minutes, spend 5 minutes reading Problem ${opportunityCost.overlookedProblemIndex}.`
+      `Implement 25-Minute Pivot Rule (Principles of Algorithmic Problem Solving Ch 2): If no algorithmic invariant is proven on Problem ${timeSink?.problemIndex} after 25 minutes, spend 5 minutes reading Problem ${opportunityCost.overlookedProblemIndex}.`
     );
   }
   if (totalRejections >= 3) {
     actionItems.push(
-      "Local Stress Testing: Before submitting, generate adversarial edge cases (N=1, N=max, empty strings, max bounds) to catch Wrong Answers."
+      "Local Stress Testing (CP4 Book 1 Sec 1.4): Before submitting, generate adversarial edge cases (N=1, N=max, empty strings, max bounds) to catch Wrong Answers and 32-bit overflow."
     );
   }
   actionItems.push(
     `Upsolve missed Problem ${
       session.problems.find((p) => !user.results[p.index]?.isSolved)?.index || "D"
-    } within 48 hours to retain context.`
+    } within 48 hours using the corresponding interactive curriculum guide to maximize retention.`
   );
 
   // 6. Recommended Upsolves
@@ -202,6 +203,8 @@ export function generatePostContestAutopsy(
     .map((p) => {
       const delta = Math.abs(p.rating - userCurrentRating);
       const yieldScore = Math.max(35, Math.min(98, Math.round(100 - delta / 6)));
+      const guide = findCurriculumGuideForProblem(p.tags);
+
       return {
         problemIndex: p.index,
         name: p.name,
@@ -209,6 +212,14 @@ export function generatePostContestAutopsy(
         tags: p.tags,
         yieldScore,
         reason: `Missed in ${session.contestTitle}. Rated ${p.rating} (${p.rating - userCurrentRating >= 0 ? "+" : ""}${p.rating - userCurrentRating} delta), optimal for building mastery in ${p.tags.join(", ")}.`,
+        curriculumGuide: guide
+          ? {
+              slug: guide.slug,
+              name: guide.name,
+              bookCitation: guide.primaryBookCitation,
+              chapter: guide.chapter,
+            }
+          : undefined,
       };
     })
     .sort((a, b) => b.yieldScore - a.yieldScore);

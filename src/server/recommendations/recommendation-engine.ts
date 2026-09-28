@@ -1,3 +1,5 @@
+import { findCurriculumGuideForProblem } from "../knowledge/curriculum-links";
+
 export type RecommendationCategory =
   | "STRENGTHENING"
   | "PROGRESSION"
@@ -15,6 +17,13 @@ export interface ProblemCandidate {
   solvedCount?: number;
 }
 
+export interface PrerequisiteGuide {
+  slug: string;
+  name: string;
+  bookCitation: string;
+  chapter: string;
+}
+
 export interface ScoredRecommendation {
   id: string;
   problemName: string;
@@ -26,6 +35,7 @@ export interface ScoredRecommendation {
   score: number; // 0 - 100 match score
   reason: string;
   url: string;
+  prerequisiteGuide?: PrerequisiteGuide;
 }
 
 /**
@@ -204,6 +214,8 @@ export function generateRecommendations(params: {
       ? `https://codeforces.com/contest/${prob.contestId}/problem/${prob.index}`
       : `https://codeforces.com/problemset/problem/${prob.id}`;
 
+    const guide = findCurriculumGuideForProblem(prob.tags);
+
     results.push({
       id: prob.id,
       problemName: prob.name,
@@ -215,6 +227,14 @@ export function generateRecommendations(params: {
       score,
       reason,
       url,
+      prerequisiteGuide: guide
+        ? {
+            slug: guide.slug,
+            name: guide.name,
+            bookCitation: guide.primaryBookCitation,
+            chapter: guide.chapter,
+          }
+        : undefined,
     });
   }
 

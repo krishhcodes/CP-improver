@@ -1,3 +1,5 @@
+import { findCurriculumGuideForTopic, CurriculumGuideLink } from "../knowledge/curriculum-links";
+
 export type TopicStatus =
   | "CRITICAL_WEAKNESS"
   | "NEEDS_WORK"
@@ -15,6 +17,14 @@ export interface TopicSubmission {
   creationTimeSeconds: number;
 }
 
+export interface TopicCurriculumRef {
+  slug: string;
+  name: string;
+  bookCitation: string;
+  chapter: string;
+  keyInvariant: string;
+}
+
 export interface TopicSkillMetric {
   tag: string;
   totalSubmissions: number;
@@ -28,6 +38,7 @@ export interface TopicSkillMetric {
   confidence: number; // 0.0 - 1.0 (based on sample size)
   status: TopicStatus;
   actionRecommendation: string;
+  curriculumRef?: TopicCurriculumRef;
 }
 
 export interface SkillVectorSummary {
@@ -162,18 +173,20 @@ export function generateTopicRecommendation(
   weaknessScore: number,
   avgSolvedRating: number,
   userRating: number,
-  failedCount: number
+  failedCount: number,
+  guide?: CurriculumGuideLink | null
 ): string {
   const targetRating = Math.max(800, userRating - 100);
   const stretchRating = userRating + 100;
+  const bookNotice = guide ? ` [Study Guide: ${guide.primaryBookCitation} — ${guide.name}]` : "";
 
   switch (status) {
     case "CRITICAL_WEAKNESS":
-      return `Critical weakness detected in ${tag} (score: ${weaknessScore}/100, ${failedCount} failures). Immediately drill foundational problems rated ${targetRating}–${userRating} before tackling higher tiers.`;
+      return `Critical weakness detected in ${tag} (score: ${weaknessScore}/100, ${failedCount} failures). Review foundational theory${bookNotice} and drill problems rated ${targetRating}–${userRating}.`;
     case "NEEDS_WORK":
-      return `Moderate failure rate in ${tag}. Strengthen your pattern recognition by practicing 5–8 targeted problems rated around ${userRating}.`;
+      return `Moderate failure rate in ${tag}. Strengthen invariant recognition${guide ? ` using ${guide.primaryBookCitation}` : ""} and practice 5–8 targeted problems rated around ${userRating}.`;
     case "PROFICIENT":
-      return `Solid execution in ${tag} (avg solve: ${avgSolvedRating}). Ready to push your envelope with progression problems rated ${stretchRating}+.`;
+      return `Solid execution in ${tag} (avg solve: ${avgSolvedRating}). Ready to push into advanced variations (${guide?.chapter || "higher tiers"}) rated ${stretchRating}+.`;
     case "MASTERED":
       return `High mastery in ${tag}. Maintained consistent success up to rating ${avgSolvedRating}. Keep fresh with occasional contest-level reviews.`;
     case "NEEDS_DATA":
@@ -253,13 +266,16 @@ export function computeSkillVector(params: {
       status = "PROFICIENT";
     }
 
+    const guide = findCurriculumGuideForTopic(tag);
+
     const actionRecommendation = generateTopicRecommendation(
       tag,
       status,
       weaknessScore,
       avgSolvedRating,
       userRating,
-      failedCount
+      failedCount,
+      guide
     );
 
     skillVector.push({
@@ -275,6 +291,15 @@ export function computeSkillVector(params: {
       confidence,
       status,
       actionRecommendation,
+      curriculumRef: guide
+        ? {
+            slug: guide.slug,
+            name: guide.name,
+            bookCitation: guide.primaryBookCitation,
+            chapter: guide.chapter,
+            keyInvariant: guide.keyInvariant,
+          }
+        : undefined,
     });
   }
 

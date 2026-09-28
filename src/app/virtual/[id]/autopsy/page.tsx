@@ -16,6 +16,7 @@ import {
   ChevronLeft,
   ShieldAlert,
   Flame,
+  BookOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PostContestAutopsy } from "@/server/virtual/autopsy-types";
@@ -408,6 +409,25 @@ export default function PostContestAutopsyPage({ params }: PageProps) {
               </div>
 
               <p className="text-xs text-zinc-300 leading-relaxed">{up.reason}</p>
+
+              {/* Theory Curriculum Guide Badge */}
+              {up.curriculumGuide && (
+                <div className="p-2.5 rounded-xl bg-indigo-950/20 border border-indigo-500/20 flex items-center justify-between gap-2 text-xs">
+                  <div className="flex items-center gap-1.5 text-zinc-300 text-[11px] truncate">
+                    <BookOpen className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                    <span className="truncate">
+                      Theory: <strong>{up.curriculumGuide.name}</strong> ({up.curriculumGuide.bookCitation})
+                    </span>
+                  </div>
+                  <Link
+                    href={`/learn/${up.curriculumGuide.slug}`}
+                    className="text-indigo-400 hover:text-indigo-300 font-bold text-[11px] underline underline-offset-2 shrink-0 flex items-center gap-0.5 ml-2"
+                  >
+                    <span>Guide</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </Link>
+                </div>
+              )}
 
               <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between">
                 <span className="text-xs text-zinc-400">Rating: {up.rating}</span>

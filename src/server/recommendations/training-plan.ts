@@ -2,6 +2,7 @@ import {
   ProblemCandidate,
   RecommendationCategory,
 } from "./recommendation-engine";
+import { findCurriculumGuideForTopic, CurriculumGuideLink } from "../knowledge/curriculum-links";
 
 export interface TrainingTask {
   id: string;
@@ -11,6 +12,16 @@ export interface TrainingTask {
   url: string;
   goal: string;
   completed: boolean;
+  isTheory?: boolean;
+}
+
+export interface TrainingDayTheoryModule {
+  slug: string;
+  title: string;
+  bookCitation: string;
+  chapter: string;
+  keyInvariant: string;
+  estimatedMinutes: number;
 }
 
 export interface TrainingDay {
@@ -21,6 +32,7 @@ export interface TrainingDay {
   targetRatingRange: string;
   estimatedMinutes: number;
   category: RecommendationCategory;
+  theoryModule?: TrainingDayTheoryModule;
   tasks: TrainingTask[];
   status: "COMPLETED" | "CURRENT" | "UPCOMING";
 }
@@ -92,6 +104,7 @@ export function generateAdaptiveTrainingPlan(params: {
 
   // Day 1: Primary Weakness Strengthening
   const day1Probs = findProblemsForDay(primaryWeakness, userRating - 200, userRating);
+  const d1Guide = findCurriculumGuideForTopic(primaryWeakness);
   days.push({
     dayNumber: 1,
     dayName: "Monday",
@@ -100,8 +113,28 @@ export function generateAdaptiveTrainingPlan(params: {
     targetRatingRange: `${userRating - 200}–${userRating}`,
     estimatedMinutes: 90,
     category: "STRENGTHENING",
+    theoryModule: d1Guide
+      ? {
+          slug: d1Guide.slug,
+          title: d1Guide.name,
+          bookCitation: d1Guide.primaryBookCitation,
+          chapter: d1Guide.chapter,
+          keyInvariant: d1Guide.keyInvariant,
+          estimatedMinutes: 20,
+        }
+      : undefined,
     status: currentDayIndex > 0 ? "COMPLETED" : currentDayIndex === 0 ? "CURRENT" : "UPCOMING",
     tasks: [
+      {
+        id: "task-mon-theory",
+        name: `📖 Theory Study: ${d1Guide?.name ?? primaryWeakness.toUpperCase()}`,
+        rating: userRating,
+        tags: [primaryWeakness, "theory"],
+        url: `/learn/${d1Guide?.slug ?? "1d-dp"}`,
+        goal: `Internalize ${d1Guide?.primaryBookCitation ?? "standard curriculum"} (${d1Guide?.chapter ?? "Theory"}). Invariant: ${d1Guide?.keyInvariant ?? "State formulation"}`,
+        completed: currentDayIndex > 0,
+        isTheory: true,
+      },
       {
         id: day1Probs[0]?.id ?? "task-mon-1",
         name: day1Probs[0]?.name ?? `${primaryWeakness.toUpperCase()} Core Pattern Drill`,
@@ -129,6 +162,7 @@ export function generateAdaptiveTrainingPlan(params: {
 
   // Day 2: Secondary Weakness Deep Dive
   const day2Probs = findProblemsForDay(secondaryWeakness, userRating - 150, userRating + 50);
+  const d2Guide = findCurriculumGuideForTopic(secondaryWeakness);
   days.push({
     dayNumber: 2,
     dayName: "Tuesday",
@@ -137,8 +171,28 @@ export function generateAdaptiveTrainingPlan(params: {
     targetRatingRange: `${userRating - 150}–${userRating + 50}`,
     estimatedMinutes: 80,
     category: "STRENGTHENING",
+    theoryModule: d2Guide
+      ? {
+          slug: d2Guide.slug,
+          title: d2Guide.name,
+          bookCitation: d2Guide.primaryBookCitation,
+          chapter: d2Guide.chapter,
+          keyInvariant: d2Guide.keyInvariant,
+          estimatedMinutes: 20,
+        }
+      : undefined,
     status: currentDayIndex > 1 ? "COMPLETED" : currentDayIndex === 1 ? "CURRENT" : "UPCOMING",
     tasks: [
+      {
+        id: "task-tue-theory",
+        name: `📖 Theory Study: ${d2Guide?.name ?? secondaryWeakness.toUpperCase()}`,
+        rating: userRating,
+        tags: [secondaryWeakness, "theory"],
+        url: `/learn/${d2Guide?.slug ?? "two-pointers"}`,
+        goal: `Read ${d2Guide?.primaryBookCitation ?? "Curriculum Guide"} on ${d2Guide?.chapter ?? "Invariants"}.`,
+        completed: currentDayIndex > 1,
+        isTheory: true,
+      },
       {
         id: day2Probs[0]?.id ?? "task-tue-1",
         name: day2Probs[0]?.name ?? `${secondaryWeakness.toUpperCase()} Invariant Analysis`,
@@ -165,6 +219,7 @@ export function generateAdaptiveTrainingPlan(params: {
   });
 
   // Day 3: Active Upsolving & Contest Diagnosis
+  const d3Guide = findCurriculumGuideForTopic("binary search");
   days.push({
     dayNumber: 3,
     dayName: "Wednesday",
@@ -173,8 +228,28 @@ export function generateAdaptiveTrainingPlan(params: {
     targetRatingRange: `${userRating}–${userRating + 150}`,
     estimatedMinutes: 90,
     category: "UPSOLVE",
+    theoryModule: d3Guide
+      ? {
+          slug: d3Guide.slug,
+          title: d3Guide.name,
+          bookCitation: d3Guide.primaryBookCitation,
+          chapter: d3Guide.chapter,
+          keyInvariant: d3Guide.keyInvariant,
+          estimatedMinutes: 15,
+        }
+      : undefined,
     status: currentDayIndex > 2 ? "COMPLETED" : currentDayIndex === 2 ? "CURRENT" : "UPCOMING",
     tasks: [
+      {
+        id: "task-wed-theory",
+        name: `📖 Theory Study: ${d3Guide?.name ?? "Binary Search on Answer"}`,
+        rating: userRating + 50,
+        tags: ["binary search", "theory"],
+        url: `/learn/${d3Guide?.slug ?? "binary-search-answer"}`,
+        goal: `Verify monotonic predicate verification invariants before upsolving.`,
+        completed: false,
+        isTheory: true,
+      },
       {
         id: "task-wed-1",
         name: "Educational Round 169 Problem D: Colored Portals",
@@ -198,6 +273,7 @@ export function generateAdaptiveTrainingPlan(params: {
 
   // Day 4: Progression & Boundary Push
   const day4Probs = findProblemsForDay(primaryStrength, userRating + 50, userRating + 250);
+  const d4Guide = findCurriculumGuideForTopic(primaryStrength);
   days.push({
     dayNumber: 4,
     dayName: "Thursday",
@@ -206,8 +282,28 @@ export function generateAdaptiveTrainingPlan(params: {
     targetRatingRange: `${userRating + 50}–${userRating + 250}`,
     estimatedMinutes: 100,
     category: "PROGRESSION",
+    theoryModule: d4Guide
+      ? {
+          slug: d4Guide.slug,
+          title: d4Guide.name,
+          bookCitation: d4Guide.primaryBookCitation,
+          chapter: d4Guide.chapter,
+          keyInvariant: d4Guide.keyInvariant,
+          estimatedMinutes: 20,
+        }
+      : undefined,
     status: currentDayIndex > 3 ? "COMPLETED" : currentDayIndex === 3 ? "CURRENT" : "UPCOMING",
     tasks: [
+      {
+        id: "task-thu-theory",
+        name: `📖 Advanced Theory: ${d4Guide?.name ?? primaryStrength.toUpperCase()}`,
+        rating: userRating + 100,
+        tags: [primaryStrength, "theory"],
+        url: `/learn/${d4Guide?.slug ?? "bfs-dfs"}`,
+        goal: `Master high-tier variations from ${d4Guide?.primaryBookCitation ?? "Textbook Guide"}.`,
+        completed: false,
+        isTheory: true,
+      },
       {
         id: day4Probs[0]?.id ?? "task-thu-1",
         name: day4Probs[0]?.name ?? `${primaryStrength.toUpperCase()} Hard Observation`,
@@ -234,6 +330,7 @@ export function generateAdaptiveTrainingPlan(params: {
   });
 
   // Day 5: Timed Speed Simulation
+  const d5Guide = findCurriculumGuideForTopic("two-pointers");
   days.push({
     dayNumber: 5,
     dayName: "Friday",
@@ -242,6 +339,16 @@ export function generateAdaptiveTrainingPlan(params: {
     targetRatingRange: `${userRating - 300}–${userRating}`,
     estimatedMinutes: 60,
     category: "CONTEST_PREPARATION",
+    theoryModule: d5Guide
+      ? {
+          slug: d5Guide.slug,
+          title: d5Guide.name,
+          bookCitation: d5Guide.primaryBookCitation,
+          chapter: d5Guide.chapter,
+          keyInvariant: d5Guide.keyInvariant,
+          estimatedMinutes: 15,
+        }
+      : undefined,
     status: currentDayIndex > 4 ? "COMPLETED" : currentDayIndex === 4 ? "CURRENT" : "UPCOMING",
     tasks: [
       {
@@ -274,6 +381,14 @@ export function generateAdaptiveTrainingPlan(params: {
     targetRatingRange: `${userRating - 200}–${userRating + 300}`,
     estimatedMinutes: 130,
     category: "CONTEST_PREPARATION",
+    theoryModule: {
+      slug: "two-pointers",
+      title: "Contest Clock Discipline & 25-Minute Pivot Rule",
+      bookCitation: "Principles of Algorithmic Problem Solving (Sannemo Ch 2)",
+      chapter: "Contest Strategy & Opportunity Cost Management",
+      keyInvariant: "Never remain stuck > 25 mins without an invariant proof; pivot to inspect easier unattempted problems.",
+      estimatedMinutes: 15,
+    },
     status: currentDayIndex > 5 ? "COMPLETED" : currentDayIndex === 5 ? "CURRENT" : "UPCOMING",
     tasks: [
       {
@@ -290,7 +405,7 @@ export function generateAdaptiveTrainingPlan(params: {
         name: "Immediate Diagnostic Autopsy",
         rating: userRating,
         tags: ["autopsy"],
-        url: "/contests",
+        url: "/virtual",
         goal: "Catalog exact time of first AC, rejected attempts, and skipped problems.",
         completed: false,
       },
@@ -298,6 +413,7 @@ export function generateAdaptiveTrainingPlan(params: {
   });
 
   // Day 7: Spaced Revision & Retrospective
+  const d7Guide = findCurriculumGuideForTopic("dsu");
   days.push({
     dayNumber: 7,
     dayName: "Sunday",
@@ -306,6 +422,16 @@ export function generateAdaptiveTrainingPlan(params: {
     targetRatingRange: `${userRating - 200}–${userRating + 100}`,
     estimatedMinutes: 60,
     category: "REVISION",
+    theoryModule: d7Guide
+      ? {
+          slug: d7Guide.slug,
+          title: d7Guide.name,
+          bookCitation: d7Guide.primaryBookCitation,
+          chapter: d7Guide.chapter,
+          keyInvariant: d7Guide.keyInvariant,
+          estimatedMinutes: 20,
+        }
+      : undefined,
     status: currentDayIndex > 6 ? "COMPLETED" : currentDayIndex === 6 ? "CURRENT" : "UPCOMING",
     tasks: [
       {

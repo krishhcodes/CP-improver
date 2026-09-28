@@ -15,6 +15,7 @@ import {
   Zap,
   ArrowRight,
   TrendingUp,
+  BookOpen,
 } from "lucide-react";
 import { TrainingPlan, TrainingDay } from "@/server/recommendations/training-plan";
 import { useUser } from "@/context/UserContext";
@@ -188,10 +189,40 @@ export default function TrainingPage() {
                 </div>
               </div>
 
+              {/* Day Theory Study Banner */}
+              {day.theoryModule && (
+                <div className="mt-3.5 p-3.5 rounded-xl bg-indigo-950/20 border border-indigo-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 flex items-center gap-1">
+                        <BookOpen className="w-3 h-3 text-indigo-400" />
+                        <span>Curriculum Invariant</span>
+                      </span>
+                      <span className="text-xs font-bold text-white">{day.theoryModule.title}</span>
+                    </div>
+                    <p className="text-[11px] text-zinc-300">
+                      Literature: <strong className="text-zinc-200">{day.theoryModule.bookCitation}</strong> ({day.theoryModule.chapter})
+                    </p>
+                    <p className="text-[10px] text-zinc-400 line-clamp-1 italic">
+                      Invariant: &ldquo;{day.theoryModule.keyInvariant}&rdquo;
+                    </p>
+                  </div>
+
+                  <Link
+                    href={`/learn/${day.theoryModule.slug}`}
+                    className="px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-all flex items-center gap-1.5 shrink-0 self-start sm:self-auto shadow-md shadow-indigo-600/20"
+                  >
+                    <span>Read Theory Guide ({day.theoryModule.estimatedMinutes}m)</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </Link>
+                </div>
+              )}
+
               {/* Day Problem Tasks */}
               <div className="pt-3 space-y-2.5">
                 {day.tasks.map((task) => {
                   const isChecked = completedTaskIds.has(task.id);
+                  const isInternalLink = task.url.startsWith("/");
 
                   return (
                     <div
@@ -199,6 +230,8 @@ export default function TrainingPage() {
                       className={`p-3 rounded-xl transition-all flex items-start sm:items-center justify-between gap-3 ${
                         isChecked
                           ? "bg-emerald-500/[0.04] border border-emerald-500/20 text-zinc-400"
+                          : task.isTheory
+                          ? "bg-indigo-950/20 border border-indigo-500/30 text-zinc-200"
                           : "bg-slate-900/60 border border-white/[0.04] hover:border-white/[0.1] text-zinc-200"
                       }`}
                     >
@@ -219,23 +252,40 @@ export default function TrainingPage() {
                             <span className={`text-xs font-bold ${isChecked ? "line-through text-zinc-500" : "text-white"}`}>
                               {task.name}
                             </span>
-                            <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-white/[0.05] text-zinc-400 border border-white/[0.08]">
-                              ★ {task.rating}
-                            </span>
+                            {!task.isTheory && (
+                              <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-white/[0.05] text-zinc-400 border border-white/[0.08]">
+                                ★ {task.rating}
+                              </span>
+                            )}
+                            {task.isTheory && (
+                              <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                                Theory
+                              </span>
+                            )}
                           </div>
                           <p className="text-[11px] text-zinc-400">{task.goal}</p>
                         </div>
                       </div>
 
-                      <a
-                        href={task.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-3 py-1 rounded-lg text-xs font-semibold bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 hover:text-white border border-white/[0.08] transition-colors flex items-center gap-1 shrink-0"
-                      >
-                        <span>Solve</span>
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
+                      {isInternalLink ? (
+                        <Link
+                          href={task.url}
+                          className="px-3 py-1 rounded-lg text-xs font-semibold bg-indigo-600/30 hover:bg-indigo-600 text-indigo-200 hover:text-white border border-indigo-500/30 transition-colors flex items-center gap-1 shrink-0"
+                        >
+                          <span>{task.isTheory ? "Study" : "Open"}</span>
+                          <ArrowRight className="w-3 h-3" />
+                        </Link>
+                      ) : (
+                        <a
+                          href={task.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3 py-1 rounded-lg text-xs font-semibold bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 hover:text-white border border-white/[0.08] transition-colors flex items-center gap-1 shrink-0"
+                        >
+                          <span>Solve</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      )}
                     </div>
                   );
                 })}

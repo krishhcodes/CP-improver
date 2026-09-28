@@ -17,6 +17,7 @@ import {
   ExternalLink,
   Award,
   CheckCircle2,
+  BookOpen,
 } from "lucide-react";
 import {
   RecommendationCategory,
@@ -245,6 +246,25 @@ function RecommendationsContent() {
                     </span>
                     <p className="text-zinc-300 leading-relaxed">{rec.reason}</p>
                   </div>
+
+                  {/* Prerequisite Textbook Theory Callout */}
+                  {rec.prerequisiteGuide && (
+                    <div className="mt-2.5 p-2.5 rounded-xl bg-indigo-950/20 border border-indigo-500/20 flex items-center justify-between gap-2 text-xs">
+                      <div className="flex items-center gap-1.5 text-zinc-300 text-[11px] min-w-0">
+                        <BookOpen className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                        <span className="truncate">
+                          Prerequisite: <strong className="text-white">{rec.prerequisiteGuide.name}</strong> ({rec.prerequisiteGuide.bookCitation})
+                        </span>
+                      </div>
+                      <Link
+                        href={`/learn/${rec.prerequisiteGuide.slug}`}
+                        className="text-indigo-400 hover:text-indigo-300 font-bold text-[11px] underline underline-offset-2 shrink-0 flex items-center gap-0.5 ml-2"
+                      >
+                        <span>Study</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </Link>
+                    </div>
+                  )}
                 </div>
 
                 {/* Footer */}

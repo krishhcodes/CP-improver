@@ -5,6 +5,8 @@ export interface ConceptPracticeProblem {
   name: string;
   rating: number;
   url: string;
+  platform?: string;
+  hint?: string;
 }
 
 export interface LiteratureReference {
@@ -19,6 +21,8 @@ export interface ConceptVariation {
   explanation: string;
   formula?: string;
   codeSnippet?: string;
+  timeComplexity?: string;
+  spaceComplexity?: string;
 }
 
 export interface RecognitionSignal {

@@ -526,6 +526,12 @@ export default function ConceptDetailPage({
                     <h4 className="text-xs font-bold text-slate-900 group-hover:text-sky-600 transition-colors">
                       {prob.name}
                     </h4>
+                    {prob.hint && (
+                      <p className="text-[11px] text-slate-500 leading-relaxed italic bg-white/70 p-2 rounded-lg border border-slate-200/60 mt-1">
+                        <span className="font-semibold text-sky-800 not-italic">Strategy Hint: </span>
+                        {prob.hint}
+                      </p>
+                    )}
                   </div>
 
                   <a

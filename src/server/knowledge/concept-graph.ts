@@ -7,6 +7,25 @@ export interface ConceptPracticeProblem {
   url: string;
 }
 
+export interface LiteratureReference {
+  source: string;
+  section: string;
+  url?: string;
+  keyInsight: string;
+}
+
+export interface ConceptVariation {
+  title: string;
+  explanation: string;
+  formula?: string;
+  codeSnippet?: string;
+}
+
+export interface RecognitionSignal {
+  triggerConstraint: string;
+  cue: string;
+}
+
 export interface ConceptNode {
   slug: string;
   name: string;
@@ -20,6 +39,11 @@ export interface ConceptNode {
   codeTemplate?: string;
   pitfalls?: string[];
   practiceProblems?: ConceptPracticeProblem[];
+  literatureReferences?: LiteratureReference[];
+  conceptualTheory?: string;
+  variations?: ConceptVariation[];
+  recognitionSignals?: RecognitionSignal[];
+  stepByStepStrategy?: string[];
 }
 
 export class ConceptGraph {
@@ -49,6 +73,11 @@ export class ConceptGraph {
       if (node.codeTemplate) existing.codeTemplate = node.codeTemplate;
       if (node.pitfalls) existing.pitfalls = node.pitfalls;
       if (node.practiceProblems) existing.practiceProblems = node.practiceProblems;
+      if (node.literatureReferences) existing.literatureReferences = node.literatureReferences;
+      if (node.conceptualTheory) existing.conceptualTheory = node.conceptualTheory;
+      if (node.variations) existing.variations = node.variations;
+      if (node.recognitionSignals) existing.recognitionSignals = node.recognitionSignals;
+      if (node.stepByStepStrategy) existing.stepByStepStrategy = node.stepByStepStrategy;
     }
   }
 

@@ -38,32 +38,32 @@ import { useUser } from "@/context/UserContext";
 
 const WEEK_THEMES: Record<number, { accent: string; border: string; bg: string; badge: string; text: string }> = {
   1: {
-    accent: "text-cyan-400",
-    border: "border-cyan-500/40",
-    bg: "from-cyan-500/15 via-sky-500/10 to-transparent",
-    badge: "bg-cyan-500/20 text-cyan-300 border-cyan-500/30",
-    text: "text-cyan-300",
+    accent: "text-sky-600",
+    border: "border-sky-300",
+    bg: "from-sky-50/90 to-white",
+    badge: "bg-sky-100 text-sky-800 border-sky-300 font-bold",
+    text: "text-sky-700",
   },
   2: {
-    accent: "text-emerald-400",
-    border: "border-emerald-500/40",
-    bg: "from-emerald-500/15 via-teal-500/10 to-transparent",
-    badge: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
-    text: "text-emerald-300",
+    accent: "text-emerald-600",
+    border: "border-emerald-300",
+    bg: "from-emerald-50/90 to-white",
+    badge: "bg-emerald-100 text-emerald-800 border-emerald-300 font-bold",
+    text: "text-emerald-700",
   },
   3: {
-    accent: "text-amber-400",
-    border: "border-amber-500/40",
-    bg: "from-amber-500/15 via-orange-500/10 to-transparent",
-    badge: "bg-amber-500/20 text-amber-300 border-amber-500/30",
-    text: "text-amber-300",
+    accent: "text-amber-600",
+    border: "border-amber-300",
+    bg: "from-amber-50/90 to-white",
+    badge: "bg-amber-100 text-amber-800 border-amber-300 font-bold",
+    text: "text-amber-700",
   },
   4: {
-    accent: "text-rose-400",
-    border: "border-rose-500/40",
-    bg: "from-rose-500/15 via-pink-500/10 to-transparent",
-    badge: "bg-rose-500/20 text-rose-300 border-rose-500/30",
-    text: "text-rose-300",
+    accent: "text-rose-600",
+    border: "border-rose-300",
+    bg: "from-rose-50/90 to-white",
+    badge: "bg-rose-100 text-rose-800 border-rose-300 font-bold",
+    text: "text-rose-700",
   },
 };
 
@@ -236,8 +236,8 @@ export default function TrainingPage() {
   if (loading && !plan) {
     return (
       <div className="py-24 text-center space-y-4">
-        <div className="w-10 h-10 rounded-full border-2 border-cyan-400 border-t-transparent animate-spin mx-auto shadow-lg shadow-cyan-500/20" />
-        <p className="text-xs font-semibold text-zinc-400">Calibrating your adaptive week #{currentWeek} training curriculum...</p>
+        <div className="w-10 h-10 rounded-full border-2 border-sky-500 border-t-transparent animate-spin mx-auto shadow-md" />
+        <p className="text-xs font-semibold text-slate-500">Calibrating your adaptive week #{currentWeek} training curriculum...</p>
       </div>
     );
   }
@@ -248,18 +248,18 @@ export default function TrainingPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5 flex-wrap">
-            <h1 className="text-2xl font-black text-white tracking-tight">
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight">
               Adaptive Training Curriculum
             </h1>
             <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border transition-all duration-300 ${activeTheme.badge}`}>
               Week #{currentWeek} of 4
             </span>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5 shadow-sm shadow-emerald-500/10">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-300 flex items-center gap-1.5 shadow-sm">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
               <span>Starts Today</span>
             </span>
           </div>
-          <p className="text-xs text-zinc-400 mt-1">
+          <p className="text-xs text-slate-500 mt-1">
             Grounded 4-week algorithmic mastery roadmap, calibrated by diagnostic theory verification and textbook invariants.
           </p>
         </div>
@@ -270,46 +270,46 @@ export default function TrainingPage() {
               setShowDiagnosticModal(true);
               setDiagnosticStep("TICK_KNOWLEDGE");
             }}
-            className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-cyan-500/20 via-emerald-500/15 to-teal-500/20 hover:from-cyan-500 hover:to-emerald-500 text-cyan-200 hover:text-slate-950 border border-cyan-500/35 transition-all duration-300 flex items-center gap-1.5 shadow-md shadow-cyan-500/10 hover:scale-103 active:scale-98"
+            className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-sky-600 to-emerald-600 hover:from-sky-500 hover:to-emerald-500 text-white transition-all duration-300 flex items-center gap-1.5 shadow-md shadow-sky-500/15 hover:scale-102 active:scale-98"
           >
-            <GraduationCap className="w-3.5 h-3.5 text-cyan-400" />
+            <GraduationCap className="w-3.5 h-3.5" />
             <span>{diagnosticResult ? "Retake Calibration Test" : "Take Skill Calibration Test"}</span>
           </button>
 
-          <div className="text-right pl-3 border-l border-white/[0.08]">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block">Target Benchmark</span>
-            <p className="text-xs font-black text-white">{plan?.targetTier ?? "Specialist (1400)"}</p>
+          <div className="text-right pl-3 border-l border-slate-200">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Target Benchmark</span>
+            <p className="text-xs font-black text-slate-900">{plan?.targetTier ?? "Specialist (1400)"}</p>
           </div>
         </div>
       </div>
 
       {/* Diagnostic Assessment Banner (If already calibrated) */}
       {diagnosticResult && (
-        <div className="p-4 rounded-2xl bg-gradient-to-r from-cyan-950/20 via-emerald-950/15 to-slate-900/40 border border-cyan-500/30 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-lg shadow-cyan-500/5">
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-sky-50/90 via-emerald-50/60 to-white border border-sky-200/90 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
           <div className="space-y-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="px-2 py-0.5 rounded text-[10px] font-black bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-cyan-400 animate-pulse" />
+              <span className="px-2 py-0.5 rounded text-[10px] font-black bg-sky-100 text-sky-800 border border-sky-300 flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-sky-600 animate-pulse" />
                 <span>DIAGNOSTIC CALIBRATED</span>
               </span>
-              <span className="text-xs font-bold text-white">
-                Verification Score: <span className="text-emerald-400 font-extrabold">{diagnosticResult.score}%</span>
+              <span className="text-xs font-bold text-slate-800">
+                Verification Score: <span className="text-emerald-700 font-extrabold">{diagnosticResult.score}%</span>
               </span>
-              <span className="text-xs text-zinc-500">•</span>
-              <span className="text-xs text-zinc-300 font-medium">
+              <span className="text-xs text-slate-400">•</span>
+              <span className="text-xs text-slate-600 font-medium">
                 {diagnosticResult.verifiedTopicIds.length} Verified Topics
               </span>
               {diagnosticResult.blindspotTopicIds.length > 0 && (
                 <>
-                  <span className="text-xs text-zinc-500">•</span>
-                  <span className="text-xs text-amber-400 font-bold">
+                  <span className="text-xs text-slate-400">•</span>
+                  <span className="text-xs text-amber-700 font-bold">
                     {diagnosticResult.blindspotTopicIds.length} Blindspots Targeted
                   </span>
                 </>
               )}
             </div>
-            <p className="text-xs text-zinc-300">
-              <strong className="text-white">{diagnosticResult.milestoneTitle}:</strong> {diagnosticResult.milestoneDescription}
+            <p className="text-xs text-slate-700">
+              <strong className="text-slate-900">{diagnosticResult.milestoneTitle}:</strong> {diagnosticResult.milestoneDescription}
             </p>
           </div>
 
@@ -318,10 +318,10 @@ export default function TrainingPage() {
               setShowDiagnosticModal(true);
               setDiagnosticStep("REPORT_CARD");
             }}
-            className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white/[0.04] hover:bg-white/[0.1] text-zinc-200 hover:text-white border border-white/[0.08] transition-all flex items-center gap-1.5 shrink-0 self-start md:self-auto hover:scale-102"
+            className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-200 shadow-sm transition-all flex items-center gap-1.5 shrink-0 self-start md:self-auto hover:scale-102"
           >
             <span>View Diagnostic Report</span>
-            <ChevronRight className="w-3.5 h-3.5 text-cyan-400" />
+            <ChevronRight className="w-3.5 h-3.5 text-sky-600" />
           </button>
         </div>
       )}
@@ -329,11 +329,11 @@ export default function TrainingPage() {
       {/* Week Selector Tab Bar (From Start to Finish Week by Week) */}
       <div className="space-y-2.5">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
-            <ListChecks className="w-3.5 h-3.5 text-cyan-400" />
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+            <ListChecks className="w-3.5 h-3.5 text-sky-600" />
             <span>Curriculum Roadmap (Weeks 1 to 4)</span>
           </span>
-          <span className="text-xs text-zinc-400">
+          <span className="text-xs text-slate-500">
             Selected: <strong className={activeTheme.accent}>Week #{currentWeek}</strong>
           </span>
         </div>
@@ -346,29 +346,29 @@ export default function TrainingPage() {
               <button
                 key={week.weekNumber}
                 onClick={() => setCurrentWeek(week.weekNumber)}
-                className={`p-3.5 rounded-2xl border text-left transition-all duration-200 group ${
+                className={`p-3.5 rounded-2xl border text-left transition-all duration-200 group shadow-sm ${
                   isSelected
-                    ? `bg-gradient-to-br ${weekTheme.bg} ${weekTheme.border} shadow-lg shadow-cyan-500/5 text-white -translate-y-0.5`
-                    : "bg-[#0d121c]/70 border-white/[0.06] hover:border-white/[0.16] hover:bg-[#111827]/80 text-zinc-400 hover:text-zinc-200"
+                    ? `bg-gradient-to-br ${weekTheme.bg} ${weekTheme.border} shadow-md text-slate-900 -translate-y-0.5`
+                    : "bg-white/90 border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-600 hover:text-slate-900"
                 }`}
               >
                 <div className="flex items-center justify-between gap-2 mb-1.5">
-                  <span className={`text-xs font-black px-2 py-0.5 rounded-lg ${
-                    isSelected ? "bg-white text-slate-950 font-black shadow-sm" : "bg-white/[0.06] text-zinc-400"
+                  <span className={`text-xs font-black px-2 py-0.5 rounded-lg border ${
+                    isSelected ? "bg-white text-slate-900 border-slate-300 shadow-sm" : "bg-slate-100 text-slate-600 border-slate-200"
                   }`}>
                     W{week.weekNumber}
                   </span>
                   {isSelected && (
                     <span className={`text-[10px] font-black uppercase tracking-wider ${weekTheme.text} flex items-center gap-1`}>
-                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-ping" />
                       Active
                     </span>
                   )}
                 </div>
-                <p className="text-xs font-bold text-white line-clamp-1 group-hover:text-cyan-300 transition-colors">
+                <p className="text-xs font-bold text-slate-900 line-clamp-1 group-hover:text-sky-700 transition-colors">
                   {week.title.replace(/^Week \d+:\s*/, "")}
                 </p>
-                <p className="text-[11px] text-zinc-400 line-clamp-1 mt-0.5">{week.subtitle}</p>
+                <p className="text-[11px] text-slate-500 line-clamp-1 mt-0.5">{week.subtitle}</p>
               </button>
             );
           })}
@@ -376,31 +376,31 @@ export default function TrainingPage() {
       </div>
 
       {/* Progress & Focus Banner */}
-      <div className="p-6 rounded-2xl glass-panel border border-white/[0.07] space-y-4 shadow-xl shadow-black/20">
+      <div className="p-6 rounded-2xl glass-panel border border-slate-200/90 space-y-4 shadow-sm bg-white">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
             <span className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 ${activeTheme.accent}`}>
               <Sparkles className="w-3.5 h-3.5 animate-pulse" />
               <span>Week #{currentWeek} Focus Objective</span>
             </span>
-            <p className="text-sm font-bold text-white">
+            <p className="text-sm font-bold text-slate-900">
               {plan?.focusOverview}
             </p>
           </div>
 
           <div className="text-right shrink-0">
             <div className="flex items-baseline gap-1 justify-end">
-              <span className="text-2xl font-black text-white">{currentCompletedCount}</span>
-              <span className="text-zinc-500 text-xs">/ {totalTasks} Tasks</span>
+              <span className="text-2xl font-black text-slate-900">{currentCompletedCount}</span>
+              <span className="text-slate-400 text-xs">/ {totalTasks} Tasks</span>
             </div>
-            <span className="text-xs font-bold text-cyan-400">{progressPercent}% Completed</span>
+            <span className="text-xs font-bold text-sky-600">{progressPercent}% Completed</span>
           </div>
         </div>
 
         {/* Dynamic Animated Gradient Progress Bar */}
-        <div className="w-full h-2.5 rounded-full bg-slate-950 overflow-hidden border border-white/[0.05] p-[1px]">
+        <div className="w-full h-2.5 rounded-full bg-slate-100 overflow-hidden border border-slate-200 p-[1px]">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-emerald-400 via-amber-400 to-rose-400 animate-shimmer transition-all duration-500 shadow-md shadow-cyan-500/20"
+            className="h-full rounded-full bg-gradient-to-r from-sky-500 via-emerald-500 via-amber-500 to-rose-500 animate-shimmer transition-all duration-500 shadow-sm"
             style={{ width: `${progressPercent}%` }}
           />
         </div>
@@ -417,36 +417,36 @@ export default function TrainingPage() {
               key={day.dayNumber}
               className={`p-5 rounded-2xl glass-panel border transition-all duration-300 ${
                 isCurrent
-                  ? "border-cyan-500/40 bg-cyan-500/[0.03] shadow-xl shadow-cyan-500/5 -translate-y-0.5"
+                  ? "border-sky-300 bg-sky-50/20 shadow-md shadow-sky-500/5 -translate-y-0.5"
                   : allDayTasksDone
-                  ? "border-emerald-500/30 bg-emerald-500/[0.02]"
-                  : "border-white/[0.07] hover:border-white/[0.16] hover:bg-[#0e1422]/60"
+                  ? "border-emerald-300 bg-emerald-50/20"
+                  : "border-slate-200/90 bg-white/95 hover:border-slate-300 hover:shadow-md"
               }`}
             >
               {/* Day Header */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/[0.05]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
                 <div className="flex items-center gap-2.5">
                   <span className={`w-7 h-7 rounded-xl font-black text-xs flex items-center justify-center border shadow-sm ${
                     isCurrent
-                      ? "bg-gradient-to-tr from-cyan-500 to-blue-600 text-white border-cyan-400/50 shadow-cyan-500/20"
+                      ? "bg-sky-600 text-white border-sky-600 shadow-sky-500/20"
                       : allDayTasksDone
-                      ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
-                      : "bg-white/[0.05] text-zinc-300 border-white/[0.08]"
+                      ? "bg-emerald-100 text-emerald-800 border-emerald-300"
+                      : "bg-slate-100 text-slate-700 border-slate-200"
                   }`}>
                     D{day.dayNumber}
                   </span>
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-sm font-extrabold text-white">{day.dayName}: {day.theme}</span>
+                      <span className="text-sm font-extrabold text-slate-900">{day.dayName}: {day.theme}</span>
                       {isCurrent && (
-                        <span className="px-2 py-0.5 rounded-md text-[10px] font-black bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 animate-pulse flex items-center gap-1 shadow-sm shadow-cyan-500/10">
-                          <Zap className="w-3 h-3 text-cyan-400" />
+                        <span className="px-2 py-0.5 rounded-md text-[10px] font-black bg-sky-100 text-sky-800 border border-sky-300 animate-pulse flex items-center gap-1 shadow-sm">
+                          <Zap className="w-3 h-3 text-sky-600" />
                           <span>TODAY&apos;S MISSION</span>
                         </span>
                       )}
                       {allDayTasksDone && (
-                        <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1 shadow-sm shadow-emerald-500/10">
-                          <CheckCircle2 className="w-3 h-3 text-emerald-400 animate-check-pop" />
+                        <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1 shadow-sm">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-600 animate-check-pop" />
                           <span>All Done</span>
                         </span>
                       )}
@@ -454,38 +454,38 @@ export default function TrainingPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-4 text-xs text-zinc-400 self-end sm:self-auto">
-                  <span>Target: <strong className="text-white font-bold">{day.targetRatingRange}</strong></span>
+                <div className="flex items-center gap-4 text-xs text-slate-500 self-end sm:self-auto">
+                  <span>Target: <strong className="text-slate-800 font-bold">{day.targetRatingRange}</strong></span>
                   <span>•</span>
                   <span className="flex items-center gap-1 font-medium">
-                    <Clock className="w-3 h-3 text-zinc-500" />
+                    <Clock className="w-3 h-3 text-slate-400" />
                     <span>{day.estimatedMinutes}m</span>
                   </span>
                 </div>
               </div>
 
-              {/* Day Theory Study Banner (Vibrant Sunburst Amber / Invariant) */}
+              {/* Day Theory Study Banner (Warm Amber / Invariant) */}
               {day.theoryModule && (
-                <div className="mt-3.5 p-3.5 rounded-xl bg-gradient-to-r from-amber-500/[0.08] via-orange-500/[0.04] to-transparent border border-amber-500/25 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-sm">
+                <div className="mt-3.5 p-3.5 rounded-xl bg-gradient-to-r from-amber-50/90 via-orange-50/40 to-white border border-amber-200/90 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-sm">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1">
-                        <BookOpen className="w-3 h-3 text-amber-400" />
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300 flex items-center gap-1">
+                        <BookOpen className="w-3 h-3 text-amber-600" />
                         <span>Curriculum Invariant</span>
                       </span>
-                      <span className="text-xs font-bold text-white">{day.theoryModule.title}</span>
+                      <span className="text-xs font-bold text-slate-900">{day.theoryModule.title}</span>
                     </div>
-                    <p className="text-[11px] text-zinc-300">
-                      Literature: <strong className="text-amber-200">{day.theoryModule.bookCitation}</strong> ({day.theoryModule.chapter})
+                    <p className="text-[11px] text-slate-700">
+                      Literature: <strong className="text-amber-900 font-bold">{day.theoryModule.bookCitation}</strong> ({day.theoryModule.chapter})
                     </p>
-                    <p className="text-[10px] text-zinc-400 line-clamp-1 italic">
+                    <p className="text-[10px] text-slate-500 line-clamp-1 italic">
                       Invariant: &ldquo;{day.theoryModule.keyInvariant}&rdquo;
                     </p>
                   </div>
 
                   <Link
                     href={`/learn/${day.theoryModule.slug}`}
-                    className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 transition-all flex items-center gap-1.5 shrink-0 self-start sm:self-auto shadow-md shadow-amber-500/20 hover:scale-102"
+                    className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white transition-all flex items-center gap-1.5 shrink-0 self-start sm:self-auto shadow-md shadow-amber-500/15 hover:scale-102"
                   >
                     <span>Read Theory Guide ({day.theoryModule.estimatedMinutes}m)</span>
                     <ArrowRight className="w-3 h-3" />
@@ -504,49 +504,49 @@ export default function TrainingPage() {
                       key={task.id}
                       className={`p-3 rounded-xl transition-all duration-200 flex items-start sm:items-center justify-between gap-3 ${
                         isChecked
-                          ? "bg-emerald-500/[0.04] border border-emerald-500/25 text-zinc-400"
+                          ? "bg-emerald-50/40 border border-emerald-200/80 text-slate-400"
                           : task.isTheory
-                          ? "bg-amber-500/[0.03] border border-amber-500/20 text-zinc-200 hover:border-amber-500/35"
-                          : "bg-slate-900/50 border border-white/[0.05] hover:border-white/[0.15] hover:bg-slate-900/80 text-zinc-200 hover:-translate-y-0.5"
+                          ? "bg-amber-50/40 border border-amber-200/70 text-slate-800 hover:border-amber-300"
+                          : "bg-slate-50/80 border border-slate-200 hover:border-slate-300 hover:bg-white text-slate-800 hover:-translate-y-0.5 shadow-sm"
                       }`}
                     >
                       <div className="flex items-start sm:items-center gap-3">
                         <button
                           onClick={() => toggleTask(task.id)}
-                          className="mt-0.5 sm:mt-0 text-zinc-500 hover:text-cyan-400 transition-colors p-0.5"
+                          className="mt-0.5 sm:mt-0 text-slate-400 hover:text-sky-600 transition-colors p-0.5"
                           title={isChecked ? "Mark as uncompleted" : "Mark as completed"}
                         >
                           {isChecked ? (
-                            <CheckCircle2 className="w-4 h-4 text-emerald-400 animate-check-pop" />
+                            <CheckCircle2 className="w-4 h-4 text-emerald-600 animate-check-pop" />
                           ) : (
-                            <Circle className="w-4 h-4 text-zinc-600 hover:text-cyan-400 transition-colors" />
+                            <Circle className="w-4 h-4 text-slate-300 hover:text-sky-600 transition-colors" />
                           )}
                         </button>
 
                         <div className="space-y-0.5">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className={`text-xs font-bold ${isChecked ? "line-through text-zinc-500" : "text-white"}`}>
+                            <span className={`text-xs font-bold ${isChecked ? "line-through text-slate-400" : "text-slate-900"}`}>
                               {task.name}
                             </span>
                             {!task.isTheory && (
-                              <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+                              <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-sky-50 text-sky-700 border border-sky-200">
                                 ★ {task.rating}
                               </span>
                             )}
                             {task.isTheory && (
-                              <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                              <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
                                 Theory
                               </span>
                             )}
                           </div>
-                          <p className="text-[11px] text-zinc-400">{task.goal}</p>
+                          <p className="text-[11px] text-slate-500">{task.goal}</p>
                         </div>
                       </div>
 
                       {isInternalLink ? (
                         <Link
                           href={task.url}
-                          className="px-3 py-1 rounded-lg text-xs font-bold bg-cyan-500/15 hover:bg-cyan-500 text-cyan-300 hover:text-slate-950 border border-cyan-500/30 transition-all flex items-center gap-1 shrink-0 shadow-sm hover:scale-102"
+                          className="px-3 py-1 rounded-lg text-xs font-bold bg-sky-100 hover:bg-sky-600 text-sky-800 hover:text-white border border-sky-300 transition-all flex items-center gap-1 shrink-0 shadow-sm hover:scale-102"
                         >
                           <span>{task.isTheory ? "Study" : "Open"}</span>
                           <ArrowRight className="w-3 h-3" />
@@ -556,7 +556,7 @@ export default function TrainingPage() {
                           href={task.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="px-3 py-1 rounded-lg text-xs font-semibold bg-white/[0.04] hover:bg-cyan-500/20 text-zinc-300 hover:text-cyan-200 border border-white/[0.08] hover:border-cyan-500/30 transition-all flex items-center gap-1 shrink-0 hover:scale-102"
+                          className="px-3 py-1 rounded-lg text-xs font-semibold bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 transition-all flex items-center gap-1 shrink-0 shadow-sm hover:scale-102"
                         >
                           <span>Solve</span>
                           <ExternalLink className="w-3 h-3" />
@@ -573,19 +573,19 @@ export default function TrainingPage() {
 
       {/* Interactive Skill Calibration & Diagnostic Assessment Modal */}
       {showDiagnosticModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xl animate-in fade-in duration-200">
-          <div className="w-full max-w-3xl max-h-[90vh] flex flex-col rounded-3xl bg-[#0a0f19] border border-white/[0.12] shadow-2xl shadow-cyan-500/10 overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="w-full max-w-3xl max-h-[90vh] flex flex-col rounded-3xl bg-white border border-slate-200 shadow-2xl overflow-hidden">
             {/* Modal Header */}
-            <div className="p-5 border-b border-white/[0.08] flex items-center justify-between bg-white/[0.02]">
+            <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-400 via-emerald-400 to-amber-400 p-[1px] flex items-center justify-center shadow-lg shadow-cyan-500/10">
-                  <div className="w-full h-full bg-[#0a0f19] rounded-[11px] flex items-center justify-center text-cyan-300">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-500 via-emerald-500 to-amber-500 p-[1.5px] flex items-center justify-center shadow-md shadow-sky-500/10">
+                  <div className="w-full h-full bg-white rounded-[10px] flex items-center justify-center text-sky-600">
                     <GraduationCap className="w-4 h-4" />
                   </div>
                 </div>
                 <div>
-                  <h2 className="text-base font-black text-white">Skill Calibration & Diagnostic Assessment</h2>
-                  <p className="text-[11px] text-zinc-400">
+                  <h2 className="text-base font-black text-slate-900">Skill Calibration & Diagnostic Assessment</h2>
+                  <p className="text-[11px] text-slate-500">
                     {diagnosticStep === "TICK_KNOWLEDGE" && "Phase 1: Concept & Paradigm Self-Audit (Tick what you know)"}
                     {diagnosticStep === "VERIFICATION_TEST" && "Phase 2: Theoretical Verification Quiz (Confirm Invariants)"}
                     {diagnosticStep === "REPORT_CARD" && "Phase 3: Diagnostic Report & Curriculum Blueprint"}
@@ -594,24 +594,24 @@ export default function TrainingPage() {
               </div>
               <button
                 onClick={() => setShowDiagnosticModal(false)}
-                className="w-8 h-8 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-zinc-400 hover:text-white flex items-center justify-center transition-colors"
+                className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 flex items-center justify-center transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Modal Body */}
-            <div className="p-6 overflow-y-auto space-y-6 flex-1 text-xs">
+            <div className="p-6 overflow-y-auto space-y-6 flex-1 text-xs text-slate-800">
               {/* STEP 1: TICK WHAT YOU KNOW */}
               {diagnosticStep === "TICK_KNOWLEDGE" && (
                 <div className="space-y-4">
-                  <div className="p-4 rounded-2xl bg-cyan-950/20 border border-cyan-500/25 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
-                    <p className="text-xs text-zinc-300">
+                  <div className="p-4 rounded-2xl bg-sky-50 border border-sky-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+                    <p className="text-xs text-slate-700">
                       Tick the algorithmic paradigms and patterns you have solved or implemented before. In Phase 2, we will present theoretical verification questions on key invariants to mathematically confirm your mastery.
                     </p>
                     <button
                       onClick={selectAllFoundations}
-                      className="px-3 py-1.5 rounded-xl text-xs font-bold bg-cyan-500/20 hover:bg-cyan-500 text-cyan-300 hover:text-slate-950 border border-cyan-500/35 transition-all shrink-0 self-start sm:self-auto shadow-sm hover:scale-102"
+                      className="px-3 py-1.5 rounded-xl text-xs font-bold bg-sky-600 hover:bg-sky-500 text-white transition-all shrink-0 self-start sm:self-auto shadow-sm hover:scale-102"
                     >
                       + Tick All Foundations
                     </button>
@@ -624,34 +624,34 @@ export default function TrainingPage() {
                         <div
                           key={topic.id}
                           onClick={() => toggleTickedTopic(topic.id)}
-                          className={`p-3.5 rounded-2xl border cursor-pointer transition-all duration-200 flex items-start gap-3 ${
+                          className={`p-3.5 rounded-2xl border cursor-pointer transition-all duration-200 flex items-start gap-3 shadow-sm ${
                             isChecked
-                              ? "bg-cyan-500/[0.06] border-cyan-500/50 text-white shadow-sm shadow-cyan-500/5 -translate-y-0.5"
-                              : "bg-slate-900/40 border-white/[0.06] hover:border-white/[0.14] text-zinc-400 hover:bg-slate-900/70"
+                              ? "bg-sky-50/70 border-sky-400 text-slate-900 -translate-y-0.5"
+                              : "bg-slate-50/70 border-slate-200 hover:border-slate-300 text-slate-600 hover:bg-white"
                           }`}
                         >
                           <div className="mt-0.5">
                             {isChecked ? (
-                              <CheckSquare className="w-4 h-4 text-cyan-400 animate-check-pop" />
+                              <CheckSquare className="w-4 h-4 text-sky-600 animate-check-pop" />
                             ) : (
-                              <Square className="w-4 h-4 text-zinc-600" />
+                              <Square className="w-4 h-4 text-slate-300" />
                             )}
                           </div>
                           <div className="space-y-1">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className="font-extrabold text-xs text-white">{topic.name}</span>
+                              <span className="font-extrabold text-xs text-slate-900">{topic.name}</span>
                               <span className={`px-1.5 py-0.2 rounded text-[9px] font-bold ${
                                 topic.difficulty === "FOUNDATIONAL"
-                                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                                  ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
                                   : topic.difficulty === "INTERMEDIATE"
-                                  ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
-                                  : "bg-rose-500/20 text-rose-300 border border-rose-500/30"
+                                  ? "bg-amber-100 text-amber-800 border border-amber-300"
+                                  : "bg-rose-100 text-rose-800 border border-rose-300"
                               }`}>
                                 {topic.difficulty}
                               </span>
                             </div>
-                            <p className="text-[11px] text-zinc-400 leading-relaxed">{topic.description}</p>
-                            <span className="text-[10px] text-zinc-500 italic block">
+                            <p className="text-[11px] text-slate-600 leading-relaxed">{topic.description}</p>
+                            <span className="text-[10px] text-slate-400 italic block">
                               Ref: {topic.bookCitation}
                             </span>
                           </div>
@@ -665,11 +665,11 @@ export default function TrainingPage() {
               {/* STEP 2: THEORETICAL VERIFICATION TEST */}
               {diagnosticStep === "VERIFICATION_TEST" && (
                 <div className="space-y-6">
-                  <div className="p-3.5 rounded-2xl bg-cyan-950/20 border border-cyan-500/25 flex items-center justify-between text-xs shadow-sm">
-                    <span className="text-zinc-300">
+                  <div className="p-3.5 rounded-2xl bg-sky-50 border border-sky-200 flex items-center justify-between text-xs shadow-sm">
+                    <span className="text-slate-700">
                       Answer these 8 multiple-choice theoretical questions grounded in CLRS, CPH, CP4, and USACO Guide to confirm your invariant comprehension.
                     </span>
-                    <span className="px-2.5 py-1 rounded-lg bg-cyan-500/20 text-cyan-300 font-bold border border-cyan-500/30 shrink-0">
+                    <span className="px-2.5 py-1 rounded-lg bg-sky-100 text-sky-800 font-bold border border-sky-300 shrink-0">
                       {Object.keys(testAnswers).length} / {VERIFICATION_QUESTIONS.length} Answered
                     </span>
                   </div>
@@ -680,17 +680,17 @@ export default function TrainingPage() {
                       return (
                         <div
                           key={q.id}
-                          className="p-4 rounded-2xl bg-slate-900/60 border border-white/[0.07] space-y-3 transition-all hover:border-white/[0.12]"
+                          className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200 space-y-3 shadow-sm transition-all hover:border-slate-300"
                         >
                           <div className="flex items-start justify-between gap-3">
-                            <span className="text-xs font-black text-cyan-400">
+                            <span className="text-xs font-black text-sky-700">
                               Q{qIdx + 1}. [{q.topicName}]
                             </span>
-                            <span className="text-[10px] text-zinc-500 italic">
+                            <span className="text-[10px] text-slate-400 italic">
                               {q.bookCitation}
                             </span>
                           </div>
-                          <p className="text-xs font-semibold text-white leading-relaxed">
+                          <p className="text-xs font-bold text-slate-900 leading-relaxed">
                             {q.question}
                           </p>
 
@@ -703,12 +703,12 @@ export default function TrainingPage() {
                                   onClick={() => handleSelectAnswer(q.id, optIdx)}
                                   className={`w-full p-2.5 rounded-xl border text-left text-xs transition-all duration-150 flex items-start gap-2.5 ${
                                     isPicked
-                                      ? "bg-cyan-500/20 border-cyan-500 text-white font-bold shadow-md shadow-cyan-500/10"
-                                      : "bg-white/[0.02] border-white/[0.05] hover:border-white/[0.12] hover:bg-white/[0.05] text-zinc-300 hover:text-white"
+                                      ? "bg-sky-100 text-sky-950 font-bold border-sky-500 shadow-sm"
+                                      : "bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700"
                                   }`}
                                 >
                                   <span className={`w-4 h-4 rounded-full border text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5 ${
-                                    isPicked ? "border-cyan-400 bg-cyan-500 text-slate-950 font-black" : "border-zinc-600 text-zinc-400"
+                                    isPicked ? "border-sky-600 bg-sky-600 text-white font-black" : "border-slate-300 text-slate-500"
                                   }`}>
                                     {String.fromCharCode(65 + optIdx)}
                                   </span>
@@ -728,36 +728,36 @@ export default function TrainingPage() {
               {diagnosticStep === "REPORT_CARD" && diagnosticResult && (
                 <div className="space-y-6">
                   {/* Score & Tier Calibration Card */}
-                  <div className="p-5 rounded-2xl bg-gradient-to-br from-cyan-950/30 via-emerald-950/20 to-slate-900 border border-cyan-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl shadow-cyan-500/5">
+                  <div className="p-5 rounded-2xl bg-gradient-to-br from-sky-50 via-emerald-50 to-white border border-sky-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
                     <div className="space-y-1">
-                      <span className="text-[10px] font-black uppercase tracking-wider text-cyan-400">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-sky-600">
                         Diagnostic Assessment Results
                       </span>
-                      <h3 className="text-lg font-black text-white">{diagnosticResult.milestoneTitle}</h3>
-                      <p className="text-xs text-zinc-300 max-w-lg">{diagnosticResult.milestoneDescription}</p>
+                      <h3 className="text-lg font-black text-slate-900">{diagnosticResult.milestoneTitle}</h3>
+                      <p className="text-xs text-slate-600 max-w-lg">{diagnosticResult.milestoneDescription}</p>
                     </div>
 
-                    <div className="text-center sm:text-right shrink-0 p-3.5 rounded-2xl bg-white/[0.04] border border-white/[0.08] shadow-sm">
-                      <span className="text-[10px] text-zinc-400 uppercase font-bold block">Theory Score</span>
-                      <span className="text-2xl font-black text-emerald-400">{diagnosticResult.score}%</span>
-                      <span className="text-[10px] text-zinc-500 block">calibrated with CLRS/CPH</span>
+                    <div className="text-center sm:text-right shrink-0 p-3.5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+                      <span className="text-[10px] text-slate-400 uppercase font-bold block">Theory Score</span>
+                      <span className="text-2xl font-black text-emerald-600">{diagnosticResult.score}%</span>
+                      <span className="text-[10px] text-slate-400 block">calibrated with CLRS/CPH</span>
                     </div>
                   </div>
 
                   {/* 3 Categories Breakdown */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     {/* Verified Concepts */}
-                    <div className="p-4 rounded-2xl bg-emerald-950/15 border border-emerald-500/25 space-y-2">
-                      <div className="flex items-center gap-1.5 text-emerald-300 font-extrabold text-xs">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 animate-check-pop" />
+                    <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-2">
+                      <div className="flex items-center gap-1.5 text-emerald-800 font-extrabold text-xs">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 animate-check-pop" />
                         <span>Verified Concepts ({diagnosticResult.verifiedTopicIds.length})</span>
                       </div>
-                      <p className="text-[11px] text-zinc-400">
+                      <p className="text-[11px] text-slate-600">
                         Paradigms you know and mathematically verified invariants.
                       </p>
                       <div className="flex flex-wrap gap-1.5 pt-1">
                         {diagnosticResult.verifiedTopicIds.map((tid) => (
-                          <span key={tid} className="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                          <span key={tid} className="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-white text-emerald-800 border border-emerald-300 shadow-sm">
                             {DIAGNOSTIC_TOPICS.find((t) => t.id === tid)?.name ?? tid}
                           </span>
                         ))}
@@ -765,20 +765,20 @@ export default function TrainingPage() {
                     </div>
 
                     {/* Theoretical Blindspots */}
-                    <div className="p-4 rounded-2xl bg-amber-950/15 border border-amber-500/25 space-y-2">
-                      <div className="flex items-center gap-1.5 text-amber-300 font-extrabold text-xs">
-                        <AlertCircle className="w-3.5 h-3.5 text-amber-400" />
+                    <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-2">
+                      <div className="flex items-center gap-1.5 text-amber-800 font-extrabold text-xs">
+                        <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
                         <span>Theoretical Blindspots ({diagnosticResult.blindspotTopicIds.length})</span>
                       </div>
-                      <p className="text-[11px] text-zinc-400">
+                      <p className="text-[11px] text-slate-600">
                         Identified invariant misconceptions. Prioritized for theory study!
                       </p>
                       <div className="flex flex-wrap gap-1.5 pt-1">
                         {diagnosticResult.blindspotTopicIds.length === 0 ? (
-                          <span className="text-[11px] text-zinc-500 italic">No blindspots detected!</span>
+                          <span className="text-[11px] text-slate-500 italic">No blindspots detected!</span>
                         ) : (
                           diagnosticResult.blindspotTopicIds.map((tid) => (
-                            <span key={tid} className="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                            <span key={tid} className="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-white text-amber-800 border border-amber-300 shadow-sm">
                               {DIAGNOSTIC_TOPICS.find((t) => t.id === tid)?.name ?? tid}
                             </span>
                           ))
@@ -787,17 +787,17 @@ export default function TrainingPage() {
                     </div>
 
                     {/* Unlearned Paradigms */}
-                    <div className="p-4 rounded-2xl bg-slate-900/60 border border-white/[0.08] space-y-2">
-                      <div className="flex items-center gap-1.5 text-zinc-300 font-extrabold text-xs">
-                        <BookOpen className="w-3.5 h-3.5 text-cyan-400" />
+                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                      <div className="flex items-center gap-1.5 text-slate-700 font-extrabold text-xs">
+                        <BookOpen className="w-3.5 h-3.5 text-sky-600" />
                         <span>Unlearned Paradigms ({diagnosticResult.unlearnedTopicIds.length})</span>
                       </div>
-                      <p className="text-[11px] text-zinc-400">
+                      <p className="text-[11px] text-slate-600">
                         Scheduled for structured foundations in subsequent weeks.
                       </p>
                       <div className="flex flex-wrap gap-1.5 pt-1">
                         {diagnosticResult.unlearnedTopicIds.map((tid) => (
-                          <span key={tid} className="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-white/[0.04] text-zinc-400 border border-white/[0.08]">
+                          <span key={tid} className="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-white text-slate-700 border border-slate-200 shadow-sm">
                             {DIAGNOSTIC_TOPICS.find((t) => t.id === tid)?.name ?? tid}
                           </span>
                         ))}
@@ -809,15 +809,15 @@ export default function TrainingPage() {
             </div>
 
             {/* Modal Footer */}
-            <div className="p-5 border-t border-white/[0.08] flex items-center justify-between bg-white/[0.02]">
+            <div className="p-5 border-t border-slate-100 flex items-center justify-between bg-slate-50/70">
               {diagnosticStep === "TICK_KNOWLEDGE" && (
                 <>
-                  <span className="text-xs text-zinc-400">
-                    <strong className="text-cyan-400 font-bold">{tickedTopics.size}</strong> topics selected
+                  <span className="text-xs text-slate-500">
+                    <strong className="text-sky-700 font-bold">{tickedTopics.size}</strong> topics selected
                   </span>
                   <button
                     onClick={() => setDiagnosticStep("VERIFICATION_TEST")}
-                    className="px-5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white transition-all flex items-center gap-1.5 shadow-lg shadow-cyan-500/20 hover:scale-102"
+                    className="px-5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white transition-all flex items-center gap-1.5 shadow-md shadow-sky-500/20 hover:scale-102"
                   >
                     <span>Proceed to Verification Quiz (Step 2 of 2)</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -829,14 +829,14 @@ export default function TrainingPage() {
                 <>
                   <button
                     onClick={() => setDiagnosticStep("TICK_KNOWLEDGE")}
-                    className="px-4 py-2 rounded-xl text-xs font-semibold bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 transition-colors"
+                    className="px-4 py-2 rounded-xl text-xs font-semibold bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 transition-colors shadow-sm"
                   >
                     ← Back to Self-Audit
                   </button>
                   <button
                     disabled={isEvaluating}
                     onClick={submitDiagnosticAssessment}
-                    className="px-5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-cyan-500 to-emerald-500 hover:opacity-90 text-slate-950 font-black transition-all flex items-center gap-1.5 shadow-lg shadow-cyan-500/20 disabled:opacity-50 hover:scale-102"
+                    className="px-5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-sky-600 to-emerald-600 hover:from-sky-500 hover:to-emerald-500 text-white font-bold transition-all flex items-center gap-1.5 shadow-md shadow-sky-500/20 disabled:opacity-50 hover:scale-102"
                   >
                     <span>{isEvaluating ? "Analyzing Invariants..." : "Submit & Generate Report →"}</span>
                   </button>
@@ -847,13 +847,13 @@ export default function TrainingPage() {
                 <>
                   <button
                     onClick={() => setDiagnosticStep("VERIFICATION_TEST")}
-                    className="px-4 py-2 rounded-xl text-xs font-semibold bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 transition-colors"
+                    className="px-4 py-2 rounded-xl text-xs font-semibold bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 transition-colors shadow-sm"
                   >
                     ← Retake Quiz
                   </button>
                   <button
                     onClick={() => applyCalibratedCurriculum(diagnosticResult.recommendedStartingWeek)}
-                    className="px-6 py-2 rounded-xl text-xs font-black bg-gradient-to-r from-cyan-400 via-emerald-400 to-teal-400 hover:opacity-95 text-slate-950 transition-all flex items-center gap-2 shadow-xl shadow-cyan-500/20 hover:scale-102"
+                    className="px-6 py-2 rounded-xl text-xs font-black bg-gradient-to-r from-sky-600 via-emerald-600 to-teal-600 hover:opacity-95 text-white transition-all flex items-center gap-2 shadow-md shadow-sky-500/20 hover:scale-102"
                   >
                     <span>Load My Calibrated Week #{diagnosticResult.recommendedStartingWeek} Curriculum</span>
                     <ArrowRight className="w-4 h-4" />

@@ -53,6 +53,21 @@ export class ConceptGraph {
     for (const node of initialNodes) {
       this.addConcept(node);
     }
+    // Bidirectional reconciliation: ensure if A in B.prerequisites, then B in A.dependents and vice-versa
+    for (const node of this.nodes.values()) {
+      for (const p of node.prerequisites) {
+        const parent = this.nodes.get(p);
+        if (parent && !parent.dependents.includes(node.slug)) {
+          parent.dependents.push(node.slug);
+        }
+      }
+      for (const d of node.dependents) {
+        const child = this.nodes.get(d);
+        if (child && !child.prerequisites.includes(node.slug)) {
+          child.prerequisites.push(node.slug);
+        }
+      }
+    }
   }
 
   public addConcept(node: ConceptNode): void {

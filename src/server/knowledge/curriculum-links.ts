@@ -117,6 +117,51 @@ export const CURRICULUM_GUIDE_MAP: Record<string, CurriculumGuideLink> = {
     keyInvariant: "Pending range updates are deferred to child nodes only upon traversal descent in O(log N)",
     recommendedTimeMinutes: 45,
   },
+  "tree-dp": {
+    slug: "tree-dp",
+    name: "Tree Dynamic Programming & Rerooting (In-Out DP)",
+    category: "Dynamic Programming",
+    primaryBookCitation: "USACO Guide Gold & CPH Ch 14",
+    chapter: "Tree Algorithms — Subtree Aggregation & Rerooting",
+    keyInvariant: "All-roots answers computed in O(N) by subtracting child subtree before merging parent context",
+    recommendedTimeMinutes: 40,
+  },
+  "binary-lifting-lca": {
+    slug: "binary-lifting-lca",
+    name: "Binary Lifting & Lowest Common Ancestor (LCA)",
+    category: "Tree Algorithms",
+    primaryBookCitation: "USACO Guide Platinum & CPH Ch 18",
+    chapter: "Tree Queries — Binary Lifting & LCA",
+    keyInvariant: "Precompute 2^k ancestors in O(N log N) enabling O(log N) tree path queries and LCA jumps",
+    recommendedTimeMinutes: 35,
+  },
+  "modular-arithmetic": {
+    slug: "modular-arithmetic",
+    name: "Modular Arithmetic, Fermat's Inverse & Combinatorics",
+    category: "Mathematics",
+    primaryBookCitation: "CPH Ch 21 & CP4 Book 2 Sec 5.3",
+    chapter: "Number Theory & Combinatorics in Competitive Programming",
+    keyInvariant: "Division under prime modulo p is multiplication by modular inverse: a^(p-2) mod p via binary exponentiation",
+    recommendedTimeMinutes: 30,
+  },
+  "string-hashing": {
+    slug: "string-hashing",
+    name: "Polynomial Rolling Hash & Rabin-Karp",
+    category: "String Algorithms",
+    primaryBookCitation: "USACO Guide Gold & CPH Ch 26",
+    chapter: "String Hashing & Substring Equivalence",
+    keyInvariant: "Prefix hash array + base powers compute any substring hash in O(1); double modulo eliminates collisions",
+    recommendedTimeMinutes: 30,
+  },
+  "trie": {
+    slug: "trie",
+    name: "Trie & Binary 0/1 XOR Trie",
+    category: "Data Structures",
+    primaryBookCitation: "CP4 Book 1 Sec 2.3 & CPH Ch 26",
+    chapter: "Prefix Trees & Maximum XOR Subarray Optimization",
+    keyInvariant: "Greedy bitwise descent at each bit level maximizes/minimizes XOR queries in O(bits) time",
+    recommendedTimeMinutes: 30,
+  },
 };
 
 /**
@@ -126,6 +171,31 @@ export const CURRICULUM_GUIDE_MAP: Record<string, CurriculumGuideLink> = {
 export function findCurriculumGuideForTopic(tagOrTopic: string): CurriculumGuideLink | null {
   if (!tagOrTopic) return null;
   const t = tagOrTopic.toLowerCase().trim();
+
+  // Trie & Binary XOR Trie
+  if (t.includes("trie") || (t.includes("xor") && (t.includes("max") || t.includes("query") || t.includes("tree")))) {
+    return CURRICULUM_GUIDE_MAP["trie"];
+  }
+
+  // String Hashing
+  if (t.includes("hash") || t.includes("string") || t.includes("rabin") || t.includes("karp")) {
+    return CURRICULUM_GUIDE_MAP["string-hashing"];
+  }
+
+  // LCA & Binary Lifting
+  if (t.includes("lca") || t.includes("ancestor") || t.includes("binary lifting")) {
+    return CURRICULUM_GUIDE_MAP["binary-lifting-lca"];
+  }
+
+  // Tree DP & Rerooting
+  if (t.includes("tree dp") || t.includes("reroot") || (t.includes("tree") && t.includes("dp"))) {
+    return CURRICULUM_GUIDE_MAP["tree-dp"];
+  }
+
+  // Modular arithmetic & Combinatorics
+  if (t.includes("modular") || t.includes("modulo") || t.includes("combinatorics") || t.includes("number theory") || t.includes("ncr") || t.includes("inverse") || t.includes("math")) {
+    return CURRICULUM_GUIDE_MAP["modular-arithmetic"];
+  }
 
   // Lazy propagation check first
   if (t.includes("lazy") || (t.includes("range") && t.includes("update"))) {
@@ -190,10 +260,6 @@ export function findCurriculumGuideForTopic(tagOrTopic: string): CurriculumGuide
   // Greedy / Math fallback
   if (t.includes("greedy") || t.includes("constructive")) {
     return CURRICULUM_GUIDE_MAP["two-pointers"];
-  }
-
-  if (t.includes("math") || t.includes("number theory") || t.includes("combinatorics")) {
-    return CURRICULUM_GUIDE_MAP["prefix-sums"];
   }
 
   return CURRICULUM_GUIDE_MAP["prefix-sums"];

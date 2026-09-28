@@ -16,14 +16,13 @@ import {
   Network,
   Code2,
   Library,
-  Lightbulb,
   Compass,
   Layers,
   GraduationCap,
   Target,
   CheckCircle2,
+  Zap,
 } from "lucide-react";
-import { ConceptNode } from "@/server/knowledge/concept-graph";
 
 export default function ConceptDetailPage({
   params,
@@ -62,11 +61,28 @@ export default function ConceptDetailPage({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const getPlatformInfo = (url: string) => {
+    if (url.includes("cses.fi")) {
+      return { name: "CSES", badge: "bg-amber-50 text-amber-800 border-amber-200" };
+    }
+    if (url.includes("atcoder.jp")) {
+      return { name: "AtCoder", badge: "bg-purple-50 text-purple-800 border-purple-200" };
+    }
+    return { name: "Codeforces", badge: "bg-sky-50 text-sky-800 border-sky-200" };
+  };
+
+  const getRatingBadge = (rating: number) => {
+    if (rating < 1400) return "bg-emerald-50 text-emerald-800 border-emerald-200";
+    if (rating < 1700) return "bg-sky-50 text-sky-800 border-sky-200";
+    if (rating < 2000) return "bg-purple-50 text-purple-800 border-purple-200";
+    return "bg-rose-50 text-rose-800 border-rose-200";
+  };
+
   if (loading) {
     return (
       <div className="py-24 text-center space-y-3">
         <div className="w-8 h-8 rounded-full border-2 border-sky-600 border-t-transparent animate-spin mx-auto" />
-        <p className="text-xs text-slate-500">Loading comprehensive competitive programming curriculum...</p>
+        <p className="text-xs text-slate-500">Loading comprehensive competitive programming curriculum chapter...</p>
       </div>
     );
   }
@@ -83,7 +99,7 @@ export default function ConceptDetailPage({
   }
 
   return (
-    <div className="space-y-8 max-w-5xl animate-in fade-in-50 duration-300 pb-16">
+    <div className="space-y-8 max-w-5xl animate-in fade-in-50 duration-300 pb-20">
       {/* Back Link & Header */}
       <div className="space-y-4">
         <Link
@@ -132,6 +148,51 @@ export default function ConceptDetailPage({
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Quick-Jump Section Navigation Bar */}
+        <div className="flex items-center gap-1.5 p-1.5 rounded-xl bg-slate-100 border border-slate-200 overflow-x-auto text-[11px] font-semibold text-slate-600 shadow-xs scrollbar-none">
+          <span className="text-[10px] uppercase font-bold text-slate-400 px-2 shrink-0">Jump To:</span>
+          {concept.literatureReferences?.length > 0 && (
+            <a href="#citations" className="px-2.5 py-1 rounded-lg hover:bg-white hover:text-sky-700 transition-colors whitespace-nowrap">
+              Citations
+            </a>
+          )}
+          {concept.conceptualTheory && (
+            <a href="#theory" className="px-2.5 py-1 rounded-lg hover:bg-white hover:text-sky-700 transition-colors whitespace-nowrap">
+              Math Invariants
+            </a>
+          )}
+          {concept.variations?.length > 0 && (
+            <a href="#variations" className="px-2.5 py-1 rounded-lg hover:bg-white hover:text-sky-700 transition-colors whitespace-nowrap">
+              Variations
+            </a>
+          )}
+          {concept.recognitionSignals?.length > 0 && (
+            <a href="#signals" className="px-2.5 py-1 rounded-lg hover:bg-white hover:text-sky-700 transition-colors whitespace-nowrap">
+              Recognition
+            </a>
+          )}
+          {concept.stepByStepStrategy?.length > 0 && (
+            <a href="#protocol" className="px-2.5 py-1 rounded-lg hover:bg-white hover:text-sky-700 transition-colors whitespace-nowrap">
+              Contest Protocol
+            </a>
+          )}
+          {concept.codeTemplate && (
+            <a href="#template" className="px-2.5 py-1 rounded-lg hover:bg-white hover:text-sky-700 transition-colors whitespace-nowrap">
+              C++20 Template
+            </a>
+          )}
+          {concept.pitfalls?.length > 0 && (
+            <a href="#pitfalls" className="px-2.5 py-1 rounded-lg hover:bg-white hover:text-sky-700 transition-colors whitespace-nowrap">
+              Traps
+            </a>
+          )}
+          {concept.practiceProblems?.length > 0 && (
+            <a href="#ladder" className="px-2.5 py-1 rounded-lg hover:bg-white hover:text-sky-700 transition-colors whitespace-nowrap text-sky-700 font-bold">
+              Practice Ladder
+            </a>
+          )}
         </div>
       </div>
 
@@ -188,7 +249,7 @@ export default function ConceptDetailPage({
 
       {/* Literature & Curriculum Citations (USACO Guide + Top 5 CP Books) */}
       {concept.literatureReferences && concept.literatureReferences.length > 0 && (
-        <div className="space-y-3">
+        <div id="citations" className="space-y-3 scroll-mt-20">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Library className="w-4 h-4 text-sky-600" />
@@ -241,7 +302,7 @@ export default function ConceptDetailPage({
 
       {/* Deep-Dive Theory & Mathematical Foundations */}
       {concept.conceptualTheory && (
-        <div className="p-6 rounded-2xl glass-panel border border-slate-200 bg-white shadow-sm space-y-4">
+        <div id="theory" className="p-6 rounded-2xl glass-panel border border-slate-200 bg-white shadow-sm space-y-4 scroll-mt-20">
           <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
             <BookOpen className="w-4 h-4 text-sky-600" />
             <h2 className="text-base font-extrabold text-slate-900">
@@ -288,7 +349,7 @@ export default function ConceptDetailPage({
 
       {/* Core Variations & Problem Archetypes */}
       {concept.variations && concept.variations.length > 0 && (
-        <div className="space-y-3">
+        <div id="variations" className="space-y-3 scroll-mt-20">
           <div className="flex items-center gap-2">
             <Layers className="w-4 h-4 text-purple-600" />
             <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
@@ -335,7 +396,7 @@ export default function ConceptDetailPage({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Recognition Signals */}
         {concept.recognitionSignals && concept.recognitionSignals.length > 0 && (
-          <div className="p-5 rounded-2xl glass-panel border border-slate-200 bg-white shadow-sm space-y-3">
+          <div id="signals" className="p-5 rounded-2xl glass-panel border border-slate-200 bg-white shadow-sm space-y-3 scroll-mt-20">
             <div className="flex items-center gap-2 text-sky-800 font-bold text-xs uppercase tracking-wide">
               <Compass className="w-4 h-4 text-sky-600" />
               <span>Contest Recognition Signals</span>
@@ -361,7 +422,7 @@ export default function ConceptDetailPage({
 
         {/* Step-by-Step Strategy */}
         {concept.stepByStepStrategy && concept.stepByStepStrategy.length > 0 && (
-          <div className="p-5 rounded-2xl glass-panel border border-slate-200 bg-white shadow-sm space-y-3">
+          <div id="protocol" className="p-5 rounded-2xl glass-panel border border-slate-200 bg-white shadow-sm space-y-3 scroll-mt-20">
             <div className="flex items-center gap-2 text-emerald-800 font-bold text-xs uppercase tracking-wide">
               <CheckCircle2 className="w-4 h-4 text-emerald-600" />
               <span>Contest Execution Protocol</span>
@@ -386,7 +447,7 @@ export default function ConceptDetailPage({
 
       {/* Production C++20 Templates */}
       {concept.codeTemplate && (
-        <div className="rounded-2xl glass-panel border border-slate-200 overflow-hidden shadow-lg bg-white">
+        <div id="template" className="rounded-2xl glass-panel border border-slate-200 overflow-hidden shadow-lg bg-white scroll-mt-20">
           <div className="p-4 bg-slate-100 border-b border-slate-200 flex items-center justify-between">
             <div className="flex items-center gap-2 text-xs font-bold text-slate-900">
               <Code2 className="w-4 h-4 text-sky-600" />
@@ -417,7 +478,7 @@ export default function ConceptDetailPage({
 
       {/* Common Pitfalls & Traps */}
       {concept.pitfalls && concept.pitfalls.length > 0 && (
-        <div className="p-5 rounded-2xl glass-panel border border-amber-200 bg-amber-50/60 space-y-3 shadow-sm">
+        <div id="pitfalls" className="p-5 rounded-2xl glass-panel border border-amber-200 bg-amber-50/60 space-y-3 shadow-sm scroll-mt-20">
           <div className="flex items-center gap-2 text-amber-800 font-bold text-xs uppercase tracking-wide">
             <AlertTriangle className="w-4 h-4 text-amber-600" />
             <span>Common Implementation Traps & WA/TLE Pitfalls</span>
@@ -432,46 +493,77 @@ export default function ConceptDetailPage({
 
       {/* Recommended Practice Ladder */}
       {concept.practiceProblems && concept.practiceProblems.length > 0 && (
-        <div className="p-6 rounded-2xl glass-panel border border-slate-200 bg-white shadow-sm space-y-4">
+        <div id="ladder" className="p-6 rounded-2xl glass-panel border border-slate-200 bg-white shadow-sm space-y-4 scroll-mt-20">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
               <Target className="w-4 h-4 text-sky-600" />
               <span>Calibrated Problem Practice Ladder</span>
             </div>
             <span className="text-xs text-slate-500">
-              {concept.practiceProblems.length} Curated Tasks (USACO & Codeforces)
+              {concept.practiceProblems.length} Curated Tasks (USACO, CSES, Codeforces)
             </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-            {concept.practiceProblems.map((prob: any, idx: number) => (
-              <div
-                key={idx}
-                className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between hover:border-sky-300 transition-all group shadow-xs"
-              >
-                <div>
-                  <h4 className="text-xs font-bold text-slate-900 group-hover:text-sky-600 transition-colors">
-                    {prob.name}
-                  </h4>
-                  <span className="text-[11px] text-slate-500 mt-1 block">
-                    Rating / Division: <strong className="text-sky-700 font-bold">★ {prob.rating}</strong>
-                  </span>
-                </div>
+            {concept.practiceProblems.map((prob: any, idx: number) => {
+              const platform = getPlatformInfo(prob.url);
+              const ratingBadge = getRatingBadge(prob.rating);
 
-                <a
-                  href={prob.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-3 py-1.5 rounded-xl text-xs font-bold bg-sky-600 hover:bg-sky-500 text-white transition-all flex items-center gap-1.5 shadow-sm"
+              return (
+                <div
+                  key={idx}
+                  className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between hover:border-sky-300 transition-all group shadow-xs"
                 >
-                  <span>Solve</span>
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </a>
-              </div>
-            ))}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center gap-2">
+                      <span className={`px-2 py-0.2 rounded text-[9px] font-bold border ${platform.badge}`}>
+                        {platform.name}
+                      </span>
+                      <span className={`px-2 py-0.2 rounded text-[9px] font-bold border ${ratingBadge}`}>
+                        ★ {prob.rating}
+                      </span>
+                    </div>
+                    <h4 className="text-xs font-bold text-slate-900 group-hover:text-sky-600 transition-colors">
+                      {prob.name}
+                    </h4>
+                  </div>
+
+                  <a
+                    href={prob.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-sky-600 hover:bg-sky-500 text-white transition-all flex items-center gap-1.5 shadow-sm shrink-0"
+                  >
+                    <span>Solve</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
+
+      {/* Diagnostic Assessment Footer Banner */}
+      <div className="p-6 rounded-2xl glass-panel border border-sky-200 bg-sky-50/60 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 text-sky-900 font-bold text-sm">
+            <Zap className="w-4 h-4 text-sky-600" />
+            <span>Verify Your Understanding of {concept.name}</span>
+          </div>
+          <p className="text-xs text-slate-600 max-w-xl">
+            Test yourself against theoretical verification questions, eliminate hidden invariant blindspots, and calibrate your weekly training plan.
+          </p>
+        </div>
+
+        <Link
+          href="/training"
+          className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-sm transition-all flex items-center gap-1.5 shrink-0"
+        >
+          <span>Take Knowledge Test</span>
+          <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
+      </div>
     </div>
   );
 }

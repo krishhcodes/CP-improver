@@ -206,4 +206,90 @@ pair<int, int> findTwoSum(vector<pair<int, int>>& a, int target) {
       hint: "Find the shortest substring containing all unique Pokemon types present in the string.",
     },
   ],
+  deepExplanation: {
+    intuition:
+      "Imagine an elastic rubber band stretched across an array. The right boundary sweeps forward, eagerly claiming new elements. When the window becomes invalid (e.g. sum exceeds capacity or duplicates appear), the left boundary contracts inward until legality is restored. Because the left pointer never rewinds or moves backward, the two pointers traverse the array like two runners in a single lane, executing at most 2N steps in total.",
+    proofOfCorrectness:
+      "Amortized Potential Argument: Define potential Phi = l + r. At each iteration of the outer loop, r advances by 1 (at most N times). In the inner loop, l advances by 1 (at most N times because l <= r). Since both pointers move monotonically from 0 to N-1, the total number of operations is bounded by 2N = O(N).",
+    complexityDerivation:
+      "Time: O(N) when applied to an already sorted array or contiguous subarray problem. O(N log N) if an initial sorting step is required (e.g. 2-Sum). Auxiliary Space: O(1) memory since only two integer indices (l and r) and a running accumulator are maintained.",
+    whenNotToUse:
+      "Do NOT use two pointers if the array contains negative numbers. Negative numbers break sum monotonicity: adding an element could decrease the sum, and shrinking the left side could increase the sum! In the presence of negative values, use Prefix Sums paired with a Hash Map or Monotonic Deque.",
+  },
+  workedExample: {
+    title: "Sliding Window Maximum Subarray Sum <= 8",
+    scenario: "Array A = [2, 1, 5, 2, 8], Constraint: Sum <= 8",
+    input: "A = [2, 1, 5, 2, 8], Target K = 8",
+    output: "Max Subarray Length = 3 (subarray [1, 5, 2] with sum 8)",
+    traceSteps: [
+      { step: 1, state: "l=0, r=0, cur=2", action: "Expand r to 0, cur=2 <= 8", insight: "Valid window [2], max_len=1" },
+      { step: 2, state: "l=0, r=1, cur=3", action: "Expand r to 1, cur=3 <= 8", insight: "Valid window [2, 1], max_len=2" },
+      { step: 3, state: "l=0, r=2, cur=8", action: "Expand r to 2, cur=8 <= 8", insight: "Valid window [2, 1, 5], max_len=3" },
+      { step: 4, state: "l=0, r=3, cur=10", action: "Expand r to 3, cur=10 > 8 (Invalid!)", insight: "Must contract left boundary" },
+      { step: 5, state: "l=1, r=3, cur=8", action: "Evict A[0]=2, l advances to 1, cur=8 <= 8", insight: "Valid window [1, 5, 2], len=3, max_len=3" },
+      { step: 6, state: "l=1, r=4, cur=16", action: "Expand r to 4, cur=16 > 8 (Invalid!)", insight: "Must contract left boundary repeatedly" },
+      { step: 7, state: "l=2, r=4, cur=15", action: "Evict A[1]=1, l=2, cur=15 > 8", insight: "Still invalid, continue contracting" },
+      { step: 8, state: "l=3, r=4, cur=10", action: "Evict A[2]=5, l=3, cur=10 > 8", insight: "Still invalid, continue contracting" },
+      { step: 9, state: "l=4, r=4, cur=8", action: "Evict A[3]=2, l=4, cur=8 <= 8", insight: "Valid window [8], len=1, max_len=3" },
+      { step: 10, state: "Termination", action: "Loop terminates as r reaches end", insight: "Final maximum length = 3" },
+    ],
+  },
+  trapAnalysis: [
+    {
+      trap: "Applying to Arrays with Negative Values",
+      cause: "Assuming sum monotonically increases when expanding the right pointer.",
+      fix: "If negative values exist, use Prefix Sums with Hash Map or Monotonic Queue.",
+      wrongSnippet: "while (cur > K) { cur -= a[l++]; } // Fails if a[l] is negative!",
+      correctedSnippet: "// Use Prefix Sums: pref[r] - pref[l-1] <= K via coordinate compression or map",
+    },
+    {
+      trap: "Inner While Loop Index Overshoot",
+      cause: "Omitting the `l <= r` guard when a single element is larger than the target.",
+      fix: "Always include `l <= r` in the while condition to avoid left pointer exceeding right pointer.",
+      wrongSnippet: "while (cur > K) { cur -= a[l++]; } // l can overshoot r when a[r] > K",
+      correctedSnippet: "while (l <= r && cur > K) { cur -= a[l++]; } // Guaranteed safe bounds",
+    },
+    {
+      trap: "Subarray Count Formula Error",
+      cause: "Adding 1 per step instead of the number of valid subarrays ending at the current right pointer.",
+      fix: "Every index from l to r forms a valid subarray ending at r. Add `(r - l + 1)`.",
+      wrongSnippet: "total_subarrays++; // Only counts 1 subarray!",
+      correctedSnippet: "total_subarrays += (r - l + 1); // Counts all valid prefixes ending at r",
+    },
+  ],
+  pythonTemplate: `import sys
+
+def solve():
+    input = sys.stdin.readline
+    
+    # Example: Longest Subarray with Sum <= K
+    n, k = map(int, input().split())
+    a = list(map(int, input().split()))
+    
+    l = 0
+    cur_sum = 0
+    max_len = 0
+    
+    for r in range(n):
+        cur_sum += a[r]
+        while l <= r and cur_sum > k:
+            cur_sum -= a[l]
+            l += 1
+        max_len = max(max_len, r - l + 1)
+        
+    print(max_len)
+
+# 2-Sum on Sorted Array
+def two_sum_sorted(a, target):
+    l, r = 0, len(a) - 1
+    while l < r:
+        s = a[l] + a[r]
+        if s == target:
+            return l, r
+        elif s < target:
+            l += 1
+        else:
+            r -= 1
+    return -1, -1
+`,
 };

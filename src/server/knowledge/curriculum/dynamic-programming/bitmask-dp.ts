@@ -214,4 +214,94 @@ vector<long long> computeSOS(int n, const vector<long long>& a) {
       hint: "SOS DP: Find an element that is a submask of ~a[i] in O(N * 2^N).",
     },
   ],
+  deepExplanation: {
+    intuition:
+      "When a problem involves tracking which subset of N items has been selected or visited, brute-force permutation checking requires O(N!), which becomes infeasible beyond N = 10. By compressing the subset of selected items into an integer bitmask where the i-th bit is 1 if item i is chosen and 0 otherwise, we map exponential subsets {0, 1}^N into contiguous integers [0, 2^N - 1]. Dynamic programming then computes optimal values over subsets in O(N^2 * 2^N) or O(N * 2^N), scaling comfortably up to N = 20-22.",
+    proofOfCorrectness:
+      "Theorem (Topological Invariance of Numerical Mask Traversal): Any valid transition in a subset expansion DP adds an unvisited element v to the current subset: next_mask = mask | (1 << v). Because (1 << v) > 0 and bitwise OR strictly sets a previously unset bit, next_mask > mask numerically and popcount(next_mask) = popcount(mask) + 1. Therefore, iterating mask as a standard integer from 1 to (1 << N) - 1 guarantees that every possible predecessor state mask' with popcount < popcount(mask) has already been computed and finalized. No cycle can exist in the state DAG, ensuring strict correctness without memoized DFS recursion.",
+    complexityDerivation:
+      "TSP Time: (2^N states) * (N ending vertices) * (N candidate transitions) = O(N^2 * 2^N). For N = 19, 19^2 * 524,288 ≈ 1.8 * 10^8 operations, executing in ~400ms in C++. SOS DP Time: Exactly N * 2^N operations by decomposing the multidimensional hypercube coordinate by coordinate. Submask Enumeration Time: sum_{k=0}^N (N choose k) * 2^k = (1 + 2)^N = 3^N via the Binomial Theorem. Space: O(N * 2^N) or O(2^N) integers.",
+    whenNotToUse:
+      "Do NOT use Bitmask DP if N > 22, as 2^23 = 8.3 * 10^6 states and 2^25 = 3.3 * 10^7 states cause immediate TLE or MLE. If the problem asks for bipartite matching or flow with N >= 100, use Hopcroft-Karp or Dinic's Algorithm (polynomial time). If N <= 40, consider Meet-in-the-Middle in O(2^(N/2)).",
+  },
+  workedExample: {
+    title: "TSP on 3 Cities (N = 3) Trace",
+    scenario: "Cities {0, 1, 2}. Start at 0, visit all cities, return to 0. Distances: d(0,1)=2, d(0,2)=9, d(1,2)=4, d(1,0)=1, d(2,0)=3, d(2,1)=7.",
+    input: "N = 3. Masks 1..7. dp[mask][u] = min cost to visit mask ending at u.",
+    output: "Minimum TSP tour = 0 -> 1 -> 2 -> 0 with cost 2 + 4 + 3 = 9.",
+    traceSteps: [
+      { step: 1, state: "Base Case", action: "dp[1][0] = 0 (mask 001_2 = {0}, end at 0). All others INF.", insight: "Starting city locked at 0" },
+      { step: 2, state: "Expand from mask 1 ({0})", action: "To city 1: dp[3][1] = dp[1][0] + d(0,1) = 0 + 2 = 2. To city 2: dp[5][2] = dp[1][0] + d(0,2) = 0 + 9 = 9.", insight: "mask 3 is {0, 1}, mask 5 is {0, 2}" },
+      { step: 3, state: "Process mask 3 ({0, 1}, end at 1)", action: "Unvisited city 2: dp[7][2] = min(INF, dp[3][1] + d(1,2)) = 2 + 4 = 6.", insight: "mask 7 is {0, 1, 2}" },
+      { step: 4, state: "Process mask 5 ({0, 2}, end at 2)", action: "Unvisited city 1: dp[7][1] = min(INF, dp[5][2] + d(2,1)) = 9 + 7 = 16.", insight: "Alternative route 0 -> 2 -> 1" },
+      { step: 5, state: "Close Tour back to 0 from full mask 7 ({0, 1, 2})", action: "From end 2: dp[7][2] + d(2,0) = 6 + 3 = 9. From end 1: dp[7][1] + d(1,0) = 16 + 1 = 17. Min = 9.", insight: "Optimal tour: 0 -> 1 -> 2 -> 0 has total cost 9!" },
+    ],
+  },
+  trapAnalysis: [
+    {
+      trap: "Bitwise Precedence Operator Hazard",
+      cause: "In C++, equality `==` and relational operators bind tighter than bitwise `&`, `^`, `|`. `mask & 1 << i == 0` parses as `mask & (1 << (i == 0))`.",
+      fix: "ALWAYS surround bitwise tests with parentheses: `((mask >> i) & 1)` or `(mask & (1 << i)) != 0`.",
+      wrongSnippet: "if (mask & (1 << v) == 0) // Bugs logic completely!",
+      correctedSnippet: "if (!(mask & (1 << v))) // Safe and unambiguous",
+    },
+    {
+      trap: "32-Bit Bit Shift Overflow (1 << 31)",
+      cause: "Writing `1 << n` when n = 31 or 32 produces undefined behavior and wraps to negative or zero in signed 32-bit int.",
+      fix: "For N >= 31, always write `1LL << n`.",
+      wrongSnippet: "for (int mask = 0; mask < (1 << n); mask++) // Undefined behavior if n >= 31",
+      correctedSnippet: "for (long long mask = 0; mask < (1LL << n); mask++) // 64-bit safe",
+    },
+    {
+      trap: "Naive Submask Iteration in O(4^N)",
+      cause: "Iterating all pairs `for mask1: for mask2: if (mask1 & mask2 == mask1)` runs in 2^N * 2^N = 4^N.",
+      fix: "Use submask decrement trick: `for (int sub = mask; sub > 0; sub = (sub - 1) & mask)` running in strict O(3^N).",
+      wrongSnippet: "for (int m = 0; m < (1<<n); m++) for (int sub = 0; sub < (1<<n); sub++) if ((sub & m) == sub) ...",
+      correctedSnippet: "for (int m = 0; m < (1<<n); m++) for (int sub = m; sub > 0; sub = (sub - 1) & m) ...",
+    },
+  ],
+  pythonTemplate: `import sys
+
+def solve_tsp():
+    """Traveling Salesperson Problem in O(N^2 * 2^N) with bitmask DP."""
+    input = sys.stdin.readline
+    n = int(input())
+    dist = [list(map(int, input().split())) for _ in range(n)]
+
+    INF = float('inf')
+    # dp[mask][u]: min cost to visit subset mask ending at city u
+    dp = [[INF] * n for _ in range(1 << n)]
+    dp[1][0] = 0  # Base case: city 0 visited, cost 0
+
+    for mask in range(1, 1 << n):
+        for u in range(n):
+            if dp[mask][u] == INF:
+                continue
+
+            for v in range(n):
+                # If city v is not yet visited in mask
+                if not (mask & (1 << v)):
+                    next_mask = mask | (1 << v)
+                    cost = dp[mask][u] + dist[u][v]
+                    if cost < dp[next_mask][v]:
+                        dp[next_mask][v] = cost
+
+    full_mask = (1 << n) - 1
+    # Close tour by returning to starting city 0
+    ans = min(dp[full_mask][u] + dist[u][0] for u in range(n))
+    print(ans)
+
+def solve_sos_dp(n: int, a: list) -> list:
+    """Sum Over Subsets (SOS DP): dp[mask] = sum(a[sub] for all sub in mask) in O(N * 2^N)."""
+    dp = list(a)
+    for i in range(n):
+        bit = 1 << i
+        for mask in range(1 << n):
+            if mask & bit:
+                dp[mask] += dp[mask ^ bit]
+    return dp
+
+if __name__ == '__main__':
+    solve_tsp()
+`,
 };

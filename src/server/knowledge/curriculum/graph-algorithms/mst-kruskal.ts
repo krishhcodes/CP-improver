@@ -196,4 +196,111 @@ pair<long long, vector<Edge>> kruskalMST(int n, vector<Edge>& edges) {
       hint: "Construct MST from pairwise distance matrix using Kruskal, then check if tree distances match original matrix.",
     },
   ],
+  deepExplanation: {
+    intuition:
+      "A Spanning Tree is an acyclic connected subgraph spanning all N vertices of a graph using exactly N - 1 edges. The Minimum Spanning Tree (MST) minimizes total edge weight. Kruskal's algorithm is an elegant greedy strategy: sort all edges in non-decreasing order of weight and iterate through them. For each edge (u, v), if u and v belong to different connected components, accept the edge and merge the components using DSU; if they are already connected, discard the edge to avoid creating a cycle.",
+    proofOfCorrectness:
+      "Theorem (Cut Property & Matroid Optimality): Let G = (V, E) be a connected weighted graph. For any cut (S, V \\ S), the lightest edge e crossing the cut belongs to some MST of G. Proof by Exchange: Suppose an MST T* does not contain e = (u, v) where u in S, v in V \\ S. Adding e to T* creates a unique cycle C in T* + {e}. Since u and v are on opposite sides of the cut, the cycle C must cross the cut at at least one other edge e' = (x, y) with x in S, y in V \\ S. Removing e' breaks the cycle and restores a spanning tree T' = T* - {e'} + {e}. Because e is the lightest edge crossing the cut, weight(e) <= weight(e'). Thus weight(T') = weight(T*) + weight(e) - weight(e') <= weight(T*). Since T* was minimal, weight(T') = weight(T*), meaning T' is also an MST that includes e. Kruskal's algorithm always adds the lightest edge crossing the cut between two distinct connected components. By induction, the set of edges selected by Kruskal forms a globally optimal MST.",
+    complexityDerivation:
+      "Time: Edge sorting takes O(M log M) = O(M log V) since M <= V^2. Processing M edges through DSU takes O(M * alpha(V)), where alpha is the inverse Ackermann function. Total runtime: O(M log V), running in ~70ms in C++ for M = 200,000. Space: O(V + M) auxiliary memory for edge list and DSU arrays.",
+    whenNotToUse:
+      "Do NOT use Kruskal's algorithm if the graph is dense (E approx V^2, e.g. complete graph where V = 2000, E = 2 * 10^6). On dense graphs, Prim's Algorithm with an adjacency matrix runs in O(V^2) without sorting overhead, whereas Kruskal takes O(V^2 log V). Also, if edge weights are already sorted or bounded integers, Prim with a bucket queue runs in O(V + E).",
+  },
+  workedExample: {
+    title: "Kruskal MST Step-by-Step Edge Selection Trace",
+    scenario: "4 vertices {1, 2, 3, 4}. Edges: (1-2, w=1), (2-3, w=2), (1-3, w=3), (3-4, w=4), (2-4, w=5).",
+    input: "N = 4, M = 5. Target: N - 1 = 3 tree edges.",
+    output: "MST Weight = 1 + 2 + 4 = 7. Edges chosen: (1-2), (2-3), (3-4).",
+    traceSteps: [
+      { step: 1, state: "Edge (1-2, w=1)", action: "find(1)=1, find(2)=2. Different components! Accept edge. Unite {1, 2}. MST weight = 1. Edges chosen: 1/3", insight: "Lightest edge in entire graph" },
+      { step: 2, state: "Edge (2-3, w=2)", action: "find(2)=1, find(3)=3. Different components! Accept edge. Unite {1, 2, 3}. MST weight = 1 + 2 = 3. Edges chosen: 2/3", insight: "Merges vertex 3 into existing component" },
+      { step: 3, state: "Edge (1-3, w=3)", action: "find(1)=1, find(3)=1. Same component! Discard edge (would create cycle 1-2-3-1).", insight: "Cycle prevention via DSU in O(alpha(V))" },
+      { step: 4, state: "Edge (3-4, w=4)", action: "find(3)=1, find(4)=4. Different components! Accept edge. Unite {1, 2, 3, 4}. MST weight = 3 + 4 = 7. Edges chosen: 3/3", insight: "Reached exactly N - 1 = 3 edges" },
+      { step: 5, state: "Termination", action: "mst_edges.size() == 3. Break early. Total weight = 7.", insight: "Discard remaining edge (2-4, w=5) without inspection." },
+    ],
+  },
+  trapAnalysis: [
+    {
+      trap: "Assuming Graph is Connected without Verification",
+      cause: "If the input graph has disconnected components, Kruskal will terminate with fewer than N - 1 edges selected.",
+      fix: "Check `if (mst_edges.size() != n - 1)` and print 'IMPOSSIBLE' or return -1.",
+      wrongSnippet: "cout << total_weight << endl; // Prints partial forest sum on disconnected graphs!",
+      correctedSnippet: "if (mst_edges.size() != n - 1) cout << \"IMPOSSIBLE\\n\"; else cout << total_weight << \"\\n\";",
+    },
+    {
+      trap: "Signed 32-Bit Integer Overflow on Total MST Weight",
+      cause: "Summing 200,000 edges of weight 10^9 produces 2 * 10^14, which wraps 32-bit signed int.",
+      fix: "Declare `total_weight` and edge weight types as `long long`.",
+      wrongSnippet: "int total_weight = 0; for (auto e : mst_edges) total_weight += e.weight;",
+      correctedSnippet: "long long total_weight = 0; for (auto e : mst_edges) total_weight += e.weight;",
+    },
+    {
+      trap: "Cycle Check using Raw Node IDs Instead of DSU Roots",
+      cause: "Checking `if (edge.u == edge.v)` instead of checking their canonical root leaders `dsu.find(edge.u) == dsu.find(edge.v)`.",
+      fix: "Rely on `dsu.unite(u, v)` which resolves roots and returns false if already in the same component.",
+      wrongSnippet: "if (edge.u != edge.v) { /* add edge */ } // Misses indirect cycles through other nodes!",
+      correctedSnippet: "if (dsu.unite(edge.u, edge.v)) { total_weight += edge.weight; }",
+    },
+  ],
+  pythonTemplate: `import sys
+
+class DSU:
+    def __init__(self, n: int):
+        self.parent = list(range(n + 1))
+        self.size = [1] * (n + 1)
+        self.num_components = n
+
+    def find(self, i: int) -> int:
+        path = []
+        while self.parent[i] != i:
+            path.append(i)
+            i = self.parent[i]
+        for node in path:
+            self.parent[node] = i
+        return i
+
+    def unite(self, i: int, j: int) -> bool:
+        root_i = self.find(i)
+        root_j = self.find(j)
+        if root_i == root_j:
+            return False
+        if self.size[root_i] < self.size[root_j]:
+            root_i, root_j = root_j, root_i
+        self.parent[root_j] = root_i
+        self.size[root_i] += self.size[root_j]
+        self.num_components -= 1
+        return True
+
+def kruskal():
+    """CSES Road Reparation / Kruskal's Minimum Spanning Tree in O(M log M)."""
+    input = sys.stdin.readline
+    n, m = map(int, input().split())
+
+    edges = []
+    for _ in range(m):
+        u, v, w = map(int, input().split())
+        edges.append((w, u, v))
+
+    # Sort edges by weight
+    edges.sort()
+
+    dsu = DSU(n)
+    total_weight = 0
+    edges_count = 0
+
+    for w, u, v in edges:
+        if dsu.unite(u, v):
+            total_weight += w
+            edges_count += 1
+            if edges_count == n - 1:
+                break
+
+    if edges_count != n - 1:
+        print("IMPOSSIBLE")
+    else:
+        print(total_weight)
+
+if __name__ == '__main__':
+    kruskal()
+`,
 };

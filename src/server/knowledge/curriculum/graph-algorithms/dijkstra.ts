@@ -161,4 +161,87 @@ vector<long long> dijkstra(int start, int n, const vector<vector<pair<int, long 
       hint: "Shortest path with path reconstruction using parent array.",
     },
   ],
+  deepExplanation: {
+    intuition:
+      "Dijkstra's Algorithm finds the single-source shortest paths in a directed or undirected graph with non-negative edge weights. It operates as a greedy priority-first search: at each step, it selects the unsettled vertex u with the smallest tentative distance from the source. Because all remaining edge weights are non-negative, any alternative path to u must pass through another currently unsettled vertex with equal or greater distance, making it impossible to ever discover a shorter path to u. Thus, u can be permanently finalized ('settled').",
+    proofOfCorrectness:
+      "Theorem (Correctness of Dijkstra's Greedy Settlement): When vertex u is popped from the min-priority queue, its tentative distance dist[u] equals the true shortest distance delta(s, u). Proof by Contradiction: Suppose u is the first vertex popped for which dist[u] > delta(s, u). Let P be a true shortest path from s to u. Since s is settled and u is unsettled, there must be an edge (x, y) along P where x is settled and y is the first unsettled vertex on P. Because x is settled before u, dist[x] = delta(s, x). When x was settled, edge (x, y) was relaxed, setting dist[y] <= dist[x] + weight(x, y) = delta(s, y). Because all edge weights are non-negative, delta(s, y) <= delta(s, u). Therefore, dist[y] <= delta(s, y) <= delta(s, u) < dist[u]. This implies dist[y] < dist[u]. But the min-priority queue chose u instead of y, which requires dist[u] <= dist[y], yielding a direct contradiction. Hence, dist[u] = delta(s, u) for all popped vertices.",
+    complexityDerivation:
+      "Time: O((V + E) log V). There are at most V vertex extractions (each taking O(log V) in a binary min-heap) and at most E edge relaxations pushing updated distances into the heap (each taking O(log V)). Total time: O(E log V) in connected graphs, easily handling V, E <= 2 * 10^5 in ~180ms in C++. Space: O(V + E) to store adjacency lists, distance array, and the priority queue.",
+    whenNotToUse:
+      "Do NOT use Dijkstra if the graph contains ANY negative edge weights; Dijkstra assumes path distances are monotonically non-decreasing and fails immediately on negative weights (use Bellman-Ford or SPFA instead). Also, on Directed Acyclic Graphs (DAGs), relaxing edges in topological order achieves O(V + E) without priority queue overhead.",
+  },
+  workedExample: {
+    title: "Min-Heap Shortest Path Trace (4 Nodes)",
+    scenario: "Nodes {1, 2, 3, 4}. Edges: (1->2, w=4), (1->3, w=2), (3->2, w=1), (2->4, w=5), (3->4, w=8). Source = 1.",
+    input: "start = 1. dist = [0, INF, INF, INF]. PQ: [(0, 1)]",
+    output: "Shortest distances: dist[1]=0, dist[3]=2, dist[2]=3, dist[4]=8. Optimal path to 4: 1 -> 3 -> 2 -> 4.",
+    traceSteps: [
+      { step: 1, state: "Pop (0, 1)", action: "Relax edges from 1: (1->2, w=4) -> dist[2]=4, push (4, 2). (1->3, w=2) -> dist[3]=2, push (2, 3). PQ: [(2, 3), (4, 2)]", insight: "Node 1 settled at 0" },
+      { step: 2, state: "Pop (2, 3)", action: "Relax edges from 3: (3->2, w=1) -> 2+1=3 < dist[2](4) -> dist[2]=3, push (3, 2). (3->4, w=8) -> dist[4]=10, push (10, 4). PQ: [(3, 2), (4, 2), (10, 4)]", insight: "Node 3 settled at 2. Discovered shortcut to node 2!" },
+      { step: 3, state: "Pop (3, 2)", action: "Relax edges from 2: (2->4, w=5) -> 3+5=8 < dist[4](10) -> dist[4]=8, push (8, 4). PQ: [(4, 2), (8, 4), (10, 4)]", insight: "Node 2 settled at 3 via 1->3->2" },
+      { step: 4, state: "Pop (4, 2)", action: "Stale check: d=4 > dist[2]=3. Ignore immediately!", insight: "Lazy deletion skips obsolete priority queue entry in O(1)" },
+      { step: 5, state: "Pop (8, 4)", action: "Node 4 has no outgoing edges. PQ has [(10, 4)] (stale).", insight: "Node 4 settled at 8 via 1->3->2->4" },
+    ],
+  },
+  trapAnalysis: [
+    {
+      trap: "Omitting the Stale State Check (d > dist[u])",
+      cause: "Without `if (d > dist[u]) continue;`, vertices pushed multiple times with outdated longer distances are processed repeatedly, degrading time to O(V * E) and causing TLE.",
+      fix: "Always check `if (d > dist[u]) continue;` immediately after popping from priority queue.",
+      wrongSnippet: "auto [d, u] = pq.top(); pq.pop(); for (auto [v, w] : adj[u]) ... // Re-processes stale vertices!",
+      correctedSnippet: "auto [d, u] = pq.top(); pq.pop(); if (d > dist[u]) continue; for (auto [v, w] : adj[u]) ...",
+    },
+    {
+      trap: "Signed 32-Bit Overflow in Distance Accumulation",
+      cause: "Summing edge weights along paths of length 10^5 with weight 10^9 produces up to 10^14, which wraps 32-bit signed int to negative.",
+      fix: "Always declare distance vectors and priority queue keys as `long long`.",
+      wrongSnippet: "priority_queue<pair<int, int>> pq; vector<int> dist; // Overflows 2.14 * 10^9",
+      correctedSnippet: "priority_queue<pair<long long, int>, vector<pair<long long, int>>, greater<>> pq; vector<long long> dist;",
+    },
+    {
+      trap: "Inverting Pair Tuple Order in std::priority_queue",
+      cause: "Pushing `pair<int, long long>(u, dist)` into priority queue sorts by node index instead of minimum distance!",
+      fix: "Always push `(distance, node)` so the heap comparator orders by smallest distance first.",
+      wrongSnippet: "pq.push({v, dist[v]}); // Sorts by vertex ID!",
+      correctedSnippet: "pq.push({dist[v], v}); // Correctly sorts by distance",
+    },
+  ],
+  pythonTemplate: `import sys
+import heapq
+
+def dijkstra():
+    """CSES Shortest Routes I / Single-Source Shortest Paths in O(E log V)."""
+    input = sys.stdin.readline
+    n, m = map(int, input().split())
+    adj = [[] for _ in range(n + 1)]
+
+    for _ in range(m):
+        u, v, w = map(int, input().split())
+        adj[u].append((v, w))
+
+    INF = float('inf')
+    dist = [INF] * (n + 1)
+    dist[1] = 0
+    
+    # Priority queue stores tuples: (distance, vertex)
+    pq = [(0, 1)]
+
+    while pq:
+        d, u = heapq.heappop(pq)
+
+        # Critical: skip stale queue entries
+        if d > dist[u]:
+            continue
+
+        for v, weight in adj[u]:
+            if dist[u] + weight < dist[v]:
+                dist[v] = dist[u] + weight
+                heapq.heappush(pq, (dist[v], v))
+
+    print(" ".join(str(dist[i]) for i in range(1, n + 1)))
+
+if __name__ == '__main__':
+    dijkstra()
+`,
 };

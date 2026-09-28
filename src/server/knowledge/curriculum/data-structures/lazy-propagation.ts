@@ -180,4 +180,144 @@ struct LazySegmentTree {
       hint: "Segment tree beats: range modulo x % m < x / 2 if x >= m, so elements decrease exponentially. Recurse only if max >= m.",
     },
   ],
+  deepExplanation: {
+    intuition:
+      "When updating an entire contiguous range [L, R] with value V, naive iteration visits up to N leaves, degrading updates to O(N). Lazy propagation postpones updating descendants. When a node's interval [start, end] is completely contained inside [L, R], we update the node's aggregate immediately, record a 'lazy debt' tag on that node, and halt recursion. The descendants are only updated ('pushed') on-demand later when an operation actually needs to inspect or modify their subtrees.",
+    proofOfCorrectness:
+      "Theorem (Invariant Preservation under Lazy Deferral): At every step of any query or update operation, the value returned or maintained at any node is identical to executing all pending updates eagerly. Proof: Let T be the segment tree. We maintain the invariant: for every node u, either lazy[u] == 0 or tree[u] correctly accounts for all updates applied to u's interval, while u's children may be deficient by exactly lazy[u]. Whenever an operation visits u and needs to recurse into its children, the subroutine push(u) is executed first: it applies lazy[u] to tree[2u] and tree[2u+1], transfers the tag to lazy[2u] and lazy[2u+1], and resets lazy[u] = 0. Therefore, whenever any child is read or written, its parent's lazy debt has been fully discharged. By induction on recursion depth, no stale node is ever read, guaranteeing exact aggregate correctness.",
+    complexityDerivation:
+      "Range Update Time: O(log N). Exactly like a range query in standard segment trees, an update range [L, R] breaks into at most 2 * ceil(log2 N) canonical maximal subsegments. At each such canonical node, the lazy tag is set in O(1) without descending further. Push operations take O(1) per node. Range Query Time: O(log N), visiting <= 4 * ceil(log2 N) nodes with O(1) push calls. Space: O(4N) array storage for tree[] plus O(4N) array storage for lazy[].",
+    whenNotToUse:
+      "Do NOT use lazy propagation if all queries are offline after all updates have completed (use an O(N) Difference Array instead). Also, do not use lazy propagation if only point updates are performed, or if range updates are purely prefix/suffix additions with commutative queries (where dual Fenwick trees suffice with 5x less code).",
+  },
+  workedExample: {
+    title: "Range Addition [0, 2] += 5 and Range Sum Query [1, 3]",
+    scenario: "Array A = [0, 0, 0, 0] of size N = 4. Initial tree and lazy arrays all 0.",
+    input: "Range Add [0, 2] += 5. Range Sum Query [1, 3].",
+    output: "Query Sum [1, 3] = 10 (elements: A[1]=5, A[2]=5, A[3]=0).",
+    traceSteps: [
+      { step: 1, state: "Update [0, 2] += 5 at Root (node 1, [0..3])", action: "Partial overlap. Mid = 1. Recurse left to node 2 ([0..1]) and right to node 3 ([2..3])", insight: "Root cannot absorb tag directly" },
+      { step: 2, state: "Left child node 2 ([0..1])", action: "Fully contained in [0..2]. tree[2] += 5 * (1 - 0 + 1) = 10. lazy[2] += 5. Return immediately", insight: "Children of node 2 are NOT visited. Saved 2 leaf visits!" },
+      { step: 3, state: "Right child node 3 ([2..3])", action: "Partial overlap. Push(3) (no-op). Mid = 2. Left child node 6 ([2..2]) fully inside -> tree[6] += 5 * 1 = 5, lazy[6] += 5. Right child node 7 ([3..3]) disjoint. Return. tree[3] = 5 + 0 = 5", insight: "Canonical node 6 absorbed leaf tag" },
+      { step: 4, state: "Back to Root node 1", action: "tree[1] = tree[2] + tree[3] = 10 + 5 = 15. Lazy update finished in O(log N)", insight: "Total tree sum correctly reflects 5 + 5 + 5 + 0 = 15" },
+      { step: 5, state: "Query Sum [1, 3] at Root (node 1)", action: "Partial overlap. Recurse left to node 2 ([0..1]) and right to node 3 ([2..3])", insight: "Must query both subtrees" },
+      { step: 6, state: "Push at Node 2 ([0..1])", action: "lazy[2] = 5 != 0. Push to node 4 ([0..0]): tree[4]+=5, lazy[4]+=5. Push to node 5 ([1..1]): tree[5]+=5, lazy[5]+=5. lazy[2] = 0", insight: "Lazy debt discharged down to children on demand!" },
+      { step: 7, state: "Query left child returns", action: "Node 5 ([1..1]) returns 5. Node 4 ([0..0]) is outside query range [1..3] -> returns 0. Left sum = 5", insight: "Correctly reads updated A[1] = 5" },
+      { step: 8, state: "Query right child returns", action: "Node 3 ([2..3]) overlaps: node 6 ([2..2]) returns 5, node 7 ([3..3]) returns 0. Right sum = 5", insight: "Sum = left (5) + right (5) = 10" },
+    ],
+  },
+  trapAnalysis: [
+    {
+      trap: "Forgetting push() inside query() Function",
+      cause: "Only putting push() in updateRange() but omitting it in query(). Child nodes retain outdated pre-update values.",
+      fix: "Always call push(node, start, end) before recursing into children in BOTH updateRange and query.",
+      wrongSnippet: "long long query(...) { if (l <= start && end <= r) return tree[node]; int mid = ...; return query(2*node...) + query(2*node+1...); }",
+      correctedSnippet: "long long query(...) { if (l <= start && end <= r) return tree[node]; push(node, start, end); int mid = ...; return query(2*node...) + query(2*node+1...); }",
+    },
+    {
+      trap: "Missing Length Multiplier on Range Sum Tags",
+      cause: "Writing tree[node] += val instead of tree[node] += val * (end - start + 1) for range addition.",
+      fix: "Multiplying by interval length (end - start + 1) because every element in the segment increases by val.",
+      wrongSnippet: "tree[node] += val; // Only adds val once, regardless of interval size!",
+      correctedSnippet: "tree[node] += val * (end - start + 1); // Correctly scales by interval length",
+    },
+    {
+      trap: "Uninitialized Lazy Array with Non-Zero Neutral Value",
+      cause: "Using 0 as the unassigned lazy marker for Range Set / Assignment updates, which corrupts valid updates setting values to 0.",
+      fix: "For Range Set, use a sentinel like INF or a boolean has_lazy[node] flag to distinguish 'no update' from 'set to 0'.",
+      wrongSnippet: "if (lazy[node] != 0) { /* set to lazy[node] */ } // Fails when setting range to 0!",
+      correctedSnippet: "if (has_lazy[node]) { tree[node] = lazy[node] * len; lazy_child = ...; has_lazy[node] = false; }",
+    },
+  ],
+  pythonTemplate: `import sys
+
+class LazySegmentTree:
+    """Segment tree with range addition and range sum queries."""
+    def __init__(self, data):
+        self.n = len(data)
+        self.tree = [0] * (4 * self.n)
+        self.lazy = [0] * (4 * self.n)
+        if self.n > 0:
+            self._build(1, 0, self.n - 1, data)
+
+    def _build(self, node: int, start: int, end: int, data: list):
+        if start == end:
+            self.tree[node] = data[start]
+            return
+        mid = (start + end) // 2
+        self._build(2 * node, start, mid, data)
+        self._build(2 * node + 1, mid + 1, end, data)
+        self.tree[node] = self.tree[2 * node] + self.tree[2 * node + 1]
+
+    def _push(self, node: int, start: int, end: int):
+        if self.lazy[node] != 0:
+            val = self.lazy[node]
+            mid = (start + end) // 2
+            
+            # Left child
+            self.tree[2 * node] += val * (mid - start + 1)
+            self.lazy[2 * node] += val
+            
+            # Right child
+            self.tree[2 * node + 1] += val * (end - mid)
+            self.lazy[2 * node + 1] += val
+            
+            self.lazy[node] = 0
+
+    def update_range(self, l: int, r: int, val: int):
+        """Add val to all elements in closed interval [l, r] (0-indexed)."""
+        self._update(1, 0, self.n - 1, l, r, val)
+
+    def _update(self, node: int, start: int, end: int, l: int, r: int, val: int):
+        if r < start or end < l:
+            return
+        if l <= start and end <= r:
+            self.tree[node] += val * (end - start + 1)
+            self.lazy[node] += val
+            return
+        self._push(node, start, end)
+        mid = (start + end) // 2
+        self._update(2 * node, start, mid, l, r, val)
+        self._update(2 * node + 1, mid + 1, end, l, r, val)
+        self.tree[node] = self.tree[2 * node] + self.tree[2 * node + 1]
+
+    def query(self, l: int, r: int) -> int:
+        """Query sum of elements in closed interval [l, r] (0-indexed)."""
+        return self._query(1, 0, self.n - 1, l, r)
+
+    def _query(self, node: int, start: int, end: int, l: int, r: int) -> int:
+        if r < start or end < l:
+            return 0
+        if l <= start and end <= r:
+            return self.tree[node]
+        self._push(node, start, end)
+        mid = (start + end) // 2
+        return (
+            self._query(2 * node, start, mid, l, r)
+            + self._query(2 * node + 1, mid + 1, end, l, r)
+        )
+
+def solve():
+    input = sys.stdin.readline
+    n, q = map(int, input().split())
+    arr = list(map(int, input().split()))
+    st = LazySegmentTree(arr)
+    
+    out = []
+    for _ in range(q):
+        parts = list(map(int, input().split()))
+        if parts[0] == 1:
+            # Range update: add u to [a-1, b-1]
+            _, a, b, u = parts
+            st.update_range(a - 1, b - 1, u)
+        else:
+            # Range sum query: sum of [a-1, b-1]
+            _, a, b = parts
+            out.append(str(st.query(a - 1, b - 1)))
+            
+    sys.stdout.write("\\n".join(out) + "\\n")
+
+if __name__ == '__main__':
+    solve()
+`,
 };

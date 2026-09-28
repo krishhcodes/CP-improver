@@ -245,4 +245,101 @@ struct PrefixSum2D {
       hint: "Build a 2D prefix sum grid where trees are 1 and empty cells are 0. Query with 4-term inclusion-exclusion.",
     },
   ],
+  deepExplanation: {
+    intuition:
+      "Consider walking along a path where each step has a certain weight. If you keep a running odometer of total weight accumulated from the origin, calculating the weight of any stretch between milestone L and milestone R is simply reading the odometer at R and subtracting the reading at L-1. Prefix sums translate the expensive O(N) repetitive process of summing elements into a single O(1) difference query by trading linear precomputation memory for constant-time evaluation.",
+    proofOfCorrectness:
+      "Base case: P[0] = 0. For any i >= 1, P[i] = P[i-1] + A[i-1] = sum_{k=0}^{i-1} A[k]. For a query [l, r], P[r+1] - P[l] = sum_{k=0}^{r} A[k] - sum_{k=0}^{l-1} A[k] = sum_{k=l}^{r} A[k]. By mathematical induction, this holds strictly for all 0 <= l <= r < N without edge cases because P[0] = 0 correctly handles l = 0.",
+    complexityDerivation:
+      "Time: O(N) build time since each element of A is visited exactly once in a single linear pass. O(1) query time because computing P[r+1] - P[l] takes exactly two array lookups and one subtraction. Space: O(N) auxiliary space to store the prefix array of size N + 1.",
+    whenNotToUse:
+      "Do NOT use prefix sums if the array elements are modified frequently (point updates). Each point update would require updating all subsequent prefix sums in O(N), which degenerates total runtime to O(Q * N). In such dynamic settings, use a Fenwick Tree (Binary Indexed Tree) or Segment Tree which balances updates and queries in O(log N).",
+  },
+  workedExample: {
+    title: "1D Range Sum & 2D Grid Execution",
+    scenario: "Array A = [3, -2, 5, 1, -4, 6] with size N = 6",
+    input: "A = [3, -2, 5, 1, -4, 6], queries: [1, 3], [0, 4], [2, 5]",
+    output: "Query [1, 3] = 4, Query [0, 4] = 3, Query [2, 5] = 8",
+    traceSteps: [
+      { step: 1, state: "P[0] = 0", action: "Initialize sentinel zero", insight: "Handles queries starting at index 0 seamlessly" },
+      { step: 2, state: "P[1] = 0 + 3 = 3", action: "Accumulate A[0]=3", insight: "Sum of prefix [0..0]" },
+      { step: 3, state: "P[2] = 3 + (-2) = 1", action: "Accumulate A[1]=-2", insight: "Sum of prefix [0..1]" },
+      { step: 4, state: "P[3] = 1 + 5 = 6", action: "Accumulate A[2]=5", insight: "Sum of prefix [0..2]" },
+      { step: 5, state: "P[4] = 6 + 1 = 7", action: "Accumulate A[3]=1", insight: "Sum of prefix [0..3]" },
+      { step: 6, state: "P[5] = 7 + (-4) = 3", action: "Accumulate A[4]=-4", insight: "Sum of prefix [0..4]" },
+      { step: 7, state: "P[6] = 3 + 6 = 9", action: "Accumulate A[5]=6", insight: "Prefix table P = [0, 3, 1, 6, 7, 3, 9]" },
+      { step: 8, state: "Query [1, 3]", action: "Compute P[4] - P[1] = 7 - 3 = 4", insight: "Verifies: A[1] + A[2] + A[3] = -2 + 5 + 1 = 4" },
+      { step: 9, state: "Query [0, 4]", action: "Compute P[5] - P[0] = 3 - 0 = 3", insight: "Verifies: 3 - 2 + 5 + 1 - 4 = 3" },
+      { step: 10, state: "Query [2, 5]", action: "Compute P[6] - P[2] = 9 - 1 = 8", insight: "Verifies: 5 + 1 - 4 + 6 = 8" },
+    ],
+  },
+  trapAnalysis: [
+    {
+      trap: "Off-by-One 0-Indexed Query Boundary",
+      cause: "Writing pref[r] - pref[l] instead of pref[r + 1] - pref[l].",
+      fix: "Always use 1-based indexing for the prefix array: pref[r + 1] - pref[l] returns sum of A[l..r].",
+      wrongSnippet: "long long sum = pref[r] - pref[l]; // Drops A[r] and misaligns",
+      correctedSnippet: "long long sum = pref[r + 1] - pref[l]; // Exact closed interval [l, r]",
+    },
+    {
+      trap: "32-Bit Signed Integer Overflow",
+      cause: "Summing 200,000 elements of value up to 10^9 produces 2 * 10^14, which exceeds INT_MAX (2.14 * 10^9).",
+      fix: "Declare the prefix array as vector<long long> or in Python use arbitrary precision integers.",
+      wrongSnippet: "vector<int> pref(n + 1, 0); // Overflows on large sums",
+      correctedSnippet: "vector<long long> pref(n + 1, 0); // Bounded up to ~9 * 10^18",
+    },
+    {
+      trap: "Negative Modulo Remainder in Divisibility Subarrays",
+      cause: "In C++ and Java, % is the remainder operator, not true mathematical modulo: (-5) % 3 == -2.",
+      fix: "Normalize remainder with ((x % k) + k) % k before indexing into frequency arrays.",
+      wrongSnippet: "int rem = pref % k; // Can be negative!",
+      correctedSnippet: "int rem = ((pref % k) + k) % k; // Always in [0, k-1]",
+    },
+  ],
+  pythonTemplate: `import sys
+from itertools import accumulate
+
+def solve():
+    input = sys.stdin.readline
+    
+    # 1D Prefix Sums
+    # Given an array a of length n, answer q range queries [l, r] (0-indexed, inclusive)
+    n, q = map(int, input().split())
+    a = list(map(int, input().split()))
+    
+    # itertools.accumulate gives running sums; prepend 0 for 1-based sentinel
+    pref = [0] + list(accumulate(a))
+    
+    out = []
+    for _ in range(q):
+        l, r = map(int, input().split())
+        # Query sum in closed interval [l, r]
+        out.append(str(pref[r + 1] - pref[l]))
+        
+    sys.stdout.write("\\n".join(out) + "\\n")
+
+# 2D Matrix Prefix Sum Class
+class PrefixSum2D:
+    def __init__(self, mat):
+        self.R = len(mat)
+        self.C = len(mat[0])
+        self.P = [[0] * (self.C + 1) for _ in range(self.R + 1)]
+        for r in range(self.R):
+            for c in range(self.C):
+                self.P[r + 1][c + 1] = (
+                    mat[r][c]
+                    + self.P[r][c + 1]
+                    + self.P[r + 1][c]
+                    - self.P[r][c]
+                )
+                
+    def query(self, r1, c1, r2, c2):
+        """Query rectangular subgrid from (r1, c1) to (r2, c2) inclusive."""
+        return (
+            self.P[r2 + 1][c2 + 1]
+            - self.P[r1][c2 + 1]
+            - self.P[r2 + 1][c1]
+            + self.P[r1][c1]
+        )
+`,
 };

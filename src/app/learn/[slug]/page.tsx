@@ -22,6 +22,12 @@ import {
   Target,
   CheckCircle2,
   Zap,
+  Lightbulb,
+  Scale,
+  ShieldAlert,
+  ListOrdered,
+  XCircle,
+  FileCode,
 } from "lucide-react";
 
 export default function ConceptDetailPage({
@@ -33,6 +39,7 @@ export default function ConceptDetailPage({
   const [concept, setConcept] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [selectedLang, setSelectedLang] = useState<"cpp" | "python">("cpp");
 
   useEffect(() => {
     async function loadConcept() {
@@ -54,9 +61,14 @@ export default function ConceptDetailPage({
     loadConcept();
   }, [slug]);
 
+  const activeCode =
+    selectedLang === "cpp"
+      ? concept?.codeTemplate
+      : concept?.pythonTemplate || concept?.codeTemplate;
+
   const copyCode = () => {
-    if (!concept?.codeTemplate) return;
-    navigator.clipboard.writeText(concept.codeTemplate);
+    if (!activeCode) return;
+    navigator.clipboard.writeText(activeCode);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -67,6 +79,12 @@ export default function ConceptDetailPage({
     }
     if (url.includes("atcoder.jp")) {
       return { name: "AtCoder", badge: "bg-purple-50 text-purple-800 border-purple-200" };
+    }
+    if (url.includes("usaco.org")) {
+      return { name: "USACO", badge: "bg-emerald-50 text-emerald-800 border-emerald-200" };
+    }
+    if (url.includes("spoj.com")) {
+      return { name: "SPOJ", badge: "bg-indigo-50 text-indigo-800 border-indigo-200" };
     }
     return { name: "Codeforces", badge: "bg-sky-50 text-sky-800 border-sky-200" };
   };
@@ -151,11 +169,16 @@ export default function ConceptDetailPage({
         </div>
 
         {/* Quick-Jump Section Navigation Bar */}
-        <div className="flex items-center gap-1.5 p-1.5 rounded-xl bg-slate-100 border border-slate-200 overflow-x-auto text-[11px] font-semibold text-slate-600 shadow-xs scrollbar-none">
+        <div className="flex items-center gap-1.5 p-1.5 rounded-xl bg-slate-100 border border-slate-200 overflow-x-auto text-[11px] font-semibold text-slate-600 shadow-xs scrollbar-none sticky top-2 z-20 backdrop-blur-md bg-slate-100/90">
           <span className="text-[10px] uppercase font-bold text-slate-400 px-2 shrink-0">Jump To:</span>
           {concept.literatureReferences?.length > 0 && (
             <a href="#citations" className="px-2.5 py-1 rounded-lg hover:bg-white hover:text-sky-700 transition-colors whitespace-nowrap">
               Citations
+            </a>
+          )}
+          {concept.deepExplanation && (
+            <a href="#deep-explanation" className="px-2.5 py-1 rounded-lg hover:bg-white hover:text-sky-700 transition-colors whitespace-nowrap text-sky-700 font-bold">
+              Proofs & Deep Dive
             </a>
           )}
           {concept.conceptualTheory && (
@@ -178,14 +201,19 @@ export default function ConceptDetailPage({
               Contest Protocol
             </a>
           )}
-          {concept.codeTemplate && (
-            <a href="#template" className="px-2.5 py-1 rounded-lg hover:bg-white hover:text-sky-700 transition-colors whitespace-nowrap">
-              C++20 Template
+          {concept.workedExample && (
+            <a href="#worked-example" className="px-2.5 py-1 rounded-lg hover:bg-white hover:text-sky-700 transition-colors whitespace-nowrap text-purple-700 font-bold">
+              Worked Trace
             </a>
           )}
-          {concept.pitfalls?.length > 0 && (
-            <a href="#pitfalls" className="px-2.5 py-1 rounded-lg hover:bg-white hover:text-sky-700 transition-colors whitespace-nowrap">
-              Traps
+          {(concept.codeTemplate || concept.pythonTemplate) && (
+            <a href="#template" className="px-2.5 py-1 rounded-lg hover:bg-white hover:text-sky-700 transition-colors whitespace-nowrap">
+              Code Templates
+            </a>
+          )}
+          {(concept.trapAnalysis?.length > 0 || concept.pitfalls?.length > 0) && (
+            <a href="#trap-analysis" className="px-2.5 py-1 rounded-lg hover:bg-white hover:text-amber-700 transition-colors whitespace-nowrap">
+              Trap Autopsy
             </a>
           )}
           {concept.practiceProblems?.length > 0 && (
@@ -300,13 +328,73 @@ export default function ConceptDetailPage({
         </div>
       )}
 
+      {/* Deep-Dive: Intuition, Mathematical Proofs & Asymptotic Derivation */}
+      {concept.deepExplanation && (
+        <div id="deep-explanation" className="space-y-4 scroll-mt-20">
+          <div className="flex items-center gap-2">
+            <BookOpen className="w-4 h-4 text-sky-600" />
+            <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
+              Deep Explanation: Intuition, Proofs & Mathematical Invariants
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4">
+            {/* Intuition & Mental Model */}
+            <div className="p-5 rounded-2xl bg-gradient-to-br from-sky-50/50 via-white to-white border border-sky-200 shadow-sm space-y-2.5">
+              <div className="flex items-center gap-2 text-sky-900 font-bold text-xs uppercase tracking-wide">
+                <Lightbulb className="w-4 h-4 text-sky-600" />
+                <span>Conceptual Intuition & Mental Model</span>
+              </div>
+              <p className="text-xs text-slate-700 leading-relaxed">
+                {concept.deepExplanation.intuition}
+              </p>
+            </div>
+
+            {/* Formal Mathematical Proof */}
+            <div className="p-5 rounded-2xl bg-gradient-to-br from-indigo-50/40 via-white to-white border border-indigo-200 shadow-sm space-y-2.5">
+              <div className="flex items-center gap-2 text-indigo-900 font-bold text-xs uppercase tracking-wide">
+                <Scale className="w-4 h-4 text-indigo-600" />
+                <span>Formal Proof of Correctness (Inductive / Exchange / Invariant)</span>
+              </div>
+              <p className="text-xs text-slate-700 leading-relaxed font-sans">
+                {concept.deepExplanation.proofOfCorrectness}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Formal Complexity Derivation */}
+              <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-2">
+                <div className="flex items-center gap-2 text-slate-900 font-bold text-xs uppercase tracking-wide">
+                  <Clock className="w-4 h-4 text-sky-600" />
+                  <span>Asymptotic Complexity Derivation</span>
+                </div>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  {concept.deepExplanation.complexityDerivation}
+                </p>
+              </div>
+
+              {/* When NOT to Use */}
+              <div className="p-5 rounded-2xl bg-rose-50/60 border border-rose-200 shadow-sm space-y-2">
+                <div className="flex items-center gap-2 text-rose-900 font-bold text-xs uppercase tracking-wide">
+                  <ShieldAlert className="w-4 h-4 text-rose-600" />
+                  <span>When NOT to Use (Antipatterns & Degenerations)</span>
+                </div>
+                <p className="text-xs text-rose-950 leading-relaxed">
+                  {concept.deepExplanation.whenNotToUse}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Deep-Dive Theory & Mathematical Foundations */}
       {concept.conceptualTheory && (
         <div id="theory" className="p-6 rounded-2xl glass-panel border border-slate-200 bg-white shadow-sm space-y-4 scroll-mt-20">
           <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
             <BookOpen className="w-4 h-4 text-sky-600" />
             <h2 className="text-base font-extrabold text-slate-900">
-              Mathematical Theory, Invariants & Mental Models
+              Mathematical Theory, Recurrences & Formulae
             </h2>
           </div>
 
@@ -445,14 +533,111 @@ export default function ConceptDetailPage({
         )}
       </div>
 
-      {/* Production C++20 Templates */}
-      {concept.codeTemplate && (
-        <div id="template" className="rounded-2xl glass-panel border border-slate-200 overflow-hidden shadow-lg bg-white scroll-mt-20">
-          <div className="p-4 bg-slate-100 border-b border-slate-200 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs font-bold text-slate-900">
-              <Code2 className="w-4 h-4 text-sky-600" />
-              <span>Production C++20 Competitive Programming Template</span>
+      {/* Interactive Step-by-Step Worked Example & Trace Table */}
+      {concept.workedExample && (
+        <div id="worked-example" className="p-6 rounded-2xl glass-panel border border-slate-200 bg-white shadow-sm space-y-4 scroll-mt-20">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+            <div className="flex items-center gap-2">
+              <ListOrdered className="w-4 h-4 text-purple-600" />
+              <h2 className="text-base font-extrabold text-slate-900">
+                Worked Example & Step-by-Step State Trace
+              </h2>
             </div>
+            <span className="px-2.5 py-0.5 rounded text-[11px] font-bold bg-purple-50 text-purple-800 border border-purple-200">
+              {concept.workedExample.title}
+            </span>
+          </div>
+
+          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-2">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-slate-700">
+              <span className="font-bold text-slate-900 shrink-0">Problem Scenario:</span>
+              <span>{concept.workedExample.scenario}</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 border-t border-slate-200/60 font-mono text-[11px]">
+              <div>
+                <span className="font-bold text-sky-800">Input: </span>
+                <span className="text-slate-800">{concept.workedExample.input}</span>
+              </div>
+              <div>
+                <span className="font-bold text-emerald-800">Output: </span>
+                <span className="text-slate-800">{concept.workedExample.output}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Trace Table */}
+          {concept.workedExample.traceSteps && concept.workedExample.traceSteps.length > 0 && (
+            <div className="overflow-x-auto rounded-xl border border-slate-200">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-100 border-b border-slate-200 text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                  <tr>
+                    <th className="py-2.5 px-3 w-16">Step</th>
+                    <th className="py-2.5 px-3">State / Configuration</th>
+                    <th className="py-2.5 px-3">Action Executed</th>
+                    <th className="py-2.5 px-3">Invariant Insight</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {concept.workedExample.traceSteps.map((step: any, idx: number) => (
+                    <tr key={idx} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="py-2.5 px-3 font-bold text-sky-700">
+                        #{step.step}
+                      </td>
+                      <td className="py-2.5 px-3 font-mono text-[11px] text-slate-900">
+                        {step.state}
+                      </td>
+                      <td className="py-2.5 px-3 text-slate-700">
+                        {step.action}
+                      </td>
+                      <td className="py-2.5 px-3 text-[11px] text-purple-900 font-medium italic bg-purple-50/30">
+                        {step.insight}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Production C++20 & Python 3 Competitive Programming Templates */}
+      {(concept.codeTemplate || concept.pythonTemplate) && (
+        <div id="template" className="rounded-2xl glass-panel border border-slate-200 overflow-hidden shadow-lg bg-white scroll-mt-20">
+          <div className="p-3 sm:p-4 bg-slate-100 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900">
+                <Code2 className="w-4 h-4 text-sky-600" />
+                <span>Production Templates</span>
+              </div>
+
+              {/* Language Selector Switcher */}
+              <div className="flex items-center p-0.5 rounded-lg bg-slate-200 text-xs font-semibold">
+                <button
+                  onClick={() => setSelectedLang("cpp")}
+                  className={`px-2.5 py-1 rounded-md transition-all text-[11px] ${
+                    selectedLang === "cpp"
+                      ? "bg-white text-sky-700 shadow-xs font-bold"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  C++20 (Gnu++20)
+                </button>
+                {concept.pythonTemplate && (
+                  <button
+                    onClick={() => setSelectedLang("python")}
+                    className={`px-2.5 py-1 rounded-md transition-all text-[11px] ${
+                      selectedLang === "python"
+                        ? "bg-white text-emerald-700 shadow-xs font-bold"
+                        : "text-slate-600 hover:text-slate-900"
+                    }`}
+                  >
+                    Python 3 (PyPy3)
+                  </button>
+                )}
+              </div>
+            </div>
+
             <button
               onClick={copyCode}
               className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 transition-all flex items-center gap-1.5 shadow-xs"
@@ -465,23 +650,90 @@ export default function ConceptDetailPage({
               ) : (
                 <>
                   <Copy className="w-3.5 h-3.5 text-slate-500" />
-                  <span>Copy Template</span>
+                  <span>Copy {selectedLang === "cpp" ? "C++20" : "Python 3"}</span>
                 </>
               )}
             </button>
           </div>
-          <pre className="p-5 font-mono text-xs text-slate-100 overflow-x-auto bg-slate-950 leading-relaxed">
-            <code>{concept.codeTemplate}</code>
+
+          <pre className="p-5 font-mono text-xs text-slate-100 overflow-x-auto bg-slate-950 leading-relaxed max-h-[550px] scrollbar-thin">
+            <code>{activeCode}</code>
           </pre>
         </div>
       )}
 
-      {/* Common Pitfalls & Traps */}
+      {/* Trap Autopsy & Anti-Pattern Lab (Side-by-Side Wrong vs Correct Snippets) */}
+      {concept.trapAnalysis && concept.trapAnalysis.length > 0 && (
+        <div id="trap-analysis" className="p-6 rounded-2xl glass-panel border border-slate-200 bg-white shadow-sm space-y-4 scroll-mt-20">
+          <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+            <AlertTriangle className="w-4 h-4 text-rose-600" />
+            <h2 className="text-base font-extrabold text-slate-900">
+              Trap Autopsy & Anti-Pattern Code Comparisons
+            </h2>
+          </div>
+
+          <div className="space-y-4">
+            {concept.trapAnalysis.map((item: any, idx: number) => (
+              <div
+                key={idx}
+                className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3"
+              >
+                <div className="space-y-1">
+                  <h3 className="text-xs font-bold text-rose-900 flex items-center gap-1.5">
+                    <span className="w-5 h-5 rounded-full bg-rose-100 text-rose-800 flex items-center justify-center text-[10px]">
+                      {idx + 1}
+                    </span>
+                    <span>{item.trap}</span>
+                  </h3>
+                  <p className="text-xs text-slate-600 pl-6">
+                    <span className="font-semibold text-slate-800">Root Cause: </span>
+                    {item.cause}
+                  </p>
+                  <p className="text-xs text-emerald-800 pl-6 font-medium">
+                    <span className="font-semibold">Fix Protocol: </span>
+                    {item.fix}
+                  </p>
+                </div>
+
+                {(item.wrongSnippet || item.correctedSnippet) && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pl-6 pt-1">
+                    {item.wrongSnippet && (
+                      <div className="rounded-xl border border-rose-200 bg-rose-50/50 p-3 space-y-1.5">
+                        <div className="flex items-center gap-1.5 text-[10px] font-bold text-rose-700 uppercase">
+                          <XCircle className="w-3.5 h-3.5" />
+                          <span>Buggy / Failing Snippet (WA / TLE / UB)</span>
+                        </div>
+                        <pre className="font-mono text-[11px] text-rose-950 overflow-x-auto bg-white/80 p-2 rounded-lg border border-rose-200/60">
+                          <code>{item.wrongSnippet}</code>
+                        </pre>
+                      </div>
+                    )}
+
+                    {item.correctedSnippet && (
+                      <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-3 space-y-1.5">
+                        <div className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-700 uppercase">
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          <span>Corrected Invariant-Safe Snippet (AC)</span>
+                        </div>
+                        <pre className="font-mono text-[11px] text-emerald-950 overflow-x-auto bg-white/80 p-2 rounded-lg border border-emerald-200/60">
+                          <code>{item.correctedSnippet}</code>
+                        </pre>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Common Pitfalls & Traps (Summary List) */}
       {concept.pitfalls && concept.pitfalls.length > 0 && (
         <div id="pitfalls" className="p-5 rounded-2xl glass-panel border border-amber-200 bg-amber-50/60 space-y-3 shadow-sm scroll-mt-20">
           <div className="flex items-center gap-2 text-amber-800 font-bold text-xs uppercase tracking-wide">
             <AlertTriangle className="w-4 h-4 text-amber-600" />
-            <span>Common Implementation Traps & WA/TLE Pitfalls</span>
+            <span>Contest Invariant Pitfall Checklist</span>
           </div>
           <ul className="space-y-2 text-xs text-slate-800 pl-4 list-disc marker:text-amber-600">
             {concept.pitfalls.map((pitfall: string, i: number) => (

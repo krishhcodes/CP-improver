@@ -6,4 +6,8 @@ export type {
   RecognitionSignal,
   DifficultyLevel,
   NodeLearningStatus,
+  WorkedExample,
+  WorkedExampleStep,
+  DeepExplanation,
+  TrapAnalysisItem,
 } from "../concept-graph";

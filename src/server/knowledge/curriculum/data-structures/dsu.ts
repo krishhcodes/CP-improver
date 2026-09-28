@@ -169,4 +169,113 @@ struct DSU {
       hint: "Unite character pairs that need to become identical; minimal spells is edges in DSU spanning forest.",
     },
   ],
+  deepExplanation: {
+    intuition:
+      "Disjoint-Set Union (DSU) partitions N elements into disjoint equivalence classes (connected components). Each component is represented as a directed tree whose root is the canonical leader. Two elements belong to the same component if and only if their root leaders match. Union merges two components by pointing one root to the other. Path compression flattens the tree during find queries, ensuring future lookups jump directly to the root in nearly constant time.",
+    proofOfCorrectness:
+      "Theorem (Tarjan's Bound: O(M * alpha(N)) with Path Compression & Union by Rank/Size): Let M be the total number of find and union operations on N elements. The height of any tree formed exclusively with union-by-size/rank is at most floor(log2 N). Whenever find(u) executes with path compression, every visited node on the path is reparented directly to the root. Using a potential function based on node ranks and Ackermann hierarchies, Robert Tarjan proved that the total amortized cost of M operations is O(M * alpha(N)), where alpha(N) is the inverse Ackermann function. For any N <= 10^80, alpha(N) <= 4, which is strictly indistinguishable from O(1) in competitive programming.",
+    complexityDerivation:
+      "Time: Amortized O(alpha(N)) per operation for both unite(u, v) and find(u). Over M = 10^6 operations, total runtime is well under 50ms. Space: O(N) auxiliary memory for the parent and size arrays.",
+    whenNotToUse:
+      "Do NOT use standard DSU if you need to DELETE edges or disconnect components online. Standard DSU is strictly semi-dynamic (incremental connectivity only). If edges must be deleted dynamically, use Rollback DSU with an offline divide-and-conquer segment tree over time queries, or use a Link-Cut Tree. Also, DSU does not model directed graph reachability.",
+  },
+  workedExample: {
+    title: "Component Merging & Path Compression Trace",
+    scenario: "5 nodes: {1}, {2}, {3}, {4}, {5}. Execute: unite(1, 2), unite(3, 4), unite(2, 3), find(4).",
+    input: "N = 5. parent = [0, 1, 2, 3, 4, 5], size = [0, 1, 1, 1, 1, 1]",
+    output: "All in single component {1, 2, 3, 4} with root 1. find(4) reparents 4 directly to 1.",
+    traceSteps: [
+      { step: 1, state: "Initial state", action: "Every node is its own root: parent[i] = i, size[i] = 1", insight: "5 components, max size = 1" },
+      { step: 2, state: "unite(1, 2)", action: "root(1)=1, root(2)=2. Both size 1. Set parent[2] = 1, size[1] = 2", insight: "Component {1, 2} rooted at 1" },
+      { step: 3, state: "unite(3, 4)", action: "root(3)=3, root(4)=4. Set parent[4] = 3, size[3] = 2", insight: "Component {3, 4} rooted at 3" },
+      { step: 4, state: "unite(2, 3)", action: "root(2)=1 (size 2), root(3)=3 (size 2). Set parent[3] = 1, size[1] = 4", insight: "Tree structure before find: 4 -> 3 -> 1, 2 -> 1" },
+      { step: 5, state: "find(4) with Path Compression", action: "Traverse 4 -> 3 -> 1. Root is 1. Backtrack and assign parent[4] = 1, parent[3] = 1", insight: "Tree depth flattened from 2 to 1! Next find(4) will take exactly 1 pointer step." },
+    ],
+  },
+  trapAnalysis: [
+    {
+      trap: "Forgetting Assignment in Path Compression",
+      cause: "Writing `if (parent[i] == i) return i; return find(parent[i]);` without assigning `parent[i] = ...`.",
+      fix: "Always write `return parent[i] = find(parent[i]);` so subsequent calls execute in O(1).",
+      wrongSnippet: "int find(int i) { if (parent[i] == i) return i; return find(parent[i]); } // Degrades to O(N) depth!",
+      correctedSnippet: "int find(int i) { if (parent[i] == i) return i; return parent[i] = find(parent[i]); } // Amortized O(alpha(N))",
+    },
+    {
+      trap: "Uniting Raw Nodes Instead of Root Leaders",
+      cause: "Writing `parent[u] = v` instead of finding root(u) and root(v) first.",
+      fix: "Always resolve root_u = find(u) and root_v = find(v) before modifying parent pointers or size counters.",
+      wrongSnippet: "void unite(int u, int v) { parent[u] = v; } // Corrupts component tree and misses cycles!",
+      correctedSnippet: "bool unite(int u, int v) { int ru = find(u), rv = find(v); if (ru == rv) return false; parent[rv] = ru; return true; }",
+    },
+    {
+      trap: "Using Path Compression with Rollback DSU",
+      cause: "Path compression performs multiple irreversible pointer writes per find(), making history undoing impossible.",
+      fix: "When rollback is required, use Union-by-Size ONLY (depth is strictly <= log2 N) and push parent updates to an undo stack.",
+      wrongSnippet: "int find(int i) { return parent[i] = find(parent[i]); } // Breaks rollback history stack",
+      correctedSnippet: "int find(int i) { while (parent[i] != i) i = parent[i]; return i; } // Strict O(log N) suitable for rollback",
+    },
+  ],
+  pythonTemplate: `import sys
+
+# Increase recursion depth for deep recursion (or use iterative find)
+sys.setrecursionlimit(300000)
+
+class DSU:
+    """Disjoint Set Union with Path Compression and Union by Size."""
+    def __init__(self, n: int):
+        self.n = n
+        self.parent = list(range(n + 1))
+        self.size = [1] * (n + 1)
+        self.num_components = n
+        self.max_size = 1
+
+    def find(self, i: int) -> int:
+        """Find representative root with path compression."""
+        path = []
+        while self.parent[i] != i:
+            path.append(i)
+            i = self.parent[i]
+        # Flatten path to root
+        for node in path:
+            self.parent[node] = i
+        return i
+
+    def unite(self, i: int, j: int) -> bool:
+        """Unite components containing i and j. Returns True if merged, False if already connected."""
+        root_i = self.find(i)
+        root_j = self.find(j)
+        if root_i == root_j:
+            return False
+
+        # Union by size: attach smaller to larger
+        if self.size[root_i] < self.size[root_j]:
+            root_i, root_j = root_j, root_i
+
+        self.parent[root_j] = root_i
+        self.size[root_i] += self.size[root_j]
+        self.num_components -= 1
+        if self.size[root_i] > self.max_size:
+            self.max_size = self.size[root_i]
+            
+        return True
+
+    def connected(self, i: int, j: int) -> bool:
+        return self.find(i) == self.find(j)
+
+def solve():
+    input = sys.stdin.readline
+    n, m = map(int, input().split())
+    dsu = DSU(n)
+    
+    out = []
+    for _ in range(m):
+        u, v = map(int, input().split())
+        dsu.unite(u, v)
+        out.append(f"{dsu.num_components} {dsu.max_size}")
+        
+    sys.stdout.write("\\n".join(out) + "\\n")
+
+if __name__ == '__main__':
+    solve()
+`,
 };

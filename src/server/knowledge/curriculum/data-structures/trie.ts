@@ -187,4 +187,119 @@ int maxSubarrayXOR(const vector<int>& a) {
       hint: "Combine 1D DP with Trie string lookup: dp[i] = sum(dp[i + len]) for dictionary words matching string prefix at i.",
     },
   ],
+  deepExplanation: {
+    intuition:
+      "A Trie (prefix tree) organizes a set of strings or fixed-width binary representations by storing common prefixes in shared parent nodes. For competitive programming, its premier application is the Binary 0/1 Trie for bitwise XOR optimization. To maximize X XOR Y given fixed X, we want each bit of Y from MSB to LSB to differ from X. The trie allows navigating greedily: at bit position b, if a branch with the inverted bit exists, we must take it.",
+    proofOfCorrectness:
+      "Theorem (Optimality of Greedy Bitwise Traversal in Binary Trie): In a binary trie with keys of width B, traversing the opposite bit branch at the highest available bit position b always yields a strictly greater XOR value than any choice made at subsequent bits b-1 ... 0. Proof: Suppose at bit position b, a node offers both bit and 1 - bit. Choosing 1 - bit contributes 2^b to the XOR product. The maximum possible sum from all remaining lower bits is sum_{k=0}^{b-1} 2^k = 2^b - 1. Since 2^b > 2^b - 1, no combination of lower bits can ever compensate for missing a 1 at bit b. Thus, the greedy decision at each bit from MSB to LSB is globally optimal.",
+    complexityDerivation:
+      "Time: O(B) per insertion and query, where B is the bit width (B = 30 for 32-bit integers, B = 62 for 64-bit integers). Across N elements, total time is O(N * B) approx 30 * 2 * 10^5 = 6 * 10^6 ops, running in ~15ms. Space: At most N * B trie nodes. In a static array implementation, size <= 2 * 10^5 * 30 = 6 * 10^6 nodes, requiring ~48MB RAM.",
+    whenNotToUse:
+      "Do NOT use a full 26-ary pointer-based Trie for simple dictionary search if you only need exact string lookup (an `unordered_set<string>` or polynomial rolling hash is much faster and uses 10x less memory). For multiple pattern matching in text, upgrade to an Aho-Corasick automaton with failure links.",
+  },
+  workedExample: {
+    title: "Binary Trie Max XOR Query with 3-Bit Numbers",
+    scenario: "Bit width B = 3. Insert 5 (101_2) and 3 (011_2). Query maxXOR with candidate 2 (010_2).",
+    input: "Keys: 5 (101_2), 3 (011_2). Query: 2 (010_2).",
+    output: "Max XOR = 2 XOR 5 = 7 (111_2).",
+    traceSteps: [
+      { step: 1, state: "Insert 5 (101_2)", action: "Root -> bit 1 (node 1) -> bit 0 (node 2) -> bit 1 (node 3)", insight: "Path represents binary 101" },
+      { step: 2, state: "Insert 3 (011_2)", action: "Root -> bit 0 (node 4) -> bit 1 (node 5) -> bit 1 (node 6)", insight: "Trie now contains both paths {101, 011}" },
+      { step: 3, state: "Query Max XOR for 2 (010_2): Bit 2 (val = 0)", action: "Opposite bit is 1. Check Root.next[1]: exists (node 1). Choose 1! Bit 2 of XOR = 1. Acc = 4", insight: "Greedy choice captures 2^2 = 4" },
+      { step: 4, state: "Query Bit 1 (val = 1)", action: "Opposite bit is 0. Check node 1.next[0]: exists (node 2). Choose 0! Bit 1 of XOR = 1. Acc = 4 + 2 = 6", insight: "Greedy choice captures 2^1 = 2" },
+      { step: 5, state: "Query Bit 0 (val = 0)", action: "Opposite bit is 1. Check node 2.next[1]: exists (node 3). Choose 1! Bit 0 of XOR = 1. Acc = 6 + 1 = 7", insight: "Matches key 5. 2 XOR 5 = 010 XOR 101 = 111_2 = 7!" },
+    ],
+  },
+  trapAnalysis: [
+    {
+      trap: "Missing Initial 0 in Prefix XOR Subarray Problems",
+      cause: "When finding max XOR contiguous subarray using pref[r] ^ pref[l-1], if the optimal subarray starts at index 0 (l = 0), pref[l-1] is pref[-1] = 0.",
+      fix: "Always call `trie.insert(0)` BEFORE iterating through the array.",
+      wrongSnippet: "BinaryTrie trie; for (int x : a) { pref ^= x; trie.insert(pref); ans = max(ans, trie.query(pref)); }",
+      correctedSnippet: "BinaryTrie trie; trie.insert(0); for (int x : a) { pref ^= x; trie.insert(pref); ans = max(ans, trie.query(pref)); }",
+    },
+    {
+      trap: "32-Bit Bit Shift Overflow (1 << b)",
+      cause: "Writing `1 << b` in C++ when b >= 31 causes undefined behavior and signed overflow.",
+      fix: "Always use `1LL << b` when manipulating 64-bit integer bitmasks.",
+      wrongSnippet: "val |= (1 << b); // UB when b >= 31!",
+      correctedSnippet: "val |= (1LL << b); // Safe for 64-bit bits up to 62",
+    },
+    {
+      trap: "Dynamic Node Allocation TLE/MLE",
+      cause: "Allocating nodes with `new TrieNode()` creates memory fragmentation and thousands of heap calls.",
+      fix: "Pre-allocate a static vector `vector<Node>` or flat 2D array `int next_node[MAX_NODES][2]`.",
+      wrongSnippet: "struct Node { Node* left; Node* right; Node() : left(nullptr), right(nullptr) {} };",
+      correctedSnippet: "struct Node { int next[2] = {-1, -1}; int cnt = 0; }; vector<Node> tree;",
+    },
+  ],
+  pythonTemplate: `import sys
+
+class BinaryTrie:
+    """Fast 0/1 Trie for bitwise XOR queries with frequency tracking."""
+    def __init__(self, bit_depth: int = 30):
+        self.bit_depth = bit_depth
+        # Flattened nodes: next_node[0], next_node[1], count
+        self.next_0 = [-1]
+        self.next_1 = [-1]
+        self.cnt = [0]
+
+    def insert(self, val: int):
+        curr = 0
+        self.cnt[curr] += 1
+        for b in range(self.bit_depth - 1, -1, -1):
+            bit = (val >> b) & 1
+            if bit == 0:
+                if self.next_0[curr] == -1:
+                    self.next_0[curr] = len(self.cnt)
+                    self.next_0.append(-1)
+                    self.next_1.append(-1)
+                    self.cnt.append(0)
+                curr = self.next_0[curr]
+            else:
+                if self.next_1[curr] == -1:
+                    self.next_1[curr] = len(self.cnt)
+                    self.next_0.append(-1)
+                    self.next_1.append(-1)
+                    self.cnt.append(0)
+                curr = self.next_1[curr]
+            self.cnt[curr] += 1
+
+    def max_xor(self, val: int) -> int:
+        """Find max(val ^ x) for all x currently stored in the trie."""
+        curr = 0
+        ans = 0
+        for b in range(self.bit_depth - 1, -1, -1):
+            bit = (val >> b) & 1
+            desired = 1 - bit
+            if desired == 1 and self.next_1[curr] != -1 and self.cnt[self.next_1[curr]] > 0:
+                ans |= (1 << b)
+                curr = self.next_1[curr]
+            elif desired == 0 and self.next_0[curr] != -1 and self.cnt[self.next_0[curr]] > 0:
+                ans |= (1 << b)
+                curr = self.next_0[curr]
+            else:
+                curr = self.next_0[curr] if bit == 0 else self.next_1[curr]
+        return ans
+
+def solve():
+    input = sys.stdin.readline
+    n = int(input())
+    a = list(map(int, input().split()))
+    
+    trie = BinaryTrie(bit_depth=30)
+    trie.insert(0) # Invariant: subarray starting at index 0
+    
+    pref = 0
+    max_xor = 0
+    for x in a:
+        pref ^= x
+        trie.insert(pref)
+        max_xor = max(max_xor, trie.max_xor(pref))
+        
+    print(max_xor)
+
+if __name__ == '__main__':
+    solve()
+`,
 };

@@ -206,4 +206,84 @@ long long minTimeToProduce(const vector<int>& machines, long long target) {
       hint: "Binary search on the number of cookies baked. Check if magic powder can cover the ingredient deficits.",
     },
   ],
+  deepExplanation: {
+    intuition:
+      "When a problem asks to find an optimal number X (e.g. minimum capacity, maximum minimum distance, or minimum time) where computing X directly requires complex combinatorial logic, observe that testing whether a specific candidate X is sufficient is often trivial. If increasing X only ever makes the condition easier to satisfy (monotonicity), the solution space splits into two contiguous halves: [Impossible, ..., Impossible, Feasible, ..., Feasible]. Instead of testing all values linearly, we eliminate half the search space with a single verification probe.",
+    proofOfCorrectness:
+      "Let P(x) be a boolean predicate defined on domain [L, R] such that P(x) is monotonic: P(a) = True implies P(b) = True for all b > a. We maintain the invariant that the optimal threshold x* satisfies low <= x* <= high + 1. At each step, we choose mid = low + (high - low) / 2. If P(mid) is True, the minimum valid x* cannot be strictly greater than mid; hence x* in [low, mid], and we set high = mid - 1 and record ans = mid. If P(mid) is False, x* cannot be in [low, mid]; hence x* in [mid + 1, high], and we set low = mid + 1. Since mid is strictly between low and high, high - low strictly decreases at every iteration by at least factor of 2. By induction, the interval contracts to empty in ceil(log2(R - L + 1)) steps, terminating with ans = x*.",
+    complexityDerivation:
+      "Time: O(log2(High - Low) * T(check)). For domain [1, 10^18], log2(10^18) approx 60 iterations. With an O(N) greedy feasibility check where N = 2 * 10^5, total operations approx 60 * 2 * 10^5 = 1.2 * 10^7, executing comfortably under 100ms in C++ and under 400ms in Python. Space: O(1) auxiliary space beyond the problem input.",
+    whenNotToUse:
+      "Do NOT use binary search on answer if the feasibility predicate P(x) is NOT monotonic (e.g. if increasing X can cause a condition to become true, then false again). Also, if the objective function is unimodal (increases to a peak then decreases), binary search will fail; use Ternary Search or Golden Section Search instead.",
+  },
+  workedExample: {
+    title: "CSES Factory Machines (Minimum Time to Produce T Products)",
+    scenario: "Machines with work times [3, 2, 5], target T = 7 products",
+    input: "machines = [3, 2, 5], target = 7 products. low = 1, high = 2 * 7 = 14",
+    output: "Minimum time = 8",
+    traceSteps: [
+      { step: 1, state: "low = 1, high = 14", action: "mid = 7. Products: 7/3 + 7/2 + 7/5 = 2 + 3 + 1 = 6 < 7", insight: "P(7) = False (insufficient). Set low = 8." },
+      { step: 2, state: "low = 8, high = 14", action: "mid = 11. Products: 11/3 + 11/2 + 11/5 = 3 + 5 + 2 = 10 >= 7", insight: "P(11) = True (feasible). ans = 11, set high = 10." },
+      { step: 3, state: "low = 8, high = 10", action: "mid = 9. Products: 9/3 + 9/2 + 9/5 = 3 + 4 + 1 = 8 >= 7", insight: "P(9) = True (feasible). ans = 9, set high = 8." },
+      { step: 4, state: "low = 8, high = 8", action: "mid = 8. Products: 8/3 + 8/2 + 8/5 = 2 + 4 + 1 = 7 >= 7", insight: "P(8) = True (feasible). ans = 8, set high = 7." },
+      { step: 5, state: "low = 8, high = 7", action: "Terminated (low > high)", insight: "Final optimal answer = 8 time units." },
+    ],
+  },
+  trapAnalysis: [
+    {
+      trap: "Integer Overflow in (low + high) / 2",
+      cause: "When low and high are large (e.g. high = 10^18), low + high exceeds 64-bit signed integer maximum (~9.22 * 10^18), overflowing into negative values.",
+      fix: "Always write mid = low + (high - low) / 2. In Python, integers have arbitrary precision, but in C++ this is critical.",
+      wrongSnippet: "long long mid = (low + high) / 2; // Can overflow if sum > 9e18",
+      correctedSnippet: "long long mid = low + (high - low) / 2; // Invariant-safe",
+    },
+    {
+      trap: "Overflow During Feasibility Accumulation",
+      cause: "Summing floor(T / k[i]) when T is up to 10^18 and k[i] = 1 can cause total products to exceed 64-bit integer limit.",
+      fix: "Early exit from the accumulator loop as soon as total >= target.",
+      wrongSnippet: "for (int x : machines) total += time / x; // can overflow 64-bit limit",
+      correctedSnippet: "for (int x : machines) { total += time / x; if (total >= target) return true; }",
+    },
+    {
+      trap: "Off-by-One in Integer Halving Bounds",
+      cause: "Using high = mid instead of high = mid - 1 with while (low <= high), leading to infinite loops when low == high.",
+      fix: "Pair while (low <= high) with high = mid - 1 and low = mid + 1, storing ans = mid on valid states.",
+      wrongSnippet: "while (low < high) { int mid = (low + high) / 2; if (check(mid)) high = mid; else low = mid; }",
+      correctedSnippet: "while (low <= high) { long long mid = low + (high - low)/2; if (check(mid)) { ans = mid; high = mid - 1; } else low = mid + 1; }",
+    },
+  ],
+  pythonTemplate: `import sys
+
+def solve():
+    input = sys.stdin.readline
+    n, target = map(int, input().split())
+    machines = list(map(int, input().split()))
+
+    def can_produce(t: int) -> bool:
+        products = 0
+        for m in machines:
+            products += t // m
+            if products >= target:
+                return True
+        return False
+
+    # Lower bound: 1 second
+    # Upper bound: fastest machine alone makes all products
+    low = 1
+    high = min(machines) * target
+    ans = high
+
+    while low <= high:
+        mid = low + (high - low) // 2
+        if can_produce(mid):
+            ans = mid
+            high = mid - 1  # Seek smaller feasible time
+        else:
+            low = mid + 1   # Need more time
+
+    print(ans)
+
+if __name__ == '__main__':
+    solve()
+`,
 };

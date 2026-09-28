@@ -1,0 +1,328 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum ParticipationType {
+  CONTESTANT
+  PRACTICE
+  VIRTUAL
+  OUT_OF_COMPETITION
+}
+
+enum SubmissionVerdict {
+  OK
+  WRONG_ANSWER
+  TIME_LIMIT_EXCEEDED
+  MEMORY_LIMIT_EXCEEDED
+  RUNTIME_ERROR
+  COMPILATION_ERROR
+  CHALLENGED
+  SKIPPED
+  OTHER
+}
+
+enum RecommendationCategory {
+  STRENGTHENING
+  PROGRESSION
+  REVISION
+  CONTEST_PREPARATION
+  UPSOLVE
+}
+
+enum RecommendationStatus {
+  PENDING
+  SOLVED
+  SKIPPED
+  DISMISSED
+}
+
+enum DifficultyLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+// -------------------------------------------------------------
+// USER & PROFILE
+// -------------------------------------------------------------
+
+model User {
+  id                    String                 @id @default(cuid())
+  email                 String?                @unique
+  username              String                 @unique
+  passwordHash          String?
+  role                  Role                   @default(USER)
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+
+  codeforcesProfile     CodeforcesProfile?
+  contestParticipations ContestParticipation[]
+  submissions           Submission[]
+  userConceptSkills     UserConceptSkill[]
+  recommendations       Recommendation[]
+  learningSessions      LearningSession[]
+  revisionItems         RevisionItem[]
+
+  @@map("users")
+}
+
+model CodeforcesProfile {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  handle          String    @unique
+  rating          Int?
+  maxRating       Int?
+  rank            String?
+  maxRank         String?
+  contribution    Int       @default(0)
+  avatar          String?
+  titlePhoto      String?
+  lastSyncedAt    DateTime?
+  syncStatus      String    @default("IDLE") // IDLE, SYNCING, COMPLETED, FAILED
+  syncError       String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([handle])
+  @@map("codeforces_profiles")
+}
+
+// -------------------------------------------------------------
+// CONTESTS & PARTICIPATION
+// -------------------------------------------------------------
+
+model Contest {
+  id                     String                 @id @default(cuid())
+  codeforcesContestId    Int                    @unique
+  name                   String
+  type                   String                 @default("CF")
+  phase                  String
+  startTimeSeconds       Int
+  durationSeconds        Int
+  ratingChangesAvailable Boolean                @default(true)
+  lastSyncedAt           DateTime?
+  createdAt              DateTime               @default(now())
+  updatedAt              DateTime               @updatedAt
+
+  participations         ContestParticipation[]
+  problems               Problem[]
+  submissions            Submission[]
+
+  @@index([startTimeSeconds])
+  @@map("contests")
+}
+
+model ContestParticipation {
+  id                String            @id @default(cuid())
+  userId            String
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contestId         String
+  contest           Contest           @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  rank              Int?
+  oldRating         Int?
+  newRating         Int?
+  ratingChange      Int?
+  participationType ParticipationType @default(CONTESTANT)
+  participatedAt    DateTime
+
+  @@unique([userId, contestId])
+  @@index([userId, participatedAt])
+  @@map("contest_participations")
+}
+
+// -------------------------------------------------------------
+// PROBLEMS & SUBMISSIONS
+// -------------------------------------------------------------
+
+model Problem {
+  id                  String             @id @default(cuid())
+  codeforcesContestId Int?
+  contest             Contest?           @relation(fields: [codeforcesContestId], references: [codeforcesContestId], onDelete: SetNull)
+  problemsetName      String?
+  index               String             // e.g. "A", "B", "C1"
+  name                String
+  type                String             @default("PROGRAMMING")
+  rating              Int?
+  points              Float?
+  solvedCount         Int                @default(0)
+  url                 String
+  lastSyncedAt        DateTime?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  tags                ProblemTag[]
+  submissions         Submission[]
+  problemConcepts     ProblemConcept[]
+  recommendations     Recommendation[]
+
+  @@unique([codeforcesContestId, index])
+  @@index([rating])
+  @@index([name])
+  @@map("problems")
+}
+
+model ProblemTag {
+  id        String   @id @default(cuid())
+  problemId String
+  problem   Problem  @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  tag       String
+
+  @@unique([problemId, tag])
+  @@index([tag])
+  @@map("problem_tags")
+}
+
+model Submission {
+  id                  String            @id @default(cuid())
+  codeforcesSubmissionId BigInt         @unique
+  userId              String
+  user                User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problemId           String
+  problem             Problem           @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  contestId           String?
+  contest             Contest?          @relation(fields: [contestId], references: [id], onDelete: SetNull)
+  verdict             SubmissionVerdict
+  language            String
+  creationTimeSeconds Int
+  relativeTimeSeconds Int?
+  passedTestCount     Int               @default(0)
+  timeConsumedMillis  Int               @default(0)
+  memoryConsumedBytes BigInt            @default(0)
+  points              Float?
+  createdAt           DateTime          @default(now())
+
+  @@index([userId, creationTimeSeconds])
+  @@index([userId, problemId, verdict])
+  @@index([verdict])
+  @@map("submissions")
+}
+
+// -------------------------------------------------------------
+// KNOWLEDGE GRAPH & CONCEPTS
+// -------------------------------------------------------------
+
+model Concept {
+  id              String              @id @default(cuid())
+  slug            String              @unique
+  name            String
+  description     String
+  difficulty      DifficultyLevel     @default(BEGINNER)
+  category        String              // "Dynamic Programming", "Graph Theory", etc.
+  contentPath     String?             // Path to markdown document
+  timeComplexity  String?
+  spaceComplexity String?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  prerequisites   ConceptDependency[] @relation("DependentConcept")
+  dependents      ConceptDependency[] @relation("PrerequisiteConcept")
+  problemConcepts ProblemConcept[]
+  userSkills      UserConceptSkill[]
+  learningSessions LearningSession[]
+  revisionItems   RevisionItem[]
+
+  @@map("concepts")
+}
+
+model ConceptDependency {
+  prerequisiteConceptId String
+  prerequisiteConcept   Concept @relation("PrerequisiteConcept", fields: [prerequisiteConceptId], references: [id], onDelete: Cascade)
+  dependentConceptId    String
+  dependentConcept      Concept @relation("DependentConcept", fields: [dependentConceptId], references: [id], onDelete: Cascade)
+
+  @@id([prerequisiteConceptId, dependentConceptId])
+  @@map("concept_dependencies")
+}
+
+model ProblemConcept {
+  problemId     String
+  problem       Problem  @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  conceptId     String
+  concept       Concept  @relation(fields: [conceptId], references: [id], onDelete: Cascade)
+  confidence    Float    @default(1.0)
+  mappingSource String   @default("TAG_RULE") // TAG_RULE, MANUAL, AI
+
+  @@id([problemId, conceptId])
+  @@map("problem_concepts")
+}
+
+// -------------------------------------------------------------
+// USER SKILLS & ADAPTIVE INTELLIGENCE
+// -------------------------------------------------------------
+
+model UserConceptSkill {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conceptId       String
+  concept         Concept   @relation(fields: [conceptId], references: [id], onDelete: Cascade)
+  skillScore      Float     @default(50.0) // 0 - 100
+  confidence      Float     @default(0.0)  // 0 - 1
+  solvedCount     Int       @default(0)
+  failedCount     Int       @default(0)
+  lastPracticedAt DateTime?
+  updatedAt       DateTime  @updatedAt
+
+  @@unique([userId, conceptId])
+  @@map("user_concept_skills")
+}
+
+model Recommendation {
+  id            String                 @id @default(cuid())
+  userId        String
+  user          User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problemId     String
+  problem       Problem                @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  category      RecommendationCategory
+  reason        String
+  score         Float                  // Ranking score
+  status        RecommendationStatus   @default(PENDING)
+  generatedAt   DateTime               @default(now())
+
+  @@index([userId, status, score])
+  @@map("recommendations")
+}
+
+model LearningSession {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conceptId   String
+  concept     Concept   @relation(fields: [conceptId], references: [id], onDelete: Cascade)
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+  result      String?   // "LEARNED", "NEEDS_PRACTICE"
+
+  @@map("learning_sessions")
+}
+
+model RevisionItem {
+  id             String    @id @default(cuid())
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conceptId      String
+  concept        Concept   @relation(fields: [conceptId], references: [id], onDelete: Cascade)
+  problemId      String?
+  nextReviewAt   DateTime
+  intervalDays   Int       @default(1)
+  easeFactor     Float     @default(2.5) // SM-2 standard default
+  repetitions    Int       @default(0)
+  lastReviewedAt DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([userId, nextReviewAt])
+  @@map("revision_items")
+}

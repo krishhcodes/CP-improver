@@ -70,7 +70,7 @@ export function PerformanceCards({ stats }: PerformanceCardsProps) {
         return (
           <div
             key={idx}
-            className="rounded-2xl glass-panel p-5 border border-white/[0.08] hover:border-white/[0.15] transition-all relative overflow-hidden group"
+            className="rounded-2xl glass-panel p-5 border border-white/[0.07] hover:border-white/[0.18] hover:-translate-y-1 hover:shadow-xl hover:shadow-cyan-500/[0.03] transition-all duration-300 relative overflow-hidden group"
           >
             <div className="flex items-start justify-between">
               <div>

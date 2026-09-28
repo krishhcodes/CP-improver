@@ -398,40 +398,7 @@ export default function ConceptDetailPage({
             </h2>
           </div>
 
-          <div className="prose max-w-none text-xs leading-relaxed text-slate-700 space-y-3">
-            {concept.conceptualTheory.split("\n\n").map((paragraph: string, idx: number) => {
-              if (paragraph.startsWith("### ")) {
-                return (
-                  <h3 key={idx} className="text-sm font-extrabold text-slate-900 pt-2">
-                    {paragraph.replace("### ", "")}
-                  </h3>
-                );
-              }
-              if (paragraph.startsWith("#### ")) {
-                return (
-                  <h4 key={idx} className="text-xs font-bold text-sky-700 pt-1 uppercase tracking-wide">
-                    {paragraph.replace("#### ", "")}
-                  </h4>
-                );
-              }
-              if (paragraph.startsWith("```")) {
-                const code = paragraph.replace(/```[a-z]*\n?/g, "").trim();
-                return (
-                  <pre
-                    key={idx}
-                    className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 font-mono text-[11px] text-sky-200 overflow-x-auto leading-relaxed my-2 shadow-xs"
-                  >
-                    <code>{code}</code>
-                  </pre>
-                );
-              }
-              return (
-                <p key={idx} className="text-slate-700 leading-relaxed">
-                  {paragraph}
-                </p>
-              );
-            })}
-          </div>
+          <TheoryMarkdown content={concept.conceptualTheory} />
         </div>
       )}
 
@@ -822,6 +789,262 @@ export default function ConceptDetailPage({
           <ArrowRight className="w-3.5 h-3.5" />
         </Link>
       </div>
+    </div>
+  );
+}
+
+function formatInline(text: string): React.ReactNode {
+  const segments: React.ReactNode[] = [];
+  const regex = /(`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*)/g;
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      segments.push(text.substring(lastIndex, match.index));
+    }
+    const token = match[0];
+    if (token.startsWith("`") && token.endsWith("`")) {
+      segments.push(
+        <code
+          key={match.index}
+          className="px-1.5 py-0.5 rounded bg-slate-100 text-sky-700 font-mono text-[11px] border border-slate-200"
+        >
+          {token.slice(1, -1)}
+        </code>
+      );
+    } else if (token.startsWith("**") && token.endsWith("**")) {
+      segments.push(
+        <strong key={match.index} className="font-bold text-slate-900">
+          {token.slice(2, -2)}
+        </strong>
+      );
+    } else if (token.startsWith("*") && token.endsWith("*")) {
+      segments.push(
+        <em key={match.index} className="italic text-slate-800">
+          {token.slice(1, -1)}
+        </em>
+      );
+    }
+    lastIndex = regex.lastIndex;
+  }
+  if (lastIndex < text.length) {
+    segments.push(text.substring(lastIndex));
+  }
+  return segments.length > 0 ? segments : text;
+}
+
+function TheoryMarkdown({ content }: { content: string }) {
+  if (!content) return null;
+
+  const blocks: {
+    type: "code" | "h2" | "h3" | "h4" | "hr" | "quote" | "ul" | "ol" | "p";
+    content: string;
+    items?: string[];
+  }[] = [];
+
+  const lines = content.split("\n");
+  let inCode = false;
+  let codeBuffer: string[] = [];
+  let listBuffer: { type: "ul" | "ol"; items: string[] } | null = null;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    if (line.trim().startsWith("```")) {
+      if (inCode) {
+        blocks.push({ type: "code", content: codeBuffer.join("\n") });
+        codeBuffer = [];
+        inCode = false;
+      } else {
+        if (listBuffer) {
+          blocks.push({ type: listBuffer.type, content: "", items: listBuffer.items });
+          listBuffer = null;
+        }
+        inCode = true;
+      }
+      continue;
+    }
+
+    if (inCode) {
+      codeBuffer.push(line);
+      continue;
+    }
+
+    const trimmed = line.trim();
+
+    if (!trimmed) {
+      if (listBuffer) {
+        blocks.push({ type: listBuffer.type, content: "", items: listBuffer.items });
+        listBuffer = null;
+      }
+      continue;
+    }
+
+    if (trimmed === "---" || trimmed === "***") {
+      if (listBuffer) {
+        blocks.push({ type: listBuffer.type, content: "", items: listBuffer.items });
+        listBuffer = null;
+      }
+      blocks.push({ type: "hr", content: "" });
+      continue;
+    }
+
+    if (trimmed.startsWith("## ")) {
+      if (listBuffer) {
+        blocks.push({ type: listBuffer.type, content: "", items: listBuffer.items });
+        listBuffer = null;
+      }
+      blocks.push({ type: "h2", content: trimmed.replace(/^##\s+/, "") });
+      continue;
+    }
+
+    if (trimmed.startsWith("### ")) {
+      if (listBuffer) {
+        blocks.push({ type: listBuffer.type, content: "", items: listBuffer.items });
+        listBuffer = null;
+      }
+      blocks.push({ type: "h3", content: trimmed.replace(/^###\s+/, "") });
+      continue;
+    }
+
+    if (trimmed.startsWith("#### ")) {
+      if (listBuffer) {
+        blocks.push({ type: listBuffer.type, content: "", items: listBuffer.items });
+        listBuffer = null;
+      }
+      blocks.push({ type: "h4", content: trimmed.replace(/^####\s+/, "") });
+      continue;
+    }
+
+    if (trimmed.startsWith("> ")) {
+      if (listBuffer) {
+        blocks.push({ type: listBuffer.type, content: "", items: listBuffer.items });
+        listBuffer = null;
+      }
+      blocks.push({ type: "quote", content: trimmed.replace(/^>\s+/, "") });
+      continue;
+    }
+
+    if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
+      const itemText = trimmed.replace(/^[-*]\s+/, "");
+      if (listBuffer && listBuffer.type === "ul") {
+        listBuffer.items.push(itemText);
+      } else {
+        if (listBuffer) blocks.push({ type: listBuffer.type, content: "", items: listBuffer.items });
+        listBuffer = { type: "ul", items: [itemText] };
+      }
+      continue;
+    }
+
+    if (/^\d+\.\s+/.test(trimmed)) {
+      const itemText = trimmed.replace(/^\d+\.\s+/, "");
+      if (listBuffer && listBuffer.type === "ol") {
+        listBuffer.items.push(itemText);
+      } else {
+        if (listBuffer) blocks.push({ type: listBuffer.type, content: "", items: listBuffer.items });
+        listBuffer = { type: "ol", items: [itemText] };
+      }
+      continue;
+    }
+
+    if (listBuffer) {
+      blocks.push({ type: listBuffer.type, content: "", items: listBuffer.items });
+      listBuffer = null;
+    }
+    blocks.push({ type: "p", content: line });
+  }
+
+  if (inCode && codeBuffer.length > 0) {
+    blocks.push({ type: "code", content: codeBuffer.join("\n") });
+  }
+  if (listBuffer) {
+    blocks.push({ type: listBuffer.type, content: "", items: listBuffer.items });
+  }
+
+  return (
+    <div className="space-y-4 text-xs leading-relaxed text-slate-700">
+      {blocks.map((block, idx) => {
+        if (block.type === "h2") {
+          return (
+            <div key={idx} className="pt-6 pb-2 border-b border-slate-200/90 first:pt-0">
+              <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-sky-600 inline-block shadow-xs" />
+                <span>{block.content}</span>
+              </h2>
+            </div>
+          );
+        }
+        if (block.type === "h3") {
+          return (
+            <h3 key={idx} className="text-sm font-extrabold text-slate-900 pt-4 pb-1 flex items-center gap-2">
+              <span className="text-sky-600 font-mono font-bold">#</span>
+              <span>{block.content}</span>
+            </h3>
+          );
+        }
+        if (block.type === "h4") {
+          return (
+            <h4 key={idx} className="text-xs font-bold text-sky-800 uppercase tracking-wider pt-2">
+              {block.content}
+            </h4>
+          );
+        }
+        if (block.type === "hr") {
+          return <hr key={idx} className="border-slate-200/70 my-5" />;
+        }
+        if (block.type === "quote") {
+          return (
+            <div
+              key={idx}
+              className="p-4 rounded-xl bg-sky-50/70 border-l-4 border-sky-500 text-slate-800 font-medium italic my-3 shadow-2xs"
+            >
+              {formatInline(block.content)}
+            </div>
+          );
+        }
+        if (block.type === "code") {
+          return (
+            <pre
+              key={idx}
+              className="p-4 rounded-xl bg-slate-900 border border-slate-800 font-mono text-[11px] text-sky-200 overflow-x-auto leading-relaxed my-3 shadow-xs"
+            >
+              <code>{block.content}</code>
+            </pre>
+          );
+        }
+        if (block.type === "ul" && block.items) {
+          return (
+            <ul key={idx} className="space-y-1.5 my-2 pl-2">
+              {block.items.map((item, iIdx) => (
+                <li key={iIdx} className="flex items-start gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-sky-500 mt-1.5 shrink-0" />
+                  <span className="text-slate-700 leading-relaxed">{formatInline(item)}</span>
+                </li>
+              ))}
+            </ul>
+          );
+        }
+        if (block.type === "ol" && block.items) {
+          return (
+            <ol key={idx} className="space-y-1.5 my-2 pl-2">
+              {block.items.map((item, iIdx) => (
+                <li key={iIdx} className="flex items-start gap-2">
+                  <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200 shrink-0">
+                    {iIdx + 1}
+                  </span>
+                  <span className="text-slate-700 leading-relaxed">{formatInline(item)}</span>
+                </li>
+              ))}
+            </ol>
+          );
+        }
+        return (
+          <p key={idx} className="text-slate-700 leading-relaxed">
+            {formatInline(block.content)}
+          </p>
+        );
+      })}
     </div>
   );
 }

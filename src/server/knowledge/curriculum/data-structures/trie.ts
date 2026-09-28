@@ -26,29 +26,218 @@ export const trieConcept: ConceptNode = {
         "A binary trie represents numbers as bit strings. At each bit from 30 down to 0, greedily choosing the opposite bit guarantees the maximum possible XOR in O(bits).",
     },
   ],
-  conceptualTheory: `### Prefix Trees & The Bitwise Greedy Property
+  conceptualTheory: `## Trie (Prefix Tree) & Binary 0/1 XOR Trie: A Complete Textbook Chapter
 
-#### 1. Dictionary Trie Architecture
-A rooted tree where each edge represents a character $\\Sigma$ (typically lowercase English letters \`a\`-\`z\`, $\\Sigma = 26$).
-- Each node stores:
-  - \`child[26]\`: array of pointers / integer indices to child nodes.
-  - \`isEndOfWord\`: boolean or integer count of words terminating at this node.
-  - \`prefixCount\`: count of words passing through this node.
+### What Is a Trie (Prefix Tree)?
+
+A **Trie** (derived from re**trie**val) is a tree-based data structure used to store a collection of strings or bit sequences:
+- Each node represents a common prefix shared by one or more keys.
+- The **root** represents the empty prefix \`""\`.
+- Each directed edge is labeled with a single character from the alphabet $\Sigma$ (for lowercase English letters, $|\Sigma| = 26$; for binary numbers, $|\Sigma| = 2$).
+- Any path from the root down to a node spells out a unique string prefix.
+
+#### Why Not a Hash Map or Sorted Array?
+Consider the trade-offs:
+
+| Data Structure | Insert | Exact Search | Prefix Search ("Starts With") | Alphabetical Order |
+|---|---|---|---|---|
+| Hash Map (\`unordered_map\`) | O(L) | O(L) | O(N * L) — Must hash all prefixes | No (Unordered) |
+| Sorted Array + Binary Search | O(N * L) | O(L log N) | O(L log N) | Yes |
+| **Trie** | **O(L)** | **O(L)** | **O(L)** | **Yes (In-Order Traversal)** |
+
+Notice that the Trie's operations depend **ONLY on the query string length $L$**, completely independent of the total dictionary size $N$! Even if you have 1,000,000 words in the dictionary, searching a 5-letter word takes exactly 5 pointer steps!
 
 ---
 
-#### 2. Binary 0/1 XOR Trie (The Greedy Invariant)
-To find $\\max_{y \\in S} (x \\oplus y)$:
-The most significant bit (MSB) has greater weight than all lower bits combined:
-$$2^b > \\sum_{i=0}^{b-1} 2^i = 2^b - 1$$
+### Visual Architecture & Node Representation
 
-Therefore:
-- To maximize $x \\oplus y$, at bit position $b$ (from $29$ down to $0$):
-  - Determine $b$-th bit of $x$: $\\text{bit} = (x \\gg b) \\& 1$.
-  - Target the **opposite bit**: $\\text{target} = 1 - \\text{bit}$.
-  - If the trie has a branch for $\\text{target}$, follow it and add $2^b$ to the running XOR!
-  - Otherwise, follow the $\\text{bit}$ branch (adding $0$).
-- This greedy choice at each step is **provably globally optimal**.`,
+Consider inserting the words: \`"cat"\`, \`"car"\`, \`"cart"\`, \`"dog"\`:
+
+\`\`\`
+                 (root)
+                /      \
+             'c'        'd'
+             /            \
+           'a'            'o'
+          /   \             \
+        't'*  'r'*          'g'*
+                \
+                't'*
+(* indicates isEndOfWord = true)
+\`\`\`
+
+#### Why You Should NEVER Use \`new Node()\` in Competitive Programming
+In university textbooks, Tries are taught using dynamic pointers:
+\`struct Node { Node* child[26]; }; Node* root = new Node();\`
+
+In competitive programming, **this is an anti-pattern**:
+1. Calling \`new\` $10^6$ times introduces massive runtime overhead (3x to 5x slower, causing TLE).
+2. Pointer overhead consumes 8 bytes per child pointer on 64-bit systems ($26 \times 8 = 208$ bytes per node), triggering **Memory Limit Exceeded (MLE)**!
+3. Memory fragmentation kills CPU L1/L2 cache locality.
+
+#### The Static Array Pattern (Competitive Programming Standard)
+Instead, allocate flat static arrays:
+\`\`\`cpp
+const int MAX_NODES = 2000005;
+int child[MAX_NODES][26];
+int passCount[MAX_NODES]; // How many words share this prefix
+int endCount[MAX_NODES];  // How many words end at this node
+int nodeCount = 1;        // Root is node 1
+\`\`\`
+This achieves maximum CPU cache locality, zero pointer overhead, and blazing execution speed!
+
+---
+
+### Core Operations on a Dictionary Trie
+
+#### 1. Insertion in O(L)
+\`\`\`cpp
+void insert(const string& s) {
+    int u = 1; // Start at root
+    passCount[u]++;
+    for (char c : s) {
+        int idx = c - 'a';
+        if (!child[u][idx]) {
+            child[u][idx] = ++nodeCount; // Allocate new node
+        }
+        u = child[u][idx];
+        passCount[u]++;
+    }
+    endCount[u]++;
+}
+\`\`\`
+
+#### 2. Exact Search in O(L)
+\`\`\`cpp
+bool search(const string& s) {
+    int u = 1;
+    for (char c : s) {
+        int idx = c - 'a';
+        if (!child[u][idx]) return false;
+        u = child[u][idx];
+    }
+    return endCount[u] > 0;
+}
+\`\`\`
+
+#### 3. Prefix Count ("Starts With") in O(L)
+*"How many words in the dictionary start with prefix $P$?"*
+\`\`\`cpp
+int countPrefix(const string& p) {
+    int u = 1;
+    for (char c : p) {
+        int idx = c - 'a';
+        if (!child[u][idx]) return 0;
+        u = child[u][idx];
+    }
+    return passCount[u];
+}
+\`\`\`
+
+---
+
+### The Binary 0/1 XOR Trie: The Greedy MSB Invariant
+
+The most powerful application of Tries in competitive programming is the **Binary 0/1 XOR Trie**:
+Any 32-bit non-negative integer $X$ can be viewed as a binary string of length 30:
+$$X = b_{29} b_{28} \dots b_1 b_0$$
+The alphabet size is strictly binary: $|\Sigma| = 2$ (\`0\` and \`1\`).
+
+#### The Fundamental Greedy MSB Theorem
+Why does a Trie allow us to find the maximum XOR pair in an array in $O(N \times 30)$ time?
+Notice the mathematical inequality:
+$$2^b > \sum_{i=0}^{b-1} 2^i = 2^b - 1$$
+**Having bit $b$ set to 1 is strictly greater than having ALL lower bits $(b-1 \dots 0)$ set to 1 combined!**
+For example:
+$$2^5 = 32 > (16 + 8 + 4 + 2 + 1) = 31$$
+
+#### The Greedy Choice Strategy
+To maximize $X \oplus Y$ for a query number $X$:
+We inspect bits from the **Most Significant Bit (MSB)** down to bit 0 (e.g. from bit 29 down to 0):
+1. At bit position $b$, compute the $b$-th bit of $X$:
+   \`bit = (X >> b) & 1;\`
+2. In order to make the $b$-th bit of the resulting XOR equal to 1, we desire the **opposite bit**:
+   \`target = 1 - bit;\`
+3. **The Greedy Rule**:
+   - If the trie HAS a child branch for \`target\`:
+     We **MUST take it**! This guarantees that the $b$-th bit of $X \oplus Y$ will be 1. We add $2^b$ (or \`1 << b\`) to our running answer!
+   - If the trie does NOT have a branch for \`target\`:
+     We are forced to take the \`bit\` branch (which yields XOR bit 0).
+4. Because higher bits dominate all lower bits, **this greedy choice at each step is provably globally optimal!**
+
+---
+
+### Maximum XOR Subarray Problem (The Canonical Archetype)
+
+**Problem Statement**:
+Given an array $A$ of $N$ integers, find a contiguous subarray $A[L \dots R]$ such that the bitwise XOR sum:
+$$A[L] \oplus A[L+1] \oplus \dots \oplus A[R]$$
+is maximized. $N \le 2 \times 10^5$, $A[i] \le 10^9$.
+
+#### Key Insight: Prefix XOR Decomposition
+Recall the self-inverting property of XOR: $X \oplus X = 0$.
+Define the prefix XOR array:
+$$P[i] = A[0] \oplus A[1] \oplus \dots \oplus A[i-1], \quad P[0] = 0$$
+Then the XOR sum of any contiguous subarray $A[L \dots R]$ is simply:
+$$A[L] \oplus \dots \oplus A[R] = P[R + 1] \oplus P[L]$$
+
+#### The Algorithm in O(N × 30)
+1. Initialize an empty Binary 0/1 Trie.
+2. **THE CRITICAL STEP**: Insert \`0\` into the trie before processing any elements!
+   *(Inserting 0 corresponds to the empty prefix $P[0] = 0$. Forgetting this will cause you to miss optimal subarrays that start at index 0!)*
+3. Maintain running prefix XOR \`pref = 0\` and \`max_xor = 0\`.
+4. For each element $x$ in array $A$:
+   - \`pref ^= x\`
+   - Query the trie for the maximum XOR with \`pref\`:
+     \`max_xor = max(max_xor, queryMaxXor(pref));\`
+   - Insert \`pref\` into the trie.
+5. Return \`max_xor\`.
+
+---
+
+### Counting Pairs with XOR Less Than K
+
+Another classic contest problem:
+*"Given an array $A$ and integer $K$, count how many pairs $(i, j)$ satisfy $A[i] \oplus A[j] < K$."*
+
+We can solve this by adapting **Digit DP logic** onto our Binary Trie in $O(N \times 30)$:
+As we traverse bit $b$ from 29 down to 0 for a query number $X$:
+- Let $k\_bit = (K \gg b) \& 1$ and $x\_bit = (X \gg b) \& 1$.
+- **Case 1: $k\_bit == 1$**:
+  - If we follow the branch with bit $x\_bit$, the resulting XOR bit at position $b$ will be $0$.
+  - Since $0 < k\_bit$ ($0 < 1$), **EVERY SINGLE ELEMENT in this branch's subtree is guaranteed to produce an XOR strictly less than $K$!**
+  - Add \`passCount[child[u][x_bit]]\` directly to the answer!
+  - Then descend into the other branch ($1 - x\_bit$) to inspect numbers whose $b$-th XOR bit is 1.
+- **Case 2: $k\_bit == 0$**:
+  - We CANNOT choose a branch that produces XOR bit 1 (that would make the XOR $> K$).
+  - We are forced to descend into the matching branch ($x\_bit$) where the XOR bit is 0.
+
+Total runtime: strictly $O(N \times 30)$!
+
+---
+
+### Sizing and Memory Allocation Formula
+
+When allocating your static trie array, how many nodes do you need?
+- For a dictionary trie with $N$ words of maximum length $L$:
+  $$\text{MAX\_NODES} = N \times L + 5$$
+  Example: $10^5$ words of length $\le 10 \implies 10^6$ nodes.
+- For a Binary 0/1 Trie with $N$ integers up to $10^9$ (30 bits):
+  $$\text{MAX\_NODES} = N \times 30 + 5$$
+  Example: $N = 2 \times 10^5 \implies 2 \times 10^5 \times 30 = 6 \times 10^6$ nodes.
+  Array size: \`int child[6000005][2];\` $\approx 6 \times 10^6 \times 2 \times 4 \text{ bytes} \approx 48 \text{ MB}$, well within standard 256 MB or 512 MB memory limits!
+
+---
+
+### Contest Checklist & Common Traps
+
+1. **Always Insert 0 for Subarray XOR**: In Maximum XOR Subarray, forgetting \`insert(0)\` prevents subarrays starting at index 0 from being discovered.
+2. **Bit Range Sizing**:
+   - Values up to $10^9 < 2^{30}$: loop from bit \`29\` down to \`0\`.
+   - Values up to $10^{18} < 2^{62}$: loop from bit \`61\` down to \`0\`, and use \`1LL << b\` (forgetting \`1LL\` causes 32-bit undefined behavior shift!).
+3. **Pre-clear on Multi-Testcases**: In competitive programming contests with $T$ test cases, re-initializing \`memset\` on 48 MB takes 0.2s per testcase and TLEs!
+   - Solution: only clear nodes up to \`nodeCount\`:
+     \`for (int i = 1; i <= nodeCount; i++) { child[i][0] = child[i][1] = passCount[i] = 0; } nodeCount = 1;\``,
   variations: [
     {
       title: "Dictionary Prefix Trie",

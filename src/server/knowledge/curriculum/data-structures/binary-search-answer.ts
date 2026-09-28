@@ -39,30 +39,170 @@ export const binarySearchAnswerConcept: ConceptNode = {
         "When the objective function is unimodal (strictly increasing then strictly decreasing) rather than monotonic, ternary search divides the search space into thirds in O(log3 N).",
     },
   ],
-  conceptualTheory: `### Monotonic Predicate Inversion & Invariants
+  conceptualTheory: `## Binary Search on Answer: A Complete Textbook Chapter
 
-#### 1. Inversion from Optimization to Verification
-Direct construction of the optimal value $X^*$ is often intractable ($NP$-hard or complex greedy combinations).
-However, testing feasibility of a candidate $x$:
-$$P(x) = \\begin{cases} \\text{True} & \\text{if candidate } x \\text{ is achievable} \\\\ \\text{False} & \\text{otherwise} \\end{cases}$$
-is often easily solvable using a greedy sweep in $O(N)$.
+### The Core Insight: Optimization to Verification (The "Flipping" Paradigm)
+
+Many optimization problems in competitive programming present formidable challenges when approached directly:
+> *"What is the minimum maximum speed required to finish a race in $T$ seconds?"*
+> *"What is the maximum minimum distance between $C$ cows placed in $N$ stalls?"*
+> *"What is the minimum capacity of a conveyor belt to ship all packages in $D$ days?"*
+
+Trying to construct the optimal answer greedily or via dynamic programming often fails because choices at step $i$ depend globally on future choices.
+However, notice what happens when we **flip the question on its head**:
+Instead of asking: *"What is the exact optimal value $X$?"*
+We ask: *"Is it possible to complete the task with value $X$?"* (A simple **YES or NO decision question**).
+
+#### The Monotone Partition Property
+If the predicate $P(X) = \text{isPossible}(X)$ is **monotonic**:
+- For **Minimization Problems**: If it is possible to achieve the task with resource budget $X$, it is automatically possible for ANY larger budget $X' \ge X$:
+  \`\`\`
+  Search Space:  [ Low ......................................... High ]
+  Predicate P:     False   False   False   TRUE    TRUE    TRUE    TRUE
+                                           ↑
+                                     First True = Minimum Feasible Answer
+  \`\`\`
+- For **Maximization Problems**: If it is possible to achieve minimum distance $X$, any smaller distance $X' \le X$ is also feasible:
+  \`\`\`
+  Search Space:  [ Low ......................................... High ]
+  Predicate P:     TRUE    TRUE    TRUE    FALSE   FALSE   FALSE   FALSE
+                                   ↑
+                             Last True = Maximum Feasible Answer
+  \`\`\`
+
+By verifying that $P(X)$ is monotonic, the problem of finding the optimum transforms into **finding the boundary in a sorted boolean array**!
+We evaluate $P(\text{mid})$:
+- In $O(\log(\text{Search Range}))$ steps, we pinpoint the exact optimal value!
+- Reduces complexity from $O(\text{Range} \times \text{Cost})$ to $O(\log(\text{Range}) \times \text{Cost})$.
 
 ---
 
-#### 2. The Monotonic Partition Pattern
-Binary search succeeds if and only if $P(x)$ is monotonic across $[\\text{Low}, \\text{High}]$:
+### The Invariant-Based Binary Search Templates
 
-\`\`\`
-Type 1 (Minimize X):  False, False, False, [True], True, True ...
-Type 2 (Maximize X):  True,  True,  [True], False, False, False ...
+Off-by-one errors and infinite loops are the bane of binary search. Following these strict invariant templates eliminates off-by-one bugs forever:
+
+#### Template 1: Closed Interval with Explicit \`ans\` Variable (Recommended)
+This is the safest, most readable, and most bulletproof template in contest environments:
+
+**For Minimization (Find the First True / Smallest Feasible Value)**:
+\`\`\`cpp
+long long low = min_possible, high = max_possible;
+long long ans = high;
+
+while (low <= high) {
+    long long mid = low + (high - low) / 2; // Prevents overflow!
+    if (check(mid)) {
+        ans = mid;        // mid is feasible, record it
+        high = mid - 1;   // Try to find a smaller feasible answer
+    } else {
+        low = mid + 1;    // mid is too small, must search higher
+    }
+}
+return ans;
 \`\`\`
 
-#### 3. Invariant-Preserving Pointer Maintenance
-For minimizing $X$ where $P(x)$ is $\\text{False} \\dots \\text{True}$:
-- Maintain invariant: $\\text{Low}-1$ is always False, $\\text{High}+1$ is always True.
-- Set $\\text{mid} = \\text{Low} + (\\text{High} - \\text{Low}) / 2$.
-- If $P(\\text{mid}) == \\text{True}$: $\\text{ans} = \\text{mid}, \\text{High} = \\text{mid} - 1$.
-- If $P(\\text{mid}) == \\text{False}$: $\\text{Low} = \\text{mid} + 1$.`,
+**For Maximization (Find the Last True / Largest Feasible Value)**:
+\`\`\`cpp
+long long low = min_possible, high = max_possible;
+long long ans = low;
+
+while (low <= high) {
+    long long mid = low + (high - low) / 2;
+    if (check(mid)) {
+        ans = mid;        // mid is feasible, record it
+        low = mid + 1;    // Try to find a larger feasible answer
+    } else {
+        high = mid - 1;   // mid is too large, must search lower
+    }
+}
+return ans;
+\`\`\`
+
+#### Why \`low + (high - low) / 2\` Instead of \`(low + high) / 2\`?
+If $low$ and $high$ are $10^{18}$ (common when searching over time or distances), computing $low + high$ produces $2 \times 10^{18}$, which overflows signed 64-bit integers (\`LLONG_MAX\` $\approx 9.22 \times 10^{18}$ is safe, but in 32-bit signed ints $10^9 + 10^9 > 2.14 \times 10^9$ causes signed integer overflow and negative mid values!).
+\`low + (high - low) / 2\` is mathematically identical and **never overflows**.
+
+---
+
+### The 4 Canonical Binary Search Archetypes
+
+#### Archetype 1: Minimize the Maximum (Resource Partitioning)
+- **Examples**: CSES Factory Machines, LeetCode Split Array Largest Sum, Painter's Partition Problem.
+- **Problem**: Divide $N$ tasks among $K$ workers such that the maximum workload assigned to any single worker is minimized.
+- **Predicate $P(X)$**: *"Can all tasks be completed such that no worker does more than $X$ work?"*
+- **Greedy Verification**: Iterate through the tasks sequentially. Add tasks to the current worker until adding the next task exceeds $X$. When it does, assign the next task to a new worker. If the total workers needed $\le K$, return \`True\`; else \`False\`.
+
+#### Archetype 2: Maximize the Minimum (Separation Distance)
+- **Examples**: CSES Aggressive Cows, USACO Social Distancing.
+- **Problem**: Place $C$ cows into $N$ stalls such that the minimum distance between any two cows is as large as possible.
+- **Predicate $P(X)$**: *"Can we place $C$ cows such that every pair is at least $X$ units apart?"*
+- **Greedy Verification**: Sort the stall positions. Always place the first cow in the first stall. For each subsequent cow, place it in the earliest stall whose coordinate is $\ge \text{last\_stall} + X$. If at least $C$ cows are placed, return \`True\`; else \`False\`.
+
+#### Archetype 3: Fractional Programming (Optimal Ratio Maximization)
+- **Problem**: Given $N$ items with value $V_i$ and weight $W_i$, select $K$ items to maximize the ratio $\frac{\sum V_i}{\sum W_i}$.
+- **Algebraic Transformation**:
+  $$\frac{\sum V_i}{\sum W_i} \ge X \iff \sum V_i \ge X \sum W_i \iff \sum (V_i - X \cdot W_i) \ge 0$$
+- **Verification in O(N log N)**:
+  For a candidate ratio $X$, compute $score_i = V_i - X \cdot W_i$ for each item. Sort the scores in descending order and sum the top $K$. If the sum $\ge 0$, then ratio $X$ is achievable!
+
+#### Archetype 4: Continuous / Floating-Point Binary Search
+- **Problem**: Find an answer in the real numbers (floating-point domain), e.g. finding coordinates or physics simulations.
+- **The Golden Rule**: **NEVER use \`while (high - low > 1e-9)\` in competitive programming!**
+  Due to IEEE 754 floating-point precision limits and rounding inaccuracies, $high - low$ might never become less than $10^{-9}$, causing an **Infinite Loop (Time Limit Exceeded)**!
+- **The Correct Pattern (Fixed Iterations)**:
+\`\`\`cpp
+double low = 0.0, high = 1e9;
+for (int iter = 0; iter < 100; iter++) {
+    double mid = low + (high - low) / 2.0;
+    if (check(mid)) high = mid;
+    else low = mid;
+}
+return low;
+\`\`\`
+**Why 100 iterations?**
+Each iteration halves the interval. After 100 iterations:
+$$\text{Interval Width} = \frac{10^9}{2^{100}} \approx \frac{10^9}{1.26 \times 10^{30}} \approx 10^{-21}$$
+This guarantees maximum double-precision accuracy with zero chance of an infinite loop!
+
+---
+
+### Ternary Search (For Unimodal Functions)
+
+What if the function is NOT monotonic, but **unimodal** (strictly increases to a peak, then strictly decreases, or vice-versa)?
+Binary search fails because the derivative changes sign. **Ternary Search** finds the global extremum in $O(\log_3 N)$:
+
+#### How It Works
+Divide the interval $[L, R]$ into three equal segments using two midpoints:
+$$m_1 = L + \frac{R - L}{3}, \quad m_2 = R - \frac{R - L}{3}$$
+Compare $f(m_1)$ and $f(m_2)$:
+- If maximizing: if $f(m_1) < f(m_2)$, the peak cannot be in $[L, m_1]$. We can discard the entire first third: \`low = m1\`!
+- If $f(m_1) \ge f(m_2)$, the peak cannot be in $[m_2, R]$. We can discard the entire last third: \`high = m2\`!
+Each iteration reduces the search space by a factor of $\frac{2}{3}$!
+
+\`\`\`cpp
+while (high - low > 2) {
+    int m1 = low + (high - low) / 3;
+    int m2 = high - (high - low) / 3;
+    if (f(m1) < f(m2)) low = m1;
+    else high = m2;
+}
+long long ans = f(low);
+for (int i = low + 1; i <= high; i++) ans = max(ans, f(i));
+return ans;
+\`\`\`
+
+---
+
+### Contest Checklist & Common Pitfalls
+
+1. **Upper Bound Underestimation**:
+   If $N = 10^5$ and each machine takes $10^9$ seconds, the answer can reach $10^{14}$ or $10^{18}$! Setting \`high = 1e9\` will result in wrong answers on large test cases. Always calculate the theoretical maximum: \`high = 1e18\`.
+2. **Lower Bound Sizing**:
+   Don't arbitrarily pick \`low = 0\` if the answer must be $\ge 1$ (e.g. non-zero capacity).
+3. **Monotonicity Check**:
+   Before writing binary search, explicitly ask yourself: *"If answer $X$ is feasible, does that strictly imply $X+1$ is feasible?"* If not, binary search is invalid; use DP or network flow instead.
+4. **Greedy Feasibility Verification**:
+   The \`check()\` function MUST be completely deterministic and correct. If your greedy check has flaws, binary search will accurately find the wrong answer!`,
   variations: [
     {
       title: "Minimize Maximum (False...True)",

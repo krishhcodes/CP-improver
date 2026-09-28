@@ -21,13 +21,13 @@ export async function GET(req: NextRequest) {
       data,
     });
   } catch (error: any) {
-    console.error(`Error fetching user data for ${handle}:`, error);
-    return NextResponse.json(
-      {
-        error: error.message ?? `Failed to fetch data for handle "${handle}"`,
-        handle: handle.trim(),
-      },
-      { status: 404 }
-    );
+    console.warn(`Error fetching user data for ${handle}, using fallback:`, error);
+    const fallbackData = LiveUserService.getFallbackData(handle.trim());
+    return NextResponse.json({
+      success: true,
+      handle: handle.trim(),
+      data: fallbackData,
+      isOfflineFallback: true,
+    });
   }
 }

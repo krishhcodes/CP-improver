@@ -12,6 +12,14 @@ import {
   ContestAutopsy,
 } from "@/types";
 import {
+  AC_PROFILE,
+  AC_PERFORMANCE_STATS,
+  AC_RATING_HISTORY,
+  AC_VERDICT_COUNTS,
+  AC_UPSOLVE_PROBLEMS,
+  AC_TOPIC_WEAKNESSES,
+  AC_RECENT_SUBMISSIONS,
+  AC_CONTEST_AUTOPSY,
   MOCK_PROFILE,
   MOCK_PERFORMANCE_STATS,
   MOCK_RATING_HISTORY,
@@ -45,40 +53,16 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 const STORAGE_KEY = "cp_active_handle";
 const DEFAULT_HANDLE = "AC_on_first_TRY";
 
-const DEFAULT_USER_PROFILE: CFProfile = {
-  handle: "AC_on_first_TRY",
-  rating: 994,
-  maxRating: 1137,
-  rank: "Newbie",
-  maxRank: "Newbie",
-  avatar: "https://userpic.codeforces.org/5896406/avatar/59fdd8229984320f.jpg",
-  contribution: 1,
-  lastSyncedAt: "Just now",
-  globalRankEstimate: 120000,
-};
-
-const DEFAULT_USER_STATS: PerformanceStats = {
-  contestsCount: 14,
-  solvedCount: 53,
-  attemptedCount: 58,
-  successRate: 44.2,
-  avgSolvedRating: 873,
-  upsolveRate: 64.5,
-  bestRank: 6488,
-  avgRank: 9806,
-  currentStreakDays: 3,
-};
-
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [handle, setHandle] = useState<string>(DEFAULT_HANDLE);
-  const [profile, setProfile] = useState<CFProfile>(DEFAULT_USER_PROFILE);
-  const [stats, setStats] = useState<PerformanceStats>(DEFAULT_USER_STATS);
-  const [ratingHistory, setRatingHistory] = useState<RatingPoint[]>(MOCK_RATING_HISTORY);
-  const [verdicts, setVerdicts] = useState<VerdictCount[]>(MOCK_VERDICT_COUNTS);
-  const [upsolveProblems, setUpsolveProblems] = useState<UpsolveProblem[]>(MOCK_UPSOLVE_PROBLEMS);
-  const [topicWeaknesses, setTopicWeaknesses] = useState<TopicWeakness[]>(MOCK_TOPIC_WEAKNESSES);
-  const [recentSubmissions, setRecentSubmissions] = useState<Submission[]>(MOCK_RECENT_SUBMISSIONS);
-  const [contestAutopsy, setContestAutopsy] = useState<ContestAutopsy>(MOCK_CONTEST_AUTOPSY);
+  const [profile, setProfile] = useState<CFProfile>(AC_PROFILE);
+  const [stats, setStats] = useState<PerformanceStats>(AC_PERFORMANCE_STATS);
+  const [ratingHistory, setRatingHistory] = useState<RatingPoint[]>(AC_RATING_HISTORY);
+  const [verdicts, setVerdicts] = useState<VerdictCount[]>(AC_VERDICT_COUNTS);
+  const [upsolveProblems, setUpsolveProblems] = useState<UpsolveProblem[]>(AC_UPSOLVE_PROBLEMS);
+  const [topicWeaknesses, setTopicWeaknesses] = useState<TopicWeakness[]>(AC_TOPIC_WEAKNESSES);
+  const [recentSubmissions, setRecentSubmissions] = useState<Submission[]>(AC_RECENT_SUBMISSIONS);
+  const [contestAutopsy, setContestAutopsy] = useState<ContestAutopsy>(AC_CONTEST_AUTOPSY);
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
@@ -97,8 +81,10 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       );
       const json = await res.json();
 
-      if (!res.ok || !json.success) {
-        throw new Error(json.error || `Failed to fetch data for ${cleanHandle}`);
+      if (!res.ok || !json.success || !json.data) {
+        console.warn(`User data notice for ${cleanHandle}:`, json?.error);
+        setError(json?.error || `Failed to fetch data for ${cleanHandle}`);
+        return;
       }
 
       const { data } = json;

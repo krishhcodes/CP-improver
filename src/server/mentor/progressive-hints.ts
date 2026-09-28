@@ -198,9 +198,10 @@ export function getProgressiveHint(
   }
 
   // Generic Pattern-Based Socratic Hints
-  const primaryTag = fallbackTags[0]?.toLowerCase() || "algorithmic problem";
+  const allTags = fallbackTags.map((t) => t.toLowerCase());
 
-  if (primaryTag.includes("dp") || primaryTag.includes("dynamic programming")) {
+  // 1. Dynamic Programming
+  if (allTags.some((t) => t.includes("dp") || t.includes("dynamic programming"))) {
     const genericDPHints: Record<HintTierLevel, ProgressiveHint> = {
       1: {
         tier: 1,
@@ -254,6 +255,284 @@ export function getProgressiveHint(
       },
     };
     return genericDPHints[tier];
+  }
+
+  // 2. Binary Search
+  if (allTags.some((t) => t.includes("binary search"))) {
+    const bsHints: Record<HintTierLevel, ProgressiveHint> = {
+      1: {
+        tier: 1,
+        title: "Optimization to Verification",
+        category: "OBSERVATION",
+        content:
+          "Can you flip the question? Instead of finding the exact optimal value directly, ask: 'Is it feasible to achieve value X?' If X is possible, are all larger (or smaller) values also possible?",
+        textbookCitation: {
+          book: "USACO Guide Silver",
+          chapter: "Binary Search on Answer / Monotonic Predicates",
+          learnSlug: "binary-search-answer",
+          invariant: "Monotonic predicate: P(x) transitions from False...False to True...True (or vice versa).",
+        },
+      },
+      2: {
+        tier: 2,
+        title: "Search Range Bounds & Invariant",
+        category: "ALGORITHM_PARADIGM",
+        content:
+          "Identify the minimum and maximum possible answer bounds [low, high]. Ensure `high` is large enough (often up to 10^14 or 10^18 for time/distance sums). Use `mid = low + (high - low) / 2` to prevent overflow.",
+        textbookCitation: {
+          book: "Principles of Algorithmic Problem Solving (Sannemo)",
+          chapter: "Chapter 5: Monotonic Predicate Search",
+          learnSlug: "binary-search-answer",
+        },
+      },
+      3: {
+        tier: 3,
+        title: "Feasibility Check (Predicate Implementation)",
+        category: "INVARIANT_PROOF",
+        content:
+          "Design a greedy or linear check function `bool check(long long x)`. In O(N) or O(N log N), verify whether target constraint `x` can be satisfied without violating problem limits.",
+        textbookCitation: {
+          book: "Competitive Programmer's Handbook (CPH)",
+          chapter: "Chapter 3: Binary Search on Monotone Functions",
+          learnSlug: "binary-search-answer",
+        },
+      },
+      4: {
+        tier: 4,
+        title: "Off-by-One Guardrails & Extreme Bounds",
+        category: "EDGE_CASES",
+        content:
+          "Watch out for: (1) `high` underestimation (check maximum constraints N * max_val); (2) 64-bit integer overflow in greedy check; (3) When answer is 0 or impossible.",
+        textbookCitation: {
+          book: "Competitive Programming 4 (CP4)",
+          chapter: "Book 1 Section 1.3: 64-bit Integer Overflow Guards",
+          learnSlug: "binary-search-answer",
+        },
+      },
+    };
+    return bsHints[tier];
+  }
+
+  // 3. Two Pointers / Sliding Window
+  if (allTags.some((t) => t.includes("two pointers") || t.includes("sliding window"))) {
+    const tpHints: Record<HintTierLevel, ProgressiveHint> = {
+      1: {
+        tier: 1,
+        title: "Monotonic Window Movement",
+        category: "OBSERVATION",
+        content:
+          "Does expanding the right pointer monotonically increase (or decrease) the window property? If all elements are non-negative, the subarray sum strictly grows as `r` moves right.",
+        textbookCitation: {
+          book: "USACO Guide Silver",
+          chapter: "Two Pointers: Subarray Sum Invariants",
+          learnSlug: "two-pointers",
+        },
+      },
+      2: {
+        tier: 2,
+        title: "Shrinking Condition",
+        category: "ALGORITHM_PARADIGM",
+        content:
+          "Define the exact condition that triggers the left pointer `l` to advance. As `r` moves right one step at a time, advance `l` in a while-loop until the window is valid again.",
+        textbookCitation: {
+          book: "Competitive Programmer's Handbook (CPH)",
+          chapter: "Chapter 8: Amortized Analysis & Two Pointers",
+          learnSlug: "two-pointers",
+          invariant: "Amortized O(N): Each pointer advances at most N times across the entire loop.",
+        },
+      },
+      3: {
+        tier: 3,
+        title: "Window Contribution Accounting",
+        category: "INVARIANT_PROOF",
+        content:
+          "When counting valid subarrays ending at `r`, every start index from `l` to `r` forms a valid subarray: `count += (r - l + 1)`. If tracking maximum length: `ans = max(ans, r - l + 1)`.",
+        textbookCitation: {
+          book: "Principles of Algorithmic Problem Solving (Sannemo)",
+          chapter: "Chapter 4: The Sliding Window Technique",
+          learnSlug: "two-pointers",
+        },
+      },
+      4: {
+        tier: 4,
+        title: "Empty Window & Reset Edge Cases",
+        category: "EDGE_CASES",
+        content:
+          "What if a single element is already invalid by itself? Ensure `l` can advance past `r` or the window can become empty safely without out-of-bounds array access.",
+        textbookCitation: {
+          book: "Competitive Programming 4 (CP4)",
+          chapter: "Book 1 Section 3.2: Complete Search & Two Pointers Pitfalls",
+          learnSlug: "two-pointers",
+        },
+      },
+    };
+    return tpHints[tier];
+  }
+
+  // 4. Greedy
+  if (allTags.some((t) => t.includes("greedy"))) {
+    const greedyHints: Record<HintTierLevel, ProgressiveHint> = {
+      1: {
+        tier: 1,
+        title: "Local Choice vs Global Optimum",
+        category: "OBSERVATION",
+        content:
+          "What order of processing simplifies decisions? Can you sort the elements by deadline, ratio, coordinate, or frequency? A greedy choice requires a total ordering.",
+        textbookCitation: {
+          book: "Introduction to Algorithms (CLRS)",
+          chapter: "Chapter 16: Greedy Algorithms",
+          learnSlug: "two-pointers",
+        },
+      },
+      2: {
+        tier: 2,
+        title: "Exchange Argument Intuition",
+        category: "ALGORITHM_PARADIGM",
+        content:
+          "Imagine an optimal solution that differs from your greedy choice. If you swap its first decision with your greedy decision, does the solution get worse? If not, greedy is optimal.",
+        textbookCitation: {
+          book: "Competitive Programmer's Handbook (CPH)",
+          chapter: "Chapter 6: Greedy Algorithms & Sorting",
+          learnSlug: "two-pointers",
+          invariant: "Exchange Argument: Swapping any inversion preserves or improves the objective value.",
+        },
+      },
+      3: {
+        tier: 3,
+        title: "Data Structure Acceleration",
+        category: "INVARIANT_PROOF",
+        content:
+          "If your greedy step repeatedly needs the 'current smallest' or 'current largest' compatible element, use a `std::priority_queue` or `std::multiset` to achieve O(log N) per step instead of O(N).",
+        textbookCitation: {
+          book: "Principles of Algorithmic Problem Solving (Sannemo)",
+          chapter: "Chapter 3: Priority Queues in Greedy Strategies",
+          learnSlug: "dsu",
+        },
+      },
+      4: {
+        tier: 4,
+        title: "Ties and Anti-Greedy Traps",
+        category: "EDGE_CASES",
+        content:
+          "How are ties broken? (e.g. elements with identical endpoints or values). Check if equal values need secondary sorting keys or if counter-examples exist on small cases.",
+        textbookCitation: {
+          book: "Competitive Programming 4 (CP4)",
+          chapter: "Book 1 Section 3.4: Greedy Pitfalls",
+          learnSlug: "two-pointers",
+        },
+      },
+    };
+    return greedyHints[tier];
+  }
+
+  // 5. Graphs (BFS, DFS, Dijkstra, Trees)
+  if (allTags.some((t) => t.includes("graphs") || t.includes("dfs") || t.includes("trees"))) {
+    const graphHints: Record<HintTierLevel, ProgressiveHint> = {
+      1: {
+        tier: 1,
+        title: "Graph Modeling & State Abstraction",
+        category: "OBSERVATION",
+        content:
+          "What represent vertices and what represent edges? In competitive programming, a vertex is not just an object—it can be a pair `(node, state)` or `(node, parity)`.",
+        textbookCitation: {
+          book: "USACO Guide Silver",
+          chapter: "Graph Traversals (BFS & DFS)",
+          learnSlug: "bfs-dfs",
+        },
+      },
+      2: {
+        tier: 2,
+        title: "Traversal Paradigm Selection",
+        category: "ALGORITHM_PARADIGM",
+        content:
+          "Unweighted shortest path? Use BFS with queue. Edge weights are strictly 0 or 1? Use 0-1 BFS with deque. General positive weights? Use Dijkstra with priority queue. Tree topology? Use DFS post-order.",
+        textbookCitation: {
+          book: "Competitive Programmer's Handbook (CPH)",
+          chapter: "Chapter 12-13: Shortest Paths & Graph Algorithms",
+          learnSlug: "dijkstra",
+        },
+      },
+      3: {
+        tier: 3,
+        title: "Visited Array Invariant",
+        category: "INVARIANT_PROOF",
+        content:
+          "Mark nodes visited when pushing to the queue (not when popping!) in BFS to prevent inserting nodes exponentially many times. For Dijkstra, skip stale distance entries: `if (d > dist[u]) continue;`.",
+        textbookCitation: {
+          book: "Introduction to Algorithms (CLRS)",
+          chapter: "Chapter 22-24: Elementary Graph Algorithms",
+          learnSlug: "bfs-dfs",
+        },
+      },
+      4: {
+        tier: 4,
+        title: "Disconnected Components & 1-Based Indexing",
+        category: "EDGE_CASES",
+        content:
+          "Ensure your graph search handles disconnected components (loop `i = 1..N` checking `!visited[i]`). Watch for 1-based vs 0-based node indexing and 64-bit distance arrays.",
+        textbookCitation: {
+          book: "Principles of Algorithmic Problem Solving (Sannemo)",
+          chapter: "Chapter 6: Graphs & Boundary Conditions",
+          learnSlug: "bfs-dfs",
+        },
+      },
+    };
+    return graphHints[tier];
+  }
+
+  // 6. Data Structures (Segment Trees, DSU, Fenwick)
+  if (allTags.some((t) => t.includes("data structures") || t.includes("dsu"))) {
+    const dsHints: Record<HintTierLevel, ProgressiveHint> = {
+      1: {
+        tier: 1,
+        title: "Dynamic Query Invariant",
+        category: "OBSERVATION",
+        content:
+          "Notice if updates and queries are interleaved. If the array is modified dynamically between queries, static prefix sums fail. What associative operation is being queried?",
+        textbookCitation: {
+          book: "USACO Guide Gold",
+          chapter: "Point Update Range Queries",
+          learnSlug: "segment-tree",
+        },
+      },
+      2: {
+        tier: 2,
+        title: "Data Structure Selection",
+        category: "ALGORITHM_PARADIGM",
+        content:
+          "Connected components or equivalence classes? Use DSU with path compression. Point update + range sum/min/max? Use Segment Tree (4N size). Range updates? Add Lazy Propagation.",
+        textbookCitation: {
+          book: "Competitive Programmer's Handbook (CPH)",
+          chapter: "Chapter 9: Segment Trees & Range Queries",
+          learnSlug: "segment-tree",
+        },
+      },
+      3: {
+        tier: 3,
+        title: "Monoid / Associativity Proof",
+        category: "INVARIANT_PROOF",
+        content:
+          "Ensure the merge operation `combine(left, right)` satisfies associativity: `(a * b) * c = a * (b * c)`. For Range Minimum Queries, identity element is INF; for sum, identity is 0.",
+        textbookCitation: {
+          book: "Introduction to Algorithms (CLRS)",
+          chapter: "Chapter 14: Augmenting Data Structures",
+          learnSlug: "segment-tree",
+        },
+      },
+      4: {
+        tier: 4,
+        title: "Memory Sizing & 4N Bound",
+        category: "EDGE_CASES",
+        content:
+          "In recursive segment trees, allocate `4 * N` elements. For DSU, initialize `parent[i] = i` and `size[i] = 1`. In sum trees, use `long long` to prevent 32-bit overflow.",
+        textbookCitation: {
+          book: "Competitive Programming 4 (CP4)",
+          chapter: "Book 1 Section 2.4: Range Query Traps",
+          learnSlug: "segment-tree",
+        },
+      },
+    };
+    return dsHints[tier];
   }
 
   // Default General CP Hint

@@ -12,6 +12,7 @@ import {
   CFProblemSchema,
   CFProblem,
 } from "./cf-schemas";
+import { CODEFORCES_REQUEST_HEADERS } from "./cf-headers";
 
 export class CodeforcesAPIError extends Error {
   constructor(
@@ -90,10 +91,7 @@ export class CodeforcesClient {
         const timeoutId = setTimeout(() => controller.abort(), this.timeoutMs);
 
         const response = await fetch(url.toString(), {
-          headers: {
-            "User-Agent": "CP-Intelligence-Platform/1.0 (+https://github.com/cp-intelligence)",
-            Accept: "application/json",
-          },
+          headers: CODEFORCES_REQUEST_HEADERS,
           signal: controller.signal,
         });
 

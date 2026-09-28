@@ -30,7 +30,8 @@ export async function POST(req: NextRequest) {
       },
     };
 
-    const reply = await generateMentorResponse(messages, userContext, persona);
+    const apiKey = req.headers.get("x-ai-api-key") || body.apiKey || undefined;
+    const reply = await generateMentorResponse(messages, userContext, persona, apiKey);
 
     return NextResponse.json({
       reply,

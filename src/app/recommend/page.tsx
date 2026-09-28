@@ -18,6 +18,7 @@ import {
   Award,
   CheckCircle2,
   BookOpen,
+  Bot,
 } from "lucide-react";
 import {
   RecommendationCategory,
@@ -281,15 +282,25 @@ function RecommendationsContent() {
                     ))}
                   </div>
 
-                  <a
-                    href={rec.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-sky-600 hover:bg-sky-500 text-white transition-all flex items-center gap-1.5 shadow-sm"
-                  >
-                    <span>Practice</span>
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
+                  <div className="flex items-center gap-2">
+                    <Link
+                      href={`/mentor?problem=${encodeURIComponent(rec.url)}`}
+                      className="px-3 py-1.5 rounded-xl text-xs font-bold bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 transition-all flex items-center gap-1.5 shadow-xs"
+                      title="Open problem in AI Mentor Studio"
+                    >
+                      <Bot className="w-3 h-3 text-sky-600" />
+                      <span>Mentor</span>
+                    </Link>
+                    <a
+                      href={rec.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-sky-600 hover:bg-sky-500 text-white transition-all flex items-center gap-1.5 shadow-sm"
+                    >
+                      <span>Practice</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </div>
                 </div>
               </div>
             );

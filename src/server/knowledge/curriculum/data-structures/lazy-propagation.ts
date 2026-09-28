@@ -26,40 +26,182 @@ export const lazyPropagationConcept: ConceptNode = {
         "A push() function must always be called before descending into children during both update() and query(). This guarantees child nodes always have fresh, consistent state.",
     },
   ],
-  conceptualTheory: `### The Deferral Invariant & Tag Composition
+  conceptualTheory: `## Segment Tree with Lazy Propagation: A Complete Textbook Chapter
 
-#### 1. Why Naive Range Updates Are $O(N)$
-In a standard Segment Tree, updating every element in $[L, R]$ requires visiting every leaf in that interval. For an update of width $N$, this touches $O(N)$ nodes, degrading performance to that of a naive loop.
+### The Range Update Bottleneck: Why Standard Segment Trees Fail
+
+In a standard Segment Tree, updating a single element takes $O(\log N)$ time by traversing from the leaf to the root.
+Now consider the problem of a **Range Update**:
+*"Add $V$ to every element in the subsegment $A[L \dots R]$."*
+
+If we perform this naively by executing $R - L + 1$ individual point updates:
+- For an update of width $N$ (e.g. $[0, N-1]$), we must visit every leaf in the tree.
+- Touching all $N$ leaves takes $O(N \log N)$ or $O(N)$ time.
+- If a problem has $Q = 10^5$ range updates, the naive approach takes:
+  $$O(Q \times N) \approx 10^5 \times 10^5 = 10^{10} \text{ operations (TLE!)}$$
+
+Even if we try to modify internal nodes directly, if we don't update their children, future queries that descend into those children will read **stale, outdated data**.
+How can we update entire ranges in $O(\log N)$ time while guaranteeing that every subsequent query receives fresh, correct values?
+The answer is **Lazy Propagation (Deferred Evaluation)**.
 
 ---
 
-#### 2. The Lazy Invariant
-When an update completely encloses a node's interval $[\\text{start}, \\text{end}] \\subseteq [l, r]$:
-1. Update the node's aggregate summary immediately:
-   $$\\text{tree}[\\text{node}] += (\\text{end} - \\text{start} + 1) \\cdot \\text{val}$$
-2. If this node is not a leaf, mark the pending delta in its lazy tag:
-   $$\\text{lazy}[\\text{node}] += \\text{val}$$
-3. Return immediately!
+### The Core Intuition: "Sticky Notes & IOU Promises"
+
+Lazy Propagation is based on a simple, brilliant real-world principle:
+> **"Never do work until you are forced to do it."**
+
+#### The School Principal Analogy
+Imagine a school with 1,000 students divided into classes:
+- If the principal decides every student gets +5 homework assignments:
+  - **Naive method**: The principal walks to all 1,000 desks individually (takes all day).
+  - **Lazy method**: The principal puts a sticky note on the 2 grade directors' doors: *"Add +5 homework to everyone in your grade."* The principal then returns to work immediately!
+  - When does the note get passed down? **Only when a specific teacher arrives asking for student records.** At that exact moment, the director passes the note down to the teacher, applies the +5 to their files, and discards their own note!
+
+#### In Segment Tree Terms:
+When an update range $[L, R]$ completely encloses a node's interval $[start, end]$:
+1. We compute and update the node's aggregate value **immediately**:
+   $$\text{tree}[u] \mathrel{+}= (end - start + 1) \times V$$
+2. Instead of recursing into its children, we record an **IOU tag** in a separate array:
+   $$\text{lazy}[u] \mathrel{+}= V$$
+3. **We return immediately without visiting the children!**
+
+Because any range $[L, R]$ decomposes into at most $2 \times \lceil \log_2 N \rceil$ canonical nodes in the tree, we only touch $O(\log N)$ nodes during the update. The children are left untouched until a future query or update actually needs to inspect them!
 
 ---
 
-#### 3. The Push-Down Protocol
-Before recursing into children (during both updates and queries):
-\`\`\`
+### The Two Core Protocols: Push Down and Pull Up
+
+The correctness of Lazy Propagation hinges on two fundamental routines:
+
+#### 1. The Push-Down Protocol (\`push\`)
+Whenever an operation (either \`update\` or \`query\`) needs to **descend into the children** of node $u$, it must first ensure that the children have up-to-date state by pushing down any pending lazy tags from parent $u$:
+
+\`\`\`cpp
 void push(int node, int start, int end) {
-    if (lazy[node] != 0) {
-        int mid = start + (end - start) / 2;
-        // Apply tag to left child
-        tree[2*node] += 1LL * (mid - start + 1) * lazy[node];
-        lazy[2*node] += lazy[node];
-        // Apply tag to right child
-        tree[2*node+1] += 1LL * (end - mid) * lazy[node];
-        lazy[2*node+1] += lazy[node];
-        // Clear parent tag
-        lazy[node] = 0;
-    }
+    if (lazy[node] == 0) return; // No pending tag
+    
+    int mid = start + (end - start) / 2;
+    long long tag = lazy[node];
+    
+    // 1. Pass tag to left child (node * 2) covering [start, mid]
+    tree[2 * node] += (mid - start + 1) * tag;
+    lazy[2 * node] += tag;
+    
+    // 2. Pass tag to right child (node * 2 + 1) covering [mid + 1, end]
+    tree[2 * node + 1] += (end - mid) * tag;
+    lazy[2 * node + 1] += tag;
+    
+    // 3. Clear the parent's tag (promise fulfilled!)
+    lazy[node] = 0;
 }
-\`\`\``,
+\`\`\`
+
+**Critical Rule**:
+You must call \`push()\` **before** recursing into child nodes in BOTH:
+- \`rangeUpdate(node, start, end, l, r, val)\`
+- \`rangeQuery(node, start, end, l, r)\`
+
+If you forget to call \`push()\` in \`rangeQuery\`, the query will read stale data from child nodes whose parents had pending modifications!
+
+#### 2. The Pull-Up Protocol (\`pull\`)
+After returning from child recursive calls, the parent's aggregate value must be recalculated from its newly updated children:
+\`\`\`cpp
+void pull(int node) {
+    tree[node] = combine(tree[2 * node], tree[2 * node + 1]);
+}
+\`\`\`
+
+---
+
+### Tag Composition Algebra: Handling Multiple Overlapping Updates
+
+What happens when a node that ALREADY has a pending lazy tag receives another update before its tag was pushed down?
+The new update must **compose** with the existing tag. Depending on the operations, the algebra of tag composition differs:
+
+#### 1. Range Addition Only
+- Formula: $\text{lazy}[u] \mathrel{+}= \text{new\_val}$
+- Associative and commutative: order of additions does not matter.
+
+#### 2. Range Assignment (Set all elements in $[L, R] = X$)
+- When a node receives an assignment tag $X$, it **completely overwrites** whatever previous value was there.
+- **Trap**: You cannot use \`lazy[u] == 0\` as a sentinel for "no pending tag", because setting values to \`0\` is a valid assignment!
+- **Solution**: Maintain a boolean array \`has_lazy[u]\`:
+\`\`\`cpp
+void applySet(int node, int start, int end, long long val) {
+    tree[node] = (end - start + 1) * val;
+    lazy[node] = val;
+    has_lazy[node] = true;
+}
+\`\`\`
+
+#### 3. Range Addition and Range Assignment Combined
+In problems with BOTH "Add $V$" and "Set to $X$":
+- An **Assignment** clears any previous addition:
+  \`has_set[u] = true; lazy_set[u] = X; lazy_add[u] = 0;\`
+- An **Addition** appends to whatever is currently there:
+  \`if (has_set[u]) lazy_set[u] += V; else lazy_add[u] += V;\`
+
+#### 4. Range Affine Transformations ($a \cdot x + b \pmod M$)
+The most general and elegant formulation represents every update as a linear function $f(x) = ax + b$:
+- "Multiply range by $C$": $f(x) = C \cdot x + 0$
+- "Add $D$ to range": $f(x) = 1 \cdot x + D$
+- "Set range to $S$": $f(x) = 0 \cdot x + S$
+
+When composing an existing tag $(a, b)$ with a new incoming tag $(c, d)$:
+$$g(f(x)) = c \cdot (a \cdot x + b) + d = (c \cdot a) x + (c \cdot b + d)$$
+Thus, the composite tag is simply:
+$$\text{tag}_{\text{new}} = (c \cdot a \pmod M, \ (c \cdot b + d) \pmod M)$$
+The identity tag is $(1, 0)$ since $1 \cdot x + 0 = x$.
+This single affine framework handles Range Add, Range Multiply, and Range Assignment all in one clean 15-line struct!
+
+---
+
+### Range Length Invariant: Sum vs Min/Max
+
+A frequent source of bugs is failing to account for how range width affects node values:
+
+| Query Type | Applying Pending Add Tag $V$ |
+|---|---|
+| **Range Sum** | $\text{tree}[u] \mathrel{+}= (\text{end} - \text{start} + 1) \times V$ (Each element in the segment increases by $V$) |
+| **Range Min** | $\text{tree}[u] \mathrel{+}= V$ (The minimum simply shifts up by $V$; **length does NOT multiply!**) |
+| **Range Max** | $\text{tree}[u] \mathrel{+}= V$ (The maximum simply shifts up by $V$; **length does NOT multiply!**) |
+
+---
+
+### Step-by-Step Execution Walkthrough
+
+Consider array $A = [0, 0, 0, 0]$ of size $N = 4$ supporting Range Add and Range Sum:
+
+1. **Initial State**: All \`tree\` and \`lazy\` nodes are 0.
+2. **Update 1: Add 3 to range $[0, 2]$**:
+   - Descend to $[0, 3]$ (root): partial overlap. Push down (no-op).
+   - Recurse left child $[0, 1]$: **completely inside $[0, 2]$!**
+     - $\text{tree}[2] \mathrel{+}= (1 - 0 + 1) \times 3 = 6$.
+     - $\text{lazy}[2] = 3$.
+     - Return immediately without visiting leaves $[0]$ and $[1]$!
+   - Recurse right child $[2, 3]$: partial overlap.
+     - Recurse into $[2, 2]$: **completely inside $[0, 2]$!**
+       - $\text{tree}[6] \mathrel{+}= (2 - 2 + 1) \times 3 = 3$.
+       - $\text{lazy}[6] = 3$.
+     - Recurse into $[3, 3]$: outside $[0, 2]$. Return.
+     - Pull up: $\text{tree}[3] = \text{tree}[6] + \text{tree}[7] = 3 + 0 = 3$.
+   - Pull up root: $\text{tree}[1] = \text{tree}[2] + \text{tree}[3] = 6 + 3 = 9$.
+3. **Query: Sum of range $[0, 1]$**:
+   - Root $[0, 3]$ partial overlap. Call \`push(1)\` (no-op).
+   - Left child $[0, 1]$ is **completely inside query $[0, 1]$**!
+   - Return $\text{tree}[2] = 6$ **instantly** without ever inspecting leaves $[0]$ and $[1]$!
+
+Notice how the leaves $[0]$ and $[1]$ still had raw values 0! The query never had to visit them because node $[0, 1]$ already held the exact precomputed aggregate of 6. This is the beauty and efficiency of lazy propagation.
+
+---
+
+### Contest Checklist & Anti-Bug Traps
+
+1. **Did you push on query?** Forgetting \`push()\` in \`query()\` is the #1 bug in lazy segment trees.
+2. **Don't push from leaves**: In \`push(node, start, end)\`, only push if $start \ne end$. Attempting to update children of a leaf node will write to out-of-bounds indices like $2 \times (4N)$!
+3. **64-bit precision**: When multiplying $(end - start + 1) \times V$, always cast to \`1LL\` to prevent 32-bit integer overflow before the multiplication.
+4. **Order of operations in tag assignment**: When applying a new tag to a child, update BOTH the child's value AND the child's lazy tag.`,
   variations: [
     {
       title: "Range Add, Range Sum",

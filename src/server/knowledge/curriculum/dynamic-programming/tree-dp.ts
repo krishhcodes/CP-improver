@@ -33,32 +33,213 @@ export const treeDPConcept: ConceptNode = {
         "Tree Knapsack (Subtree DP) merges child subtrees in O(N^2) rather than O(N^3) by bounding the inner convolution by the product of subtree sizes.",
     },
   ],
-  conceptualTheory: `### The 2-Pass Rerooting Architecture
+  conceptualTheory: `## Tree DP & Rerooting: A Complete Textbook Chapter
 
-#### 1. Pass 1: Bottom-Up Post-Order DFS
-Root the tree arbitrarily at node $1$.
-Compute for every node $u$:
-- $sz[u] = 1 + \\sum_{v \\in \\text{children}(u)} sz[v]$
-- $dp[u] = \\sum_{v \\in \\text{children}(u)} (dp[v] + sz[v])$ (Sum of distances from $u$ to all nodes in its subtree).
+### What Makes Tree DP Different from Linear DP?
+
+In standard Linear Dynamic Programming, states are typically indexed sequentially along an array:
+\`dp[i]\` depends on predecessors \`dp[i-1]\`, \`dp[i-2]\`, or a sliding prefix.
+
+A tree, however, has **hierarchical branching topology**:
+- There is no single "left-to-right" order.
+- Instead, a tree naturally decomposes into **nested subtrees**: removing any edge disconnects the tree into two independent subtrees.
+- If we root the tree arbitrarily at a vertex (conventionally vertex 1), every node $u$ defines a rooted subtree $T_u$ consisting of $u$ and all its descendants.
+
+#### The Bottom-Up Invariant (Post-Order Traversal)
+In Tree DP, **a parent's state depends strictly on the states of its children**:
+$$\text{dp}[u] = \text{combine}(\text{dp}[v_1], \text{dp}[v_2], \dots, \text{dp}[v_k])$$
+Therefore, we evaluate the tree in **Post-Order Traversal**:
+1. Recurse into all children first.
+2. When the recursion backtracks from child $v$ to parent $u$, the child's subtree $T_v$ is completely solved.
+3. Compute $\text{dp}[u]$ using the finalized child states.
+A simple recursive Depth-First Search (DFS) naturally implements this post-order evaluation order!
 
 ---
 
-#### 2. Pass 2: Top-Down Pre-Order Rerooting DFS
-When moving the root from parent $u$ to child $v$:
-- The distance to all nodes in $v$'s subtree decreases by $1$: $-sz[v]$.
-- The distance to all nodes outside $v$'s subtree increases by $1$: $+(N - sz[v])$.
-- **Rerooting Formula**:
-  $$\\text{ans}[v] = \\text{ans}[u] - sz[v] + (N - sz[v]) = \\text{ans}[u] + N - 2 \\cdot sz[v]$$
-This allows answering queries for **all $N$ potential roots** in strictly $O(N)$ total time!
+### Archetype 1: Subtree Optimizations (Diameter & Maximum Path)
+
+#### Classic Problem: Tree Diameter (Longest Simple Path in a Tree)
+Given an unweighted tree of $N$ vertices, find the length of the longest path between any two vertices.
+
+#### State Definition
+At each node $u$:
+Let $\text{down}[u]$ be the length of the longest simple path starting at $u$ and going **downward** into the subtree of $u$.
+
+#### Base Case & Recurrence
+- If $u$ is a leaf node: $\text{down}[u] = 0$.
+- For an internal node $u$ with children $v_1, v_2, \dots$:
+  $$\text{down}[u] = 1 + \max_{v \in \text{children}(u)} \text{down}[v]$$
+
+#### Finding the Diameter
+The longest path in the entire tree has a unique highest node (its Lowest Common Ancestor $u$):
+- Either the path passes THROUGH $u$: it comes up from one child subtree, reaches $u$, and goes down into another child subtree.
+- Its length is the sum of the **two longest downward paths** among all children of $u$:
+  $$\text{path\_through}(u) = \text{longest\_child}(u) + \text{second\_longest\_child}(u) + 2$$
+- The overall tree diameter is simply:
+  $$\text{Diameter} = \max_{u \in V} \text{path\_through}(u)$$
+
+\`\`\`cpp
+int diameter = 0;
+int dfs(int u, int p) {
+    int max1 = 0, max2 = 0;
+    for (int v : adj[u]) {
+        if (v == p) continue;
+        int d = 1 + dfs(v, u);
+        if (d > max1) { max2 = max1; max1 = d; }
+        else if (d > max2) { max2 = d; }
+    }
+    diameter = max(diameter, max1 + max2);
+    return max1;
+}
+\`\`\`
+**Runtime**: Exactly one DFS visit per vertex and edge: strictly $O(N)$!
 
 ---
 
-#### 3. General In-Out / Prefix-Suffix Rerooting
-For general non-invertible operations (e.g. maximum, gcd):
-To compute the rerooted answer without inverse operations:
-1. For each node $u$, compute prefix and suffix combinations of child answers:
-   $$\\text{pref}[i] = \\bigotimes_{j=0}^i \\text{child}[j], \\quad \\text{suff}[i] = \\bigotimes_{j=i}^k \\text{child}[j]$$
-2. When transitioning to child $i$, the excluded context is $\\text{pref}[i-1] \\otimes \\text{suff}[i+1] \\otimes \\text{up}[u]$.`,
+### Archetype 2: Subtree Subset Selection (Maximum Independent Set)
+
+#### Classic Problem: House Robber on a Tree
+Given a tree where each node $u$ has value $val[u]$, choose a subset of nodes with maximum total value such that **no two chosen nodes are directly connected by an edge**.
+
+#### The 2-State Recurrence
+For each node $u$, we maintain two mutually exclusive states:
+1. $\text{dp}[u][0]$: Maximum value in subtree $T_u$ given that node $u$ is **NOT chosen**.
+2. $\text{dp}[u][1]$: Maximum value in subtree $T_u$ given that node $u$ **IS chosen**.
+
+#### State Transitions
+- **If node $u$ is NOT chosen ($	ext{dp}[u][0]$)**:
+  Its children can either be chosen or not chosen — each child $v$ independently picks whichever yields the greater value!
+  $$\text{dp}[u][0] = \sum_{v \in \text{children}(u)} \max(\text{dp}[v][0], \ \text{dp}[v][1])$$
+- **If node $u$ IS chosen ($	ext{dp}[u][1]$)**:
+  Because adjacent nodes cannot both be chosen, **NONE of $u$'s children can be chosen**! Every child $v$ is forced into state $\text{dp}[v][0]$:
+  $$\text{dp}[u][1] = val[u] + \sum_{v \in \text{children}(u)} \text{dp}[v][0]$$
+
+#### Final Answer
+$$\max(\text{dp}[\text{root}][0], \ \text{dp}[\text{root}][1])$$
+**Runtime**: $O(N)$ time and $O(N)$ space.
+
+---
+
+### Archetype 3: The Rerooting Technique (All-Roots Tree DP)
+
+#### The Problem That Breaks Naive Tree DP
+Suppose a problem asks:
+> *"For **EACH** vertex $u \in \{1, \dots, N\}$, find the sum of distances from $u$ to all other vertices in the tree."* ($N = 2 \times 10^5$)
+
+- **Naive approach**: Run a separate DFS from each of the $N$ nodes as root.
+  $$\text{Total Time} = N \times O(N) = O(N^2) \approx (2 \times 10^5)^2 = 4 \times 10^{10} \text{ operations (TLE!)}$$
+- **Rerooting Technique**: Solves this for ALL $N$ vertices simultaneously in strictly **$O(N)$ time**!
+
+---
+
+### The 2-Pass Rerooting Protocol (In Depth)
+
+Rerooting solves all-roots problems using two complementary DFS passes:
+1. **Pass 1 (Bottom-Up Post-Order)**: Root the tree arbitrarily at vertex 1. Compute subtree sizes $sz[u]$ and subtree metrics for root 1.
+2. **Pass 2 (Top-Down Pre-Order)**: Push the root answers down to children in $O(1)$ per edge!
+
+#### Mathematical Derivation of the Transition Formula
+Let $ans[u]$ be the sum of distances from node $u$ to all nodes in the tree.
+Suppose we know $ans[u]$, and we want to compute $ans[v]$ for a neighbor child $v$:
+When the root moves from $u$ across edge $(u, v)$ to $v$:
+1. **Nodes in $v$'s subtree ($sz[v]$ nodes)**:
+   Every node in the subtree of $v$ is now **1 step CLOSER** to the new root $v$.
+   Contribution: $-sz[v]$
+2. **Nodes outside $v$'s subtree ($N - sz[v]$ nodes)**:
+   Every node outside $v$'s subtree was previously connected to $u$. To reach $v$, they must now travel across the edge $(u, v)$, making them **1 step FARTHER**.
+   Contribution: $+(N - sz[v])$
+
+Summing both contributions yields the famous **Rerooting Distance Formula**:
+$$ans[v] = ans[u] - sz[v] + (N - sz[v]) = ans[u] + N - 2 \times sz[v]$$
+
+Because $N$ and $sz[v]$ are precomputed, computing $ans[v]$ from $ans[u]$ takes strictly **$O(1)$ time**!
+
+\`\`\`cpp
+// Pass 1: Bottom-up subtree sizes and root-1 distance sum
+void dfs1(int u, int p, int depth) {
+    sz[u] = 1;
+    ans[1] += depth;
+    for (int v : adj[u]) {
+        if (v == p) continue;
+        dfs1(v, u, depth + 1);
+        sz[u] += sz[v];
+    }
+}
+
+// Pass 2: Top-down rerooting transfer
+void dfs2(int u, int p) {
+    for (int v : adj[u]) {
+        if (v == p) continue;
+        // O(1) state transfer
+        ans[v] = ans[u] + n - 2 * sz[v];
+        dfs2(v, u);
+    }
+}
+\`\`\`
+Total execution time: exactly two $O(N)$ DFS passes = strictly $O(N)$!
+
+---
+
+### Archetype 4: Non-Invertible Rerooting via Prefix-Suffix Merging
+
+In the distance sum problem, the aggregation operation was addition, which is **invertible** (we could subtract child $v$'s contribution).
+What if the aggregation is **NOT invertible**?
+For example:
+- Finding the maximum distance to any node (operation is $\max$). You cannot "un-max" a value!
+- Multiplying probabilities or weights under non-prime modulo $M$ (division by zero or non-coprime numbers is undefined).
+
+#### The Prefix-Suffix Solution
+For each node $u$ with children $v_1, v_2, \dots, v_k$:
+To compute what $u$ contributes to child $v_i$ when $v_i$ becomes the new root:
+1. We need the aggregate of all children of $u$ **EXCEPT $v_i$**, merged with the parent contribution from above $u$.
+2. Compute two auxiliary arrays across the list of children:
+   - $\text{pref}[i]$ = aggregate of children $v_1 \dots v_i$
+   - $\text{suff}[i]$ = aggregate of children $v_i \dots v_k$
+3. Then the contribution excluding child $v_i$ is simply:
+   $$\text{exclude}(v_i) = \text{combine}(\text{pref}[i - 1], \ \text{suff}[i + 1], \ \text{parent\_contrib})$$
+
+Because each child list of length $k$ takes $O(k)$ to build prefix/suffix tables, the sum over all nodes $\sum k = O(N)$. Non-invertible rerooting runs in strictly **$O(N)$ time**!
+
+---
+
+### Archetype 5: Tree Knapsack (Why It Is O(N²) and NOT O(N³))
+
+A common problem:
+*"Each node has weight $w[u]$ and value $val[u]$. Choose at most $K$ connected nodes in the tree to maximize total value."*
+
+Let $\text{dp}[u][j]$ be the maximum value in subtree $T_u$ using $j$ nodes.
+When merging child subtree $v$ of size $sz[v]$ into parent $u$ of current size $sz[u]$:
+\`\`\`cpp
+for (int j = min(k, sz[u]); j >= 0; j--) {
+    for (int c = 0; c <= min(k - j, sz[v]); c++) {
+        new_dp[j + c] = max(new_dp[j + c], dp[u][j] + dp[v][c]);
+    }
+}
+\`\`\`
+
+#### The Pair-Counting Proof of O(N²) Runtime
+At first glance, three nested loops (nodes $\times$ budget $\times$ budget) look like $O(N^3)$ or $O(N \cdot K^2)$.
+However, notice the bound:
+The inner double loop runs $sz[u] \times sz[v]$ iterations.
+What does $sz[u] \times sz[v]$ represent?
+**It represents the number of pairs of vertices $(x, y)$ such that $x \in T_u$ and $y \in T_v$!**
+Because every pair of vertices in a tree has a **unique Lowest Common Ancestor (LCA)**, each pair of vertices $(x, y)$ is considered in the inner loop **EXACTLY ONCE** across the entire algorithm — at the moment their subtrees are merged at their LCA!
+Since there are $\binom{N}{2} = \frac{N(N - 1)}{2} = O(N^2)$ total pairs of vertices in the tree:
+$$\text{Total Operations} \le \sum_{\text{merges}} sz[u] \times sz[v] = \frac{N(N - 1)}{2} = O(N^2)$$
+When bounded by knapsack capacity $K$, the runtime reduces further to **$O(N \times K)$**!
+
+---
+
+### Contest Checklist & Tree DP Traps
+
+1. **Stack Overflow on Line Trees**:
+   A degenerated tree (a bamboo line graph of $N = 2 \times 10^5$) will recurse 200,000 frames deep. In C++, ensure the contest environment has sufficient stack size (Codeforces provides 256MB stack; on platforms with limited stack, use manual stack or BFS topological order). In Python, ALWAYS set \`sys.setrecursionlimit(300000)\`.
+2. **64-bit Distance Sums**:
+   On a line tree of $N = 2 \times 10^5$, the sum of distances from an endpoint is $\frac{N(N - 1)}{2} \approx 2 \times 10^{10}$, which overflows 32-bit signed integers. Always use \`long long\` for distance metrics.
+3. **Subtree Size Initialization**:
+   In \`dfs1\`, initialize \`sz[u] = 1\` (accounting for node $u$ itself) BEFORE iterating over children.
+4. **Undirected Edge Avoidance**:
+   Always pass the parent parameter \`p\` in \`dfs(u, p)\` and check \`if (v == p) continue;\` to prevent infinite cycling between parent and child.`,
   variations: [
     {
       title: "Tree Distances II (Sum of Distances to All Vertices)",

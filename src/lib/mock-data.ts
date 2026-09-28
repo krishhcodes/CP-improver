@@ -9,6 +9,251 @@ import {
   ContestAutopsy,
 } from "@/types";
 
+// ==========================================
+// AC_on_first_TRY Baseline (User's Handle: 994 Newbie)
+// ==========================================
+
+export const AC_PROFILE: CFProfile = {
+  handle: "AC_on_first_TRY",
+  rating: 994,
+  maxRating: 1137,
+  rank: "Newbie",
+  maxRank: "Newbie",
+  avatar: "https://userpic.codeforces.org/5896406/avatar/59fdd8229984320f.jpg",
+  contribution: 1,
+  lastSyncedAt: "Offline Baseline",
+  globalRankEstimate: 120000,
+};
+
+export const AC_PERFORMANCE_STATS: PerformanceStats = {
+  contestsCount: 14,
+  solvedCount: 53,
+  attemptedCount: 120,
+  successRate: 44.2,
+  avgSolvedRating: 873,
+  upsolveRate: 64.5,
+  bestRank: 6488,
+  avgRank: 9806,
+  currentStreakDays: 3,
+};
+
+export const AC_RATING_HISTORY: RatingPoint[] = [
+  { contestId: 1915, contestName: "Codeforces Round 918 (Div. 4)", rating: 780, oldRating: 0, ratingChange: 780, rank: 11200, date: "Dec 2024", timestampSeconds: 1735400000 },
+  { contestId: 1921, contestName: "Codeforces Round 920 (Div. 3)", rating: 840, oldRating: 780, ratingChange: 60, rank: 9850, date: "Jan 2025", timestampSeconds: 1736900000 },
+  { contestId: 1927, contestName: "Codeforces Round 925 (Div. 3)", rating: 895, oldRating: 840, ratingChange: 55, rank: 9120, date: "Feb 2025", timestampSeconds: 1739400000 },
+  { contestId: 1931, contestName: "Codeforces Round 928 (Div. 4)", rating: 955, oldRating: 895, ratingChange: 60, rank: 8430, date: "Feb 2025", timestampSeconds: 1740000000 },
+  { contestId: 1941, contestName: "Codeforces Round 933 (Div. 3)", rating: 920, oldRating: 955, ratingChange: -35, rank: 10450, date: "Mar 2025", timestampSeconds: 1741700000 },
+  { contestId: 1950, contestName: "Codeforces Round 937 (Div. 4)", rating: 990, oldRating: 920, ratingChange: 70, rank: 7920, date: "Mar 2025", timestampSeconds: 1743100000 },
+  { contestId: 1955, contestName: "Codeforces Round 938 (Div. 3)", rating: 1035, oldRating: 990, ratingChange: 45, rank: 7410, date: "Apr 2025", timestampSeconds: 1744000000 },
+  { contestId: 1971, contestName: "Codeforces Round 944 (Div. 4)", rating: 1105, oldRating: 1035, ratingChange: 70, rank: 6920, date: "May 2025", timestampSeconds: 1746800000 },
+  { contestId: 1985, contestName: "Codeforces Round 952 (Div. 4)", rating: 1137, oldRating: 1105, ratingChange: 32, rank: 6488, date: "Jun 2025", timestampSeconds: 1749600000 },
+  { contestId: 1986, contestName: "Codeforces Round 954 (Div. 3)", rating: 1090, oldRating: 1137, ratingChange: -47, rank: 8950, date: "Jun 2025", timestampSeconds: 1750700000 },
+  { contestId: 1992, contestName: "Codeforces Round 957 (Div. 3)", rating: 1055, oldRating: 1090, ratingChange: -35, rank: 9640, date: "Jul 2025", timestampSeconds: 1752200000 },
+  { contestId: 1999, contestName: "Codeforces Round 964 (Div. 4)", rating: 1078, oldRating: 1055, ratingChange: 23, rank: 8120, date: "Aug 2025", timestampSeconds: 1754400000 },
+  { contestId: 2008, contestName: "Codeforces Round 971 (Div. 4)", rating: 1030, oldRating: 1078, ratingChange: -48, rank: 9910, date: "Sep 2025", timestampSeconds: 1756900000 },
+  { contestId: 2009, contestName: "Codeforces Round 972 (Div. 2)", rating: 994, oldRating: 1030, ratingChange: -36, rank: 11400, date: "Oct 2025", timestampSeconds: 1758000000 },
+];
+
+export const AC_VERDICT_COUNTS: VerdictCount[] = [
+  { verdict: "Accepted", count: 53, percentage: 44.2, color: "#10b981" },
+  { verdict: "Wrong Answer", count: 45, percentage: 37.5, color: "#f43f5e" },
+  { verdict: "Time Limit Exceeded", count: 12, percentage: 10.0, color: "#f59e0b" },
+  { verdict: "Runtime Error", count: 6, percentage: 5.0, color: "#a855f7" },
+  { verdict: "Compilation Error", count: 4, percentage: 3.3, color: "#71717a" },
+];
+
+export const AC_UPSOLVE_PROBLEMS: UpsolveProblem[] = [
+  {
+    id: "2008-C",
+    contestId: 2008,
+    contestName: "Codeforces Round 971 (Div. 4)",
+    index: "C",
+    name: "The Legend of Freya the Frog",
+    rating: 1000,
+    tags: ["math", "greedy"],
+    failedAttempts: 2,
+    priority: "HIGH",
+    reason: "Attempted during Round 971 with WA on test 3. Target rating gap: +6 to your current 994.",
+    url: "https://codeforces.com/contest/2008/problem/C",
+  },
+  {
+    id: "2009-B",
+    contestId: 2009,
+    contestName: "Codeforces Round 972 (Div. 2)",
+    index: "B",
+    name: "The Strict Teacher",
+    rating: 1100,
+    tags: ["binary search", "greedy", "math"],
+    failedAttempts: 1,
+    priority: "HIGH",
+    reason: "Missed in Round 972. Coordinate midpoints and greedy teacher movement will unlock Pupil rating.",
+    url: "https://codeforces.com/contest/2009/problem/B",
+  },
+  {
+    id: "1999-D",
+    contestId: 1999,
+    contestName: "Codeforces Round 964 (Div. 4)",
+    index: "D",
+    name: "Slavic's Exam",
+    rating: 1000,
+    tags: ["greedy", "strings", "two pointers"],
+    failedAttempts: 2,
+    priority: "MEDIUM",
+    reason: "Subsequence greedy pointer matching. High frequency pattern in Div. 3 / Div. 4 contests.",
+    url: "https://codeforces.com/contest/1999/problem/D",
+  },
+];
+
+export const AC_TOPIC_WEAKNESSES: TopicWeakness[] = [
+  {
+    tag: "implementation",
+    proficiencyScore: 58,
+    weaknessScore: 42,
+    solvedCount: 24,
+    failedCount: 16,
+    avgRating: 850,
+    status: "NEEDS_WORK",
+    actionRecommendation: "Watch out for boundary off-by-one errors and 1-based indexing in array loops.",
+  },
+  {
+    tag: "math",
+    proficiencyScore: 48,
+    weaknessScore: 56,
+    solvedCount: 14,
+    failedCount: 15,
+    avgRating: 900,
+    status: "CRITICAL",
+    actionRecommendation: "Practice integer division ceilings, modulo arithmetic, and basic parity reasoning.",
+  },
+  {
+    tag: "greedy",
+    proficiencyScore: 62,
+    weaknessScore: 38,
+    solvedCount: 18,
+    failedCount: 11,
+    avgRating: 920,
+    status: "STABLE",
+    actionRecommendation: "Good instinct on sorting and prefix sums. Practice 2-pointer greedy scanning.",
+  },
+  {
+    tag: "brute force",
+    proficiencyScore: 66,
+    weaknessScore: 34,
+    solvedCount: 15,
+    failedCount: 8,
+    avgRating: 880,
+    status: "STRONG",
+    actionRecommendation: "Reliable complete search on small constraints (N <= 1000).",
+  },
+  {
+    tag: "strings",
+    proficiencyScore: 44,
+    weaknessScore: 60,
+    solvedCount: 8,
+    failedCount: 12,
+    avgRating: 950,
+    status: "CRITICAL",
+    actionRecommendation: "Work on palindrome checks, character frequency maps, and string tokenization.",
+  },
+];
+
+export const AC_RECENT_SUBMISSIONS: Submission[] = [
+  {
+    id: "281014520",
+    problemIndex: "B",
+    problemName: "The Strict Teacher (Easy)",
+    problemRating: 1000,
+    contestId: 2009,
+    verdict: "WRONG_ANSWER",
+    language: "GNU C++20 (64)",
+    runtimeMs: 62,
+    memoryKb: 2100,
+    submittedAtSeconds: 1758004200,
+    tags: ["greedy", "math"],
+  },
+  {
+    id: "281011240",
+    problemIndex: "A",
+    problemName: "Simple Palindrome",
+    problemRating: 800,
+    contestId: 2009,
+    verdict: "OK",
+    language: "GNU C++20 (64)",
+    runtimeMs: 31,
+    memoryKb: 1400,
+    submittedAtSeconds: 1758001200,
+    tags: ["greedy", "strings"],
+  },
+  {
+    id: "280854210",
+    problemIndex: "C",
+    problemName: "The Legend of Freya the Frog",
+    problemRating: 1000,
+    contestId: 2008,
+    verdict: "WRONG_ANSWER",
+    language: "GNU C++20 (64)",
+    runtimeMs: 46,
+    memoryKb: 1800,
+    submittedAtSeconds: 1756905100,
+    tags: ["math", "greedy"],
+  },
+  {
+    id: "280851120",
+    problemIndex: "B",
+    problemName: "Square or Not",
+    problemRating: 800,
+    contestId: 2008,
+    verdict: "OK",
+    language: "GNU C++20 (64)",
+    runtimeMs: 31,
+    memoryKb: 1600,
+    submittedAtSeconds: 1756902200,
+    tags: ["implementation", "math"],
+  },
+  {
+    id: "280848900",
+    problemIndex: "A",
+    problemName: "Sakurako's Exam",
+    problemRating: 800,
+    contestId: 2008,
+    verdict: "OK",
+    language: "GNU C++20 (64)",
+    runtimeMs: 15,
+    memoryKb: 1200,
+    submittedAtSeconds: 1756900800,
+    tags: ["math"],
+  },
+];
+
+export const AC_CONTEST_AUTOPSY: ContestAutopsy = {
+  contestId: 2009,
+  contestName: "Codeforces Round 972 (Div. 2)",
+  date: "Oct 12, 2025",
+  rank: 11400,
+  ratingChange: -36,
+  solvedProblems: ["A"],
+  failedProblems: ["B"],
+  missedProblems: ["C", "D"],
+  insights: {
+    wentWell: [
+      "Problem A solved in 8 minutes with 0 wrong submissions using vowel round-robin distribution.",
+      "Fast comprehension of problem statements.",
+    ],
+    wentWrong: [
+      "Spent 45 minutes on Problem B debugging off-by-one ceiling division for teacher distances.",
+      "Accumulated WA penalties by not checking edge case where query student is outside both teachers.",
+    ],
+    actionItems: [
+      "Upsolve Problem B immediately to solidify coordinate distance clamping.",
+      "Practice 1000-rated Div. 2 B math problems to break into Pupil tier.",
+    ],
+  },
+};
+
+// ==========================================
+// Alex_Algo Baseline (Demo Handle: 1748 Expert)
+// ==========================================
+
 export const MOCK_PROFILE: CFProfile = {
   handle: "Alex_Algo",
   rating: 1748,

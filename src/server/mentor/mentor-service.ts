@@ -73,6 +73,68 @@ function generateDeterministicMentorReply(
     return `### 🎯 Strategic Training Assessment for ${context.handle} (Rating: ${context.rating})\n\nBased on your historical submission telemetry:\n\n- **Primary Blindspot**: **${weakest}** (estimated proficiency below target rating).\n- **Prescription**: Focus your next 3 training sessions on problems rated **${context.rating - 100} to ${context.rating + 100}** tagged with \`${weakest.toLowerCase()}\`.\n- **Tactical Rule**: Do not look at editorials before 30 minutes of active scratchpad derivation. If stuck, request Tier 1 hints rather than full code solutions.${guideNotice}`;
   }
 
+  // 5. Concept & Theory Teaching (e.g. "teach two pointer method", "explain binary search", "how does DSU work")
+  if (
+    queryLower.includes("two pointer") ||
+    queryLower.includes("sliding window")
+  ) {
+    return `### 🎯 Two Pointers & Sliding Window Method (USACO Guide Silver & CPH Ch 8)
+
+The **Two Pointers technique** optimizes brute-force $O(N^2)$ nested subarray searches down to **$O(N)$ linear time** by exploiting **monotonicity**.
+
+#### 🔑 The Core Invariant
+If advancing the right pointer $r$ strictly increases a condition (e.g., subarray sum of non-negative integers), then when the window violates the constraint, advancing the left pointer $l$ is strictly guaranteed to restore validity. Because $l$ and $r$ only advance forward and never move backward, each element is visited at most twice ($2N$ operations total).
+
+#### 🛠️ Standard Monotonic Window Pattern
+\`\`\`cpp
+int l = 0, currentSum = 0, maxLen = 0;
+for (int r = 0; r < n; r++) {
+    currentSum += a[r]; // 1. Expand right boundary
+    
+    // 2. Shrink left boundary while invariant is violated
+    while (currentSum > target && l <= r) {
+        currentSum -= a[l];
+        l++;
+    }
+    
+    // 3. Update answer with valid window [l, r]
+    maxLen = max(maxLen, r - l + 1);
+}
+\`\`\`
+
+#### 📚 Textbook References & Practice
+- **Curriculum Guide**: [Interactive Two Pointers & Sliding Window Chapter](/learn/two-pointers)
+- **Literature**: *Competitive Programmer's Handbook (CPH)* Chapter 8; *USACO Guide Silver*.
+- **Classic Problems**: [CF 279B: Books](https://codeforces.com/contest/279/problem/B), [CF 371C: Hamburgers](https://codeforces.com/contest/371/problem/C).`;
+  }
+
+  if (queryLower.includes("binary search")) {
+    return `### 🎯 Binary Search on Answer / Monotonic Predicates (Sannemo Ch 5 & USACO Guide)
+
+When directly computing an optimal value is difficult, check if you can verify feasibility in polynomial time: **Can we achieve value $X$?**
+
+#### 🔑 The Monotonic Predicate Invariant
+A predicate $P(X)$ is monotonic if $P(X) = \\text{true}$ implies $P(X') = \\text{true}$ for all $X' \\le X$ (or vice versa). This reduces an optimization problem into logarithmic decision steps.
+
+#### 🛠️ Canonical Binary Search Template
+\`\`\`cpp
+long long low = 1, high = 1e14, best = -1;
+while (low <= high) {
+    long long mid = low + (high - low) / 2; // Guard against 32-bit overflow!
+    if (checkFeasible(mid)) {
+        best = mid;
+        low = mid + 1; // Try to achieve larger answer
+    } else {
+        high = mid - 1;
+    }
+}
+\`\`\`
+
+#### 📚 Textbook References
+- **Curriculum Guide**: [Interactive Binary Search on Answer Chapter](/learn/binary-search-answer)
+- **Literature**: *Principles of Algorithmic Problem Solving (Sannemo)* Chapter 5; *CPH* Chapter 3.`;
+  }
+
   // Default Socratic conversational response
   if (persona === "STRICT_COACH") {
     return `Competitive programming rewards precision and algorithmic discipline, ${context.handle}. What specific problem or submission are we analyzing? State the constraints ($N$, time limit), your current theoretical hypothesis, and which [Curriculum Guide](/learn) you are referencing.`;
@@ -82,35 +144,23 @@ function generateDeterministicMentorReply(
 }
 
 /**
- * Dispatches query to Gemini Generative AI API if key is present,
- * or gracefully falls back to deterministic CP mentor engine.
+ * Builds the comprehensive Competitive Programming System Prompt.
  */
-export async function generateMentorResponse(
-  messages: MentorChatMessage[],
+function buildSystemInstruction(
   context: UserMentorContext,
-  persona: MentorPersona = "SOCRATIC"
-): Promise<string> {
-  const apiKey =
-    process.env.GEMINI_API_KEY ||
-    process.env.GOOGLE_GENERATIVE_AI_API_KEY ||
-    process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+  persona: MentorPersona
+): string {
+  const personaPrompt =
+    persona === "STRICT_COACH"
+      ? "You are a world-class ICPC Coach. Be concise, rigorous, demanding, and uncompromising on time/space complexity and submission discipline. Never write full code solutions unless explicitly requested. Always cite standard competitive programming literature (USACO Guide, CPH, CP4, CLRS, Sannemo) and direct users to internal guides like [Prefix Sums](/learn/prefix-sums), [Two Pointers](/learn/two-pointers), [Binary Search](/learn/binary-search-answer), [1D DP](/learn/1d-dp), [Segment Tree](/learn/segment-tree), [DSU](/learn/dsu), [Dijkstra](/learn/dijkstra)."
+      : persona === "DIAGNOSTICIAN"
+      ? "You are an expert CP Algorithm Diagnostician. Methodically break down complexity proofs, mathematical invariants, and error vectors. Cross-reference concepts with internal textbook guides at /learn/<slug> and standard literature (CPH, CP4, CLRS, USACO Guide)."
+      : "You are a Socratic Competitive Programming Mentor. Guide the user step-by-step with thoughtful leading questions, invariant hints, and nudge them to discover the algorithmic solution on their own. NEVER dump the final answer or full code upfront. When teaching a method or topic, explain the core invariant, provide clear templates, and cite relevant literature and internal guides at /learn/<slug>.";
 
-  const latestUserMessage =
-    messages.filter((m) => m.role === "user").pop()?.content || "Hello mentor!";
+  return `${personaPrompt}
 
-  // Live Gemini API path
-  if (apiKey) {
-    try {
-      const personaPrompt =
-        persona === "STRICT_COACH"
-          ? "You are a world-class ICPC Coach. Be concise, rigorous, demanding, and uncompromising on time/space complexity and submission discipline. Never write full code solutions unless explicitly requested. Always cite standard competitive programming literature (USACO Guide, CPH, CP4, CLRS, Sannemo) and direct users to internal guides like [Prefix Sums](/learn/prefix-sums), [Two Pointers](/learn/two-pointers), [Binary Search](/learn/binary-search-answer), [1D DP](/learn/1d-dp), [Segment Tree](/learn/segment-tree), [DSU](/learn/dsu), [Dijkstra](/learn/dijkstra)."
-          : persona === "DIAGNOSTICIAN"
-          ? "You are an expert CP Algorithm Diagnostician. Methodically break down complexity proofs, mathematical invariants, and error vectors. Cross-reference concepts with internal textbook guides at /learn/<slug> and standard literature (CPH, CP4, CLRS, USACO Guide)."
-          : "You are a Socratic Competitive Programming Mentor. Guide the user step-by-step with thoughtful leading questions, invariant hints, and nudge them to discover the algorithmic solution on their own. NEVER dump the final answer or full code. Refer users to relevant internal guides at /learn/<slug> when appropriate.";
-
-      const systemInstruction = `${personaPrompt}
 Platform Knowledge Base Context:
-You have a literal textbook inside you covering:
+You have a complete algorithmic textbook curriculum inside you:
 1. Prefix Sums & Range Queries (/learn/prefix-sums - USACO Guide Bronze, CPH Ch 9)
 2. Two Pointers & Sliding Window (/learn/two-pointers - USACO Guide Silver, CPH Ch 8)
 3. Binary Search on Answer (/learn/binary-search-answer - USACO Guide Silver, Sannemo Ch 5)
@@ -128,36 +178,186 @@ User Context:
 - Codeforces Handle: ${context.handle}
 - Current Rating: ${context.rating}
 - Weakest Topics: ${context.weakestTopics.map((w) => `${w.topic} (${w.score}/100)`).join(", ")}
-${context.currentProblem ? `- Active Problem: ${context.currentProblem.name} (${context.currentProblem.rating} rating, tags: ${context.currentProblem.tags.join(", ")})` : ""}`;
+${context.currentProblem ? `- Active Problem in Focus: ${context.currentProblem.name} (${context.currentProblem.rating} rating, tags: ${context.currentProblem.tags.join(", ")})` : ""}
+`;
+}
 
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [
-              {
-                role: "user",
-                parts: [{ text: `${systemInstruction}\n\nUser Question: ${latestUserMessage}` }],
-              },
-            ],
-            generationConfig: {
-              temperature: 0.3,
-              maxOutputTokens: 1024,
-            },
-          }),
-        }
-      );
+/**
+ * Calls Google Gemini API (supporting gemini-2.0-flash and gemini-1.5-flash)
+ */
+async function callGeminiAPI(
+  apiKey: string,
+  systemInstruction: string,
+  messages: MentorChatMessage[]
+): Promise<string | null> {
+  const models = [
+    "gemini-3.6-flash",
+    "gemini-3.7-flash",
+    "gemini-3.8-flash",
+    "gemini-flash-latest",
+    "gemini-3.5-flash-lite",
+    "gemini-3.1-flash-lite",
+  ];
+
+  const recent = messages.filter((m) => m.role === "user" || m.role === "assistant").slice(-10);
+  const formattedContents = recent.map((m) => ({
+    role: m.role === "assistant" ? "model" : "user",
+    parts: [{ text: m.content }],
+  }));
+
+  if (formattedContents.length === 0) {
+    const lastUserMsg = messages.filter((m) => m.role === "user").pop()?.content || "Hello!";
+    formattedContents.push({
+      role: "user",
+      parts: [{ text: lastUserMsg }],
+    });
+  }
+
+  for (const model of models) {
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          system_instruction: {
+            parts: [{ text: systemInstruction }],
+          },
+          contents: formattedContents,
+          generationConfig: {
+            temperature: 0.35,
+            maxOutputTokens: 1800,
+          },
+        }),
+      });
 
       if (res.ok) {
         const data = await res.json();
         const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (text) return text;
+        if (text && text.trim()) return text;
+      } else {
+        const errJson = await res.json().catch(() => ({}));
+        console.warn(`[Gemini API] ${model} returned HTTP ${res.status}:`, errJson);
       }
     } catch (err) {
-      console.warn("Live Gemini API call failed or timed out. Falling back to Socratic engine.", err);
+      console.warn(`[Gemini API] Request error with ${model}:`, err);
     }
+  }
+
+  return null;
+}
+
+/**
+ * Calls OpenAI-compatible API (OpenAI, Groq, OpenRouter)
+ */
+async function callOpenAICompatibleAPI(
+  endpoint: string,
+  apiKey: string,
+  model: string,
+  systemInstruction: string,
+  messages: MentorChatMessage[]
+): Promise<string | null> {
+  const recent = messages.filter((m) => m.role === "user" || m.role === "assistant").slice(-10);
+  const chatMessages = [
+    { role: "system", content: systemInstruction },
+    ...recent.map((m) => ({ role: m.role, content: m.content })),
+  ];
+
+  try {
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model,
+        messages: chatMessages,
+        temperature: 0.35,
+        max_tokens: 1800,
+      }),
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      const text = data.choices?.[0]?.message?.content;
+      if (text && text.trim()) return text;
+    } else {
+      const errJson = await res.json().catch(() => ({}));
+      console.warn(`[OpenAI Compatible API] ${model} returned HTTP ${res.status}:`, errJson);
+    }
+  } catch (err) {
+    console.warn(`[OpenAI Compatible API] Request error with ${model}:`, err);
+  }
+
+  return null;
+}
+
+/**
+ * Dispatches query to Real AI API if key is present (Gemini, OpenAI, Groq, OpenRouter),
+ * or gracefully falls back to deterministic CP mentor engine.
+ */
+export async function generateMentorResponse(
+  messages: MentorChatMessage[],
+  context: UserMentorContext,
+  persona: MentorPersona = "SOCRATIC",
+  customApiKey?: string
+): Promise<string> {
+  const geminiKey =
+    customApiKey ||
+    process.env.GEMINI_API_KEY ||
+    process.env.GOOGLE_GENERATIVE_AI_API_KEY ||
+    process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+
+  const openaiKey = process.env.OPENAI_API_KEY;
+  const groqKey = process.env.GROQ_API_KEY;
+  const openrouterKey = process.env.OPENROUTER_API_KEY;
+
+  const latestUserMessage =
+    messages.filter((m) => m.role === "user").pop()?.content || "Hello mentor!";
+
+  const systemInstruction = buildSystemInstruction(context, persona);
+
+  // 1. Google Gemini (Primary Real AI)
+  if (geminiKey) {
+    const reply = await callGeminiAPI(geminiKey, systemInstruction, messages);
+    if (reply) return reply;
+  }
+
+  // 2. OpenAI (GPT-4o-mini)
+  if (openaiKey) {
+    const reply = await callOpenAICompatibleAPI(
+      "https://api.openai.com/v1/chat/completions",
+      openaiKey,
+      "gpt-4o-mini",
+      systemInstruction,
+      messages
+    );
+    if (reply) return reply;
+  }
+
+  // 3. Groq (Llama 3.3 70B)
+  if (groqKey) {
+    const reply = await callOpenAICompatibleAPI(
+      "https://api.groq.com/openai/v1/chat/completions",
+      groqKey,
+      "llama-3.3-70b-versatile",
+      systemInstruction,
+      messages
+    );
+    if (reply) return reply;
+  }
+
+  // 4. OpenRouter
+  if (openrouterKey) {
+    const reply = await callOpenAICompatibleAPI(
+      "https://openrouter.ai/api/v1/chat/completions",
+      openrouterKey,
+      "google/gemini-2.0-flash-001",
+      systemInstruction,
+      messages
+    );
+    if (reply) return reply;
   }
 
   // Deterministic Offline Resilient Socratic Fallback

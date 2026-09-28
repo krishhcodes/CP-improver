@@ -32,35 +32,242 @@ export const modularArithmeticConcept: ConceptNode = {
         "Precomputing factorials and inverse factorials up to N = 10^6 allows answering binomial coefficient queries nCr(n, r) in strictly O(1) time.",
     },
   ],
-  conceptualTheory: `### The Algebra of Congruence Classes & Fermat's Inverse
+  conceptualTheory: `## Modular Arithmetic, Fermat's Inverse & Combinatorics: A Complete Textbook Chapter
 
-#### 1. Fundamental Modular Arithmetic Identities
-$$(A + B) \\pmod M = ((A \\pmod M) + (B \\pmod M)) \\pmod M$$
-$$(A - B) \\pmod M = ((A \\pmod M) - (B \\pmod M) + M) \\pmod M$$
-$$(A \\cdot B) \\pmod M = ((A \\pmod M) \\cdot (B \\pmod M)) \\pmod M$$
+### Why Modulo Exists in Competitive Programming
 
-**Notice: Division does NOT distribute!** $(A / B) \\pmod M \\ne (A \\pmod M) / (B \\pmod M)$.
+In competitive programming, combinatorial and dynamic programming answers grow at staggering rates:
+- $10! = 3,628,800$
+- $20! \approx 2.43 \times 10^{18}$ (approaching the maximum limit of an unsigned 64-bit integer, $1.84 \times 10^{19}$)
+- $30! \approx 2.65 \times 10^{32}$ (completely overflows 64-bit hardware registers)
+- The number of binary strings or grid paths of length $N = 10^5$ reaches $2^{100000}$, a number with over 30,000 decimal digits!
+
+To prevent competitive programming from devolving into an arbitrary-precision "BigInteger" library implementation contest, problem setters require results modulo a large prime:
+$$\text{Output the answer modulo } 10^9 + 7 \text{ (or } 998,244,353\text{)}$$
+
+#### Why Are $10^9+7$ and $998,244,353$ the Universal Standards?
+1. **Both are Prime Numbers**:
+   Every non-zero integer $A \not\equiv 0 \pmod M$ has a unique modular multiplicative inverse by Fermat's Little Theorem. Division is always valid and well-defined!
+2. **Fits in a Signed 32-bit Integer**:
+   Both primes are $< 2^{31} - 1 \approx 2.14 \times 10^9$. A single variable fits comfortably in a standard 32-bit \`int\`.
+3. **Product Fits in a Signed 64-bit Integer**:
+   The maximum possible product of two numbers less than $M$ is:
+   $$(M - 1) \times (M - 1) < M^2 \approx 10^{18} < 2^{63} - 1 \approx 9.22 \times 10^{18}$$
+   This means intermediate multiplication \`1LL * a * b\` fits in standard \`long long\` without 128-bit hardware emulation!
+4. **$998,244,353$ is an NTT Prime**:
+   $998,244,353 = 119 \times 2^{23} + 1$. Its factorization contains a huge power of two ($2^{23}$), making it ideal for Number Theoretic Transforms (polynomial multiplication in $O(N \log N)$).
 
 ---
 
-#### 2. Division & Fermat's Little Theorem
-Division $\\frac{A}{B} \\pmod M$ is defined as $A \\cdot B^{-1} \\pmod M$, where $B \\cdot B^{-1} \\equiv 1 \\pmod M$.
-If $M$ is a prime number and $\\gcd(B, M) = 1$:
-$$B^{M-1} \\equiv 1 \\pmod M$$
-Multiplying both sides by $B^{-1}$:
-$$B^{-1} \\equiv B^{M-2} \\pmod M$$
-We compute $B^{M-2} \\pmod M$ in $O(\\log M)$ time using **Binary Exponentiation**!
+### The Fundamental Axioms of Modular Arithmetic
+
+Two integers $A$ and $B$ are **congruent modulo $M$** (written $A \equiv B \pmod M$) if and only if their difference $A - B$ is an integer multiple of $M$:
+$$A \equiv B \pmod M \iff M \mid (A - B)$$
+
+#### The 3 Well-Behaved Operations: Addition, Subtraction, Multiplication
+Modular reduction distributes cleanly over addition, subtraction, and multiplication:
+1. **Addition**:
+   $$(A + B) \pmod M = ((A \pmod M) + (B \pmod M)) \pmod M$$
+2. **Subtraction (Watch Out for the Negative Modulo Trap!)**:
+   $$(A - B) \pmod M = ((A \pmod M) - (B \pmod M) + M) \pmod M$$
+   *Crucial Warning*: In C++ and Java, \`%\` is the **remainder** operator, NOT true mathematical modulo!
+   In C++, \`(-5) % 3\` produces \`-2\`, not \`+1\`!
+   To prevent negative results when subtracting under modulo, **always add $M$ before the final modulo**:
+   \`long long diff = (a - b) % M; if (diff < 0) diff += M;\`
+3. **Multiplication**:
+   $$(A \times B) \pmod M = ((A \pmod M) \times (B \pmod M)) \pmod M$$
+   *Crucial Warning*: If \`a\` and \`b\` are 32-bit \`int\`s, \`a * b\` evaluates as a 32-bit integer before the modulo, silently overflowing! Always write:
+   \`long long prod = (1LL * a * b) % M;\`
 
 ---
 
-#### 3. Combinatorics $\\binom{N}{K}$ in $O(1)$ Time
-Precompute factorials $fact[i] = i! \\pmod M$ and inverse factorials $invFact[i] = (i!)^{-1} \\pmod M$ in $O(N)$ time:
-1. $fact[i] = (fact[i-1] \\cdot i) \\pmod M$
-2. $invFact[N] = \\text{power}(fact[N], M - 2)$
-3. $invFact[i] = (invFact[i+1] \\cdot (i+1)) \\pmod M$ (Linear sweep backwards!)
+### The Division Dilemma & Modular Multiplicative Inverse
 
-Then for any query:
-$$\\binom{N}{K} = \\frac{N!}{K!(N-K)!} \\equiv fact[N] \\cdot invFact[K] \\cdot invFact[N-K] \\pmod M$$`,
+Notice that division does **NOT** distribute under modulo:
+$$\frac{A}{B} \pmod M \ne \frac{A \pmod M}{B \pmod M}$$
+
+For example:
+- $\frac{12}{3} = 4 \equiv 4 \pmod 5$.
+- But $(12 \pmod 5) / (3 \pmod 5) = 2 / 3 = 0 \ne 4 \pmod 5$!
+- Even worse, consider $(4 / 2) \pmod 4 = 2 \pmod 4$, but if we used $6 / 2 = 3$, $6 \equiv 2 \pmod 4$, yet $3 \not\equiv 1 \pmod 4$.
+
+#### Defining the Modular Multiplicative Inverse
+In standard arithmetic, dividing by $B$ is equivalent to multiplying by the reciprocal $B^{-1} = 1/B$, where $B \times B^{-1} = 1$.
+In modular arithmetic, the **modular inverse** of $B$ modulo $M$ is defined as an integer $X$ such that:
+$$B \times X \equiv 1 \pmod M$$
+We denote this integer $X$ as $B^{-1}$.
+Once $B^{-1}$ is known, **division becomes multiplication**:
+$$\frac{A}{B} \equiv A \times B^{-1} \pmod M$$
+
+#### When Does a Modular Inverse Exist? (Bézout's Theorem)
+A modular inverse $B^{-1} \pmod M$ exists **if and only if $B$ and $M$ are coprime**:
+$$\gcd(B, M) = 1$$
+If $M$ is a prime number, every integer $B$ that is not a multiple of $M$ satisfies $\gcd(B, M) = 1$. Thus, for any prime modulo, every non-zero element has a unique modular inverse!
+
+---
+
+### Fermat's Little Theorem (Inverse in O(log M))
+
+**Fermat's Little Theorem**: If $M$ is a prime number and $B$ is not divisible by $M$:
+$$B^{M - 1} \equiv 1 \pmod M$$
+
+#### Derivation of the Inverse Formula
+Multiply both sides of Fermat's Little Theorem by $B^{-1}$:
+$$B^{-1} \times B^{M - 1} \equiv B^{-1} \times 1 \pmod M$$
+$$B^{M - 2} \equiv B^{-1} \pmod M$$
+
+This is one of the most celebrated and useful results in all of computer science:
+> **To divide by $B$ modulo prime $M$, simply raise $B$ to the power $M - 2$ modulo $M$!**
+> $$\frac{A}{B} \pmod M = (A \times B^{M - 2}) \pmod M$$
+
+---
+
+### Binary Exponentiation: Fast Power in O(log P)
+
+How do we compute $B^{M - 2} \pmod M$?
+For $M = 10^9 + 7$, $M - 2 = 1,000,000,005$. A naive loop multiplying $B$ one billion times will take 2 seconds and TLE.
+**Binary Exponentiation (Exponentiation by Squaring)** solves this in just 30 multiplications!
+
+#### The Core Insight
+Consider computing $3^{13}$:
+The exponent $13$ in binary is $1101_2 = 8 + 4 + 1$.
+$$3^{13} = 3^8 \times 3^4 \times 3^1$$
+Instead of computing $3 \times 3 \times 3 \dots$, we repeatedly square the base:
+- $3^1 = 3$
+- $3^2 = 3^1 \times 3^1 = 9$
+- $3^4 = 3^2 \times 3^2 = 81$
+- $3^8 = 3^4 \times 3^4 = 6561$
+We only include powers corresponding to the \`1\` bits in the binary representation of the exponent!
+
+#### The Canonical C++ Implementation
+\`\`\`cpp
+long long power(long long base, long long exp) {
+    long long res = 1;
+    base %= MOD;
+    while (exp > 0) {
+        if (exp & 1) res = (1LL * res * base) % MOD;
+        base = (1LL * base * base) % MOD;
+        exp >>= 1;
+    }
+    return res;
+}
+
+long long modInverse(long long n) {
+    return power(n, MOD - 2);
+}
+\`\`\`
+**Complexity**: Exactly $\lfloor \log_2(\text{exp}) \rfloor + 1$ iterations. For $P = 10^9$, this is at most 30 steps — executing in mere nanoseconds!
+
+---
+
+### Binomial Coefficients (nCr) in O(1) Time
+
+A ubiquitous problem in competitive programming:
+*"Calculate $\binom{N}{R} = \frac{N!}{R! (N - R)!} \pmod M$ for $Q = 2 \times 10^5$ queries with $N \le 10^6$."*
+
+If we compute $R!^{M-2}$ and $(N-R)!^{M-2}$ via binary exponentiation for each query:
+$$O(Q \log M) \approx 2 \times 10^5 \times 30 = 6 \times 10^6 \text{ operations (Acceptable, but can be made 30x faster!)}$$
+
+#### The O(N) Precomputation with Backward Linear Sweep Trick
+We can answer EVERY query in strictly **$O(1)$ time** by precomputing:
+1. $fact[i] = i! \pmod M$
+2. $invFact[i] = (i!)^{-1} \pmod M$
+
+**Step 1**: Precompute factorials in $O(N)$:
+\`fact[0] = 1;\`
+\`for (int i = 1; i <= N; i++) fact[i] = (fact[i - 1] * i) % MOD;\`
+
+**Step 2**: Compute the inverse of the LAST factorial using ONE single binary exponentiation call:
+\`invFact[N] = power(fact[N], MOD - 2);\`
+
+**Step 3**: The Backward Sweep:
+Notice the mathematical identity:
+$$\frac{1}{(i - 1)!} = \frac{i}{i!} = i \times \frac{1}{i!}$$
+Therefore:
+$$invFact[i - 1] = (invFact[i] \times i) \pmod M$$
+By sweeping backwards from $N$ down to $1$, we compute ALL $10^6$ inverse factorials using simple multiplications, **requiring only ONE binary exponentiation call in total!**
+
+\`\`\`cpp
+for (int i = N; i >= 1; i--) {
+    invFact[i - 1] = (1LL * invFact[i] * i) % MOD;
+}
+\`\`\`
+
+#### Answering Queries in O(1)
+\`\`\`cpp
+long long nCr(int n, int r) {
+    if (r < 0 || r > n) return 0;
+    return 1LL * fact[n] * invFact[r] % MOD * invFact[n - r] % MOD;
+}
+\`\`\`
+
+---
+
+### Extended Euclidean Algorithm (Non-Prime Modulo)
+
+What if the modulo $M$ is NOT prime (e.g. $M = 10^9$ or composite), but we still need to find $B^{-1} \pmod M$?
+Fermat's Little Theorem fails when $M$ is composite!
+Instead, we use the **Extended Euclidean Algorithm**:
+By Bézout's Identity, for any integers $A$ and $B$, there exist integers $x$ and $y$ such that:
+$$A \cdot x + B \cdot y = \gcd(A, B)$$
+Setting $B = M$, if $\gcd(A, M) = 1$:
+$$A \cdot x + M \cdot y = 1$$
+Reducing this equation modulo $M$:
+$$A \cdot x \equiv 1 \pmod M$$
+The Bézout coefficient $x$ is precisely the modular inverse $A^{-1} \pmod M$!
+
+\`\`\`cpp
+long long extgcd(long long a, long long b, long long &x, long long &y) {
+    if (b == 0) { x = 1; y = 0; return a; }
+    long long x1, y1;
+    long long d = extgcd(b, a % b, x1, y1);
+    x = y1;
+    y = x1 - y1 * (a / b);
+    return d;
+}
+
+long long modInverseComposite(long long a, long long m) {
+    long long x, y;
+    long long g = extgcd(a, m, x, y);
+    if (g != 1) return -1; // Inverse does not exist (not coprime!)
+    return (x % m + m) % m;
+}
+\`\`\`
+
+---
+
+### Linear Inverse of All Integers 1 to N in O(N)
+
+If you need the inverses of all single numbers $1, 2, \dots, N$ (not factorials), you can compute them in $O(N)$ total without any logarithmic factors:
+
+#### Mathematical Derivation
+Let $M = q \times i + r$, where $q = \lfloor M / i \rfloor$ and $r = M \pmod i$.
+Then:
+$$q \times i + r \equiv 0 \pmod M$$
+Multiply both sides by $i^{-1} \times r^{-1}$:
+$$q \times r^{-1} + i^{-1} \equiv 0 \pmod M$$
+$$i^{-1} \equiv -q \times r^{-1} \pmod M$$
+Substituting $q = \lfloor M / i \rfloor$ and $r = M \pmod i$:
+$$inv[i] = (M - \lfloor M / i \rfloor) \times inv[M \pmod i] \pmod M$$
+
+\`\`\`cpp
+vector<long long> inv(n + 1);
+inv[1] = 1;
+for (int i = 2; i <= n; i++) {
+    inv[i] = (MOD - MOD / i) * inv[MOD % i] % MOD;
+}
+\`\`\`
+Every inverse from $1$ to $N$ is computed in strictly $O(1)$ time per element!
+
+---
+
+### Contest Checklist & Common Traps
+
+1. **Negative Modulo**: Never write \`(a - b) % MOD\`. Always write \`((a - b) % MOD + MOD) % MOD\`.
+2. **64-bit Casting**: Never multiply two 32-bit values without casting: \`1LL * a * b % MOD\`.
+3. **Division by Zero**: If $B \equiv 0 \pmod M$, modular inverse does NOT exist! Dividing by a multiple of $M$ causes undefined results.
+4. **Boundary Checks in nCr**: Always guard against $r < 0$ and $r > n$ by returning $0$.
+5. **$0^0$ Definition**: By convention in combinatorics, $0^0 = 1$ and $0! = 1$.`,
   variations: [
     {
       title: "Binary Modular Exponentiation",

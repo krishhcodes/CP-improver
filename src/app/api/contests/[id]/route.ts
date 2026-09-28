@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { analyzeContestPerformance } from "@/server/analytics/contest-analytics";
 import { ContestRepository } from "@/server/db/repositories/contest-repo";
 import { MOCK_CONTEST_AUTOPSY } from "@/lib/mock-data";
+import { CODEFORCES_REQUEST_HEADERS } from "@/server/codeforces/cf-headers";
 
 export async function GET(
   req: NextRequest,
@@ -20,13 +21,13 @@ export async function GET(
     try {
       const [ratingRes, statusRes] = await Promise.allSettled([
         fetch(`https://codeforces.com/api/user.rating?handle=${encodeURIComponent(handle)}`, {
-          headers: { "User-Agent": "CP-Intelligence-Platform/1.0" },
+          headers: CODEFORCES_REQUEST_HEADERS,
           next: { revalidate: 300 },
         }).then((r) => r.json()),
         fetch(
           `https://codeforces.com/api/contest.status?contestId=${contestId}&handle=${encodeURIComponent(handle)}&from=1&count=100`,
           {
-            headers: { "User-Agent": "CP-Intelligence-Platform/1.0" },
+            headers: CODEFORCES_REQUEST_HEADERS,
             next: { revalidate: 300 },
           }
         ).then((r) => r.json()),

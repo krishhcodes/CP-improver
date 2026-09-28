@@ -33,43 +33,166 @@ export const stringHashingConcept: ConceptNode = {
         "Never use a single 64-bit integer overflow modulo (2^64). Test case creators can deterministically break 2^64 hashing using Thue-Morse sequence generators.",
     },
   ],
-  conceptualTheory: `### The Polynomial Rolling Hash Invariant
+  conceptualTheory: `## Polynomial Rolling Hashing & Double Modulo: A Complete Textbook Chapter
 
-#### 1. Hash Definition
-For a string $S = s_0 s_1 \\dots s_{N-1}$, choose a base $B > |\\Sigma|$ (e.g. $B = 313$ or $B = 37$) and a large prime modulo $M$:
-$$\\text{hash}(S) = \\left( \\sum_{i=0}^{N-1} s_i \\cdot B^{N - 1 - i} \\right) \\pmod M$$
+### The Substring Equivalence Problem: Why Hash Strings?
 
-We precompute:
-- **Prefix Hash Table**: $H[i] = \\text{hash}(S[0 \\dots i-1])$
-  $$H[0] = 0$$
-  $$H[i] = (H[i-1] \\cdot B + S[i-1]) \\pmod M$$
-- **Base Powers**: $P[i] = B^i \\pmod M$
+Consider one of the most common requirements in competitive programming:
+> Given a string $S$ of length $N = 10^5$, answer $Q = 10^5$ queries:
+> *"Is substring $S[a \dots b]$ identical to substring $S[c \dots d]$?"*
+
+If we perform naive character-by-character comparison:
+- Comparing two substrings of length $L$ takes $O(L)$ time.
+- For $Q = 10^5$ queries on strings of length $10^5$:
+  $$\text{Total Time} = O(Q \times N) \approx 10^5 \times 10^5 = 10^{10} \text{ operations (Time Limit Exceeded!)}$$
+
+Can we check if two arbitrary substrings are equal in strictly **$O(1)$ time**?
+Yes, using **Polynomial Rolling Hashing**:
+We map every possible substring to an integer fingerprint (hash). If two substrings have identical hashes, they are equal with overwhelming probability ($> 99.9999999999999999\%$).
 
 ---
 
-#### 2. Querying Any Substring in $O(1)$
-To extract the hash of substring $S[l \\dots r]$ (0-indexed, inclusive, length $L = r - l + 1$):
-$$\\text{hash}(S[l \\dots r]) = (H[r+1] - H[l] \\cdot B^L) \\pmod M$$
-In C++:
+### The Base-10 Number Analogy: Mental Model
+
+Before writing formulas, think about how we write normal numbers in base 10:
+Consider the number \`472\`:
+$$472 = 4 \times 10^2 + 7 \times 10^1 + 2 \times 10^0$$
+
+Now suppose you have a sequence of digits \`[4, 7, 2, 9, 5]\` and you computed prefix numbers:
+- \`P[0] = 0\`
+- \`P[1] = 4\`
+- \`P[2] = 47\`
+- \`P[3] = 472\`
+- \`P[4] = 4729\`
+
+How would you extract the number \`729\` (from index 1 to 3) in $O(1)$?
+1. Take \`P[4] = 4729\`.
+2. Take \`P[1] = 4\`.
+3. Shift \`P[1]\` to the left by 3 decimal places: \`4 * 10^3 = 4000\`.
+4. Subtract: \`4729 - 4000 = 729\`!
+
+Polynomial Rolling Hashing does the **EXACT SAME THING**, but instead of base 10, we use a large base $B$ (e.g. $B = 313$), and instead of unlimited digits, we compute everything **modulo a large prime $M$**!
+
+---
+
+### The Mathematical Formulation
+
+Given a string $S = s_0 s_1 \dots s_{N-1}$:
+1. Choose an integer **Base** $B$ strictly greater than the alphabet size:
+   $$B > |\Sigma|$$
+   (For lowercase English letters \`a\`-\`z\`, $|\Sigma| = 26$, so choose $B \approx 300$ or a randomized prime base).
+2. Choose a large **Prime Modulo** $M$ (e.g. $10^9 + 7$).
+
+#### Prefix Hashes & Power Tables
+We precompute two arrays in $O(N)$ time:
+- **Base Powers**: $P[i] = B^i \pmod M$
+  $$P[0] = 1, \quad P[i] = (P[i-1] \times B) \pmod M$$
+- **Prefix Hashes**: $H[i] = \text{hash}(S[0 \dots i-1])$
+  $$H[0] = 0$$
+  $$H[i] = (H[i-1] \times B + (S[i-1] - \text{'a'} + 1)) \pmod M$$
+
+#### Querying Any Substring $S[l \dots r]$ in O(1)
+For a substring starting at index $l$ and ending at index $r$ (0-indexed, inclusive, length $L = r - l + 1$):
+$$\text{hash}(S[l \dots r]) = (H[r + 1] - H[l] \times B^L) \pmod M$$
+
 \`\`\`cpp
 long long getHash(int l, int r) {
-    long long res = (H[r + 1] - H[l] * P[r - l + 1]) % M;
-    if (res < 0) res += M;
+    long long res = (H[r + 1] - 1LL * H[l] * P[r - l + 1]) % MOD;
+    if (res < 0) res += MOD; // Negative modulo protection!
     return res;
 }
 \`\`\`
 
 ---
 
-#### 3. Why Double Modulo Is Essential
-If only one prime $M = 10^9+7$ is used:
-By the **Birthday Paradox**, among $K$ random substrings, the probability of collision exceeds $50\\%$ when:
-$$K \\approx \\sqrt{M} \\approx \\sqrt{10^9} \\approx 31,622$$
-In a contest with $N = 10^5$, an array of $N$ substrings has guaranteed collisions!
-With **Double Modulo** $(M_1 = 10^9+7, M_2 = 10^9+9)$:
-$$\\text{Effective Modulo Space} = M_1 \\times M_2 \\approx 10^{18}$$
-$$\\text{Collision Threshold} \\approx \\sqrt{10^{18}} \\approx 10^9 \\text{ strings!}$$
-This eliminates collision risk completely.`,
+### Collision Probabilities & Why Double Modulo Is Mandatory
+
+In hash-based algorithms, two distinct strings $S_1 \ne S_2$ might produce the same hash value (a **Hash Collision**).
+
+#### The Birthday Paradox & Single Modulo Vulnerability
+If we use a single prime $M = 10^9 + 7$:
+By the **Birthday Paradox**, among $K$ distinct strings, the probability of at least one collision exceeds $50\%$ when:
+$$K \approx \sqrt{M} \approx \sqrt{10^9} \approx 31,622$$
+
+In a competitive programming problem where $N = 10^5$, an array has $\approx 10^5$ suffixes and $O(N^2)$ substrings.
+With $10^5$ distinct hashes, **a single modulo $10^9 + 7$ will collide with $> 99.9\%$ probability!** Your solution will fail with Wrong Answer on hidden test cases.
+
+#### Why \`unsigned long long\` (Modulo $2^{64}$) Is Deterministically Broken
+Many competitors use \`unsigned long long\` relying on automatic hardware overflow (modulo $2^{64}$) to avoid modulo operations:
+> **WARNING**: Never use $2^{64}$ single-modulo hashing on platforms like Codeforces!
+> Using the **Thue-Morse sequence**, test creators can deterministically generate two strings of length $2^{12} = 4096$ that have the EXACT SAME hash modulo $2^{64}$ for ANY fixed base $B$! Codeforces test suites systematically include anti-hash test cases.
+
+#### The Double Modulo Solution: $10^{18}$ State Space
+Instead of one prime, we compute hashes under **TWO independent large primes**:
+- $M_1 = 10^9 + 7$
+- $M_2 = 10^9 + 9$ (or $10^9 + 21$, $10^9 + 33$)
+- Base $B = 313$ (or a randomized base generated via \`mt19937\`)
+
+A substring's hash is stored as a \`pair<long long, long long>\`:
+$$\text{hash}(S) = (\text{hash}_{M_1}(S), \ \text{hash}_{M_2}(S))$$
+The effective hash space is:
+$$M_1 \times M_2 \approx 10^9 \times 10^9 = 10^{18}$$
+By the Birthday Paradox:
+$$K \approx \sqrt{10^{18}} = 10^9 \text{ strings needed for a } 50\% \text{ collision chance!}$$
+Across $10^5$ strings, the collision probability is $< 10^{-8}$ — rendering collisions practically impossible!
+
+---
+
+### The 5 Classical String Hashing Archetypes
+
+#### Archetype 1: Substring Pattern Matching (Rabin-Karp) in O(N + M)
+Find all occurrences of pattern $P$ (length $M$) in text $T$ (length $N$):
+1. Compute the pattern hash $H_P = \text{hash}(P)$ in $O(M)$.
+2. Precompute prefix hashes for text $T$ in $O(N)$.
+3. Slide a window of length $M$ from index $i = 0$ to $N - M$:
+   - If \`getHash(i, i + M - 1) == H_P\`, record match at index $i$!
+Total runtime: strictly $O(N + M)$!
+
+#### Archetype 2: Longest Common Prefix (LCP) in O(log N)
+Given two starting positions $i$ and $j$ in string $S$, how many characters do their suffixes share?
+Binary search on the length $L \in [1, \min(N - i, N - j)]$:
+- If \`getHash(i, i + L - 1) == getHash(j, j + L - 1)\`: feasible, try larger $L$ (\`low = mid + 1\`).
+- Else: infeasible, try smaller $L$ (\`high = mid - 1\`).
+Runtime: strictly $O(\log N)$!
+
+#### Archetype 3: Lexicographical Substring Comparison in O(log N)
+How do we compare two substrings $S[a \dots b]$ and $S[c \dots d]$ alphabetically without $O(N)$ string comparison?
+1. Find their Longest Common Prefix length $k = \text{LCP}(a, c)$ in $O(\log N)$.
+2. If $k$ equals the length of one substring, the shorter substring is lexicographically smaller.
+3. Otherwise, the very first character where they diverge is at index $a + k$ vs $c + k$:
+   - Compare the characters: \`S[a + k] < S[c + k]\` in $O(1)$!
+Enables sorting $N$ substrings in $O(N \log^2 N)$ without building a Suffix Array!
+
+#### Archetype 4: Palindrome Queries in O(1)
+To check if ANY substring $S[l \dots r]$ is a palindrome:
+1. Compute prefix hashes of $S$: \`H_fwd\`
+2. Compute prefix hashes of reversed $S$: \`H_bwd\`
+3. $S[l \dots r]$ is a palindrome if and only if:
+   $$\text{fwd\_hash}(l, r) == \text{bwd\_hash}(N - 1 - r, N - 1 - l)$$
+Answers arbitrary palindrome queries in strictly $O(1)$!
+
+#### Archetype 5: Counting Distinct Substrings in O(N² log N)
+To count how many distinct substrings exist in a string of length $N \le 3000$:
+- Extract the double hash for all $N(N + 1)/2$ substrings.
+- Insert them into a \`vector<pair<long long, long long>>\`, sort, and use \`std::unique\`.
+- Total runtime: $O(N^2 \log N)$ with zero memory leaks.
+
+---
+
+### Contest Checklist & Anti-Hack Traps
+
+1. **Randomize Your Base**:
+   \`\`\`cpp
+   mt19937_64 rng(chrono::steady_clock::now().time_since_epoch().count());
+   long long B = uniform_int_distribution<long long>(300, 1e9)(rng);
+   \`\`\`
+   A randomized base prevents anti-hash test generators from predicting your hash function!
+2. **Negative Modulo Handling**:
+   Always write \`(diff % MOD + MOD) % MOD\` when subtracting hashes.
+3. **1-Based Prefix Indexing**:
+   $H[0] = 0$ is the empty prefix. Substring $S[l \dots r]$ uses $H[r + 1] - H[l] \times B^{r - l + 1}$.
+4. **Base Greater Than Alphabet**:
+   Never use $B = 26$ or smaller; characters will carry over like arithmetic addition and collide.`,
   variations: [
     {
       title: "Double Modulo String Hashing",

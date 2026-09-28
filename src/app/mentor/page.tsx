@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense, useCallback, useRef } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useUser } from "@/context/UserContext";
 import {
   Bot,
@@ -10,16 +11,16 @@ import {
   Code2,
   Lightbulb,
   AlertTriangle,
-  CheckCircle2,
-  ShieldAlert,
   ArrowRight,
-  Terminal,
   Zap,
-  HelpCircle,
-  FileCode,
-  Flame,
   ChevronRight,
   BookOpen,
+  Search,
+  ExternalLink,
+  RefreshCw,
+  Target,
+  Globe,
+  Key,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -30,14 +31,44 @@ import {
   ProgressiveHint,
 } from "@/server/mentor/types";
 
-const PRESET_PROBLEMS = [
+interface ProblemFocus {
+  key: string;
+  name: string;
+  rating: number;
+  tags: string[];
+  timeLimit: number;
+  url: string;
+  sampleCode: string;
+}
+
+const PRESET_PROBLEMS: ProblemFocus[] = [
   {
     key: "970E",
     name: "Alternating String",
     rating: 1400,
     tags: ["greedy", "strings"],
     timeLimit: 2.0,
-    sampleCode: `#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    // Note: Fast IO missing!\n    int n;\n    cin >> n;\n    string s;\n    cin >> s;\n    \n    // Potential O(N^2) loop\n    int ans = 0;\n    for (int i = 0; i < n; i++) {\n        for (int j = 0; j < n; j++) {\n            // nested loop check\n        }\n    }\n    cout << ans << endl;\n    return 0;\n}`,
+    url: "https://codeforces.com/contest/2008/problem/E",
+    sampleCode: `#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    // Note: Fast IO missing!
+    int n;
+    cin >> n;
+    string s;
+    cin >> s;
+    
+    // Potential O(N^2) loop
+    int ans = 0;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            // nested loop check
+        }
+    }
+    cout << ans << endl;
+    return 0;
+}`,
   },
   {
     key: "371C",
@@ -45,7 +76,21 @@ const PRESET_PROBLEMS = [
     rating: 1400,
     tags: ["binary search", "brute force"],
     timeLimit: 2.0,
-    sampleCode: `#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);\n    string recipe;\n    cin >> recipe;\n    // Potential 32-bit overflow when multiplying high bounds!\n    int r;\n    cin >> r;\n    long long low = 0, high = 1e14;\n    return 0;\n}`,
+    url: "https://codeforces.com/contest/371/problem/C",
+    sampleCode: `#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    string recipe;
+    cin >> recipe;
+    // Potential 32-bit overflow when multiplying high bounds!
+    int r;
+    cin >> r;
+    long long low = 0, high = 1e14;
+    return 0;
+}`,
   },
   {
     key: "279B",
@@ -53,28 +98,51 @@ const PRESET_PROBLEMS = [
     rating: 1400,
     tags: ["two pointers", "binary search"],
     timeLimit: 2.0,
-    sampleCode: `#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);\n    int n, t;\n    cin >> n >> t;\n    vector<int> a(n);\n    for (int i = 0; i < n; i++) cin >> a[i];\n    \n    int l = 0, currentSum = 0, maxBooks = 0;\n    for (int r = 0; r < n; r++) {\n        currentSum += a[r];\n        while (currentSum > t) {\n            currentSum -= a[l];\n            l++;\n        }\n        maxBooks = max(maxBooks, r - l + 1);\n    }\n    cout << maxBooks << "\\n";\n    return 0;\n}`,
+    url: "https://codeforces.com/contest/279/problem/B",
+    sampleCode: `#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int n, t;
+    cin >> n >> t;
+    vector<int> a(n);
+    for (int i = 0; i < n; i++) cin >> a[i];
+    
+    int l = 0, currentSum = 0, maxBooks = 0;
+    for (int r = 0; r < n; r++) {
+        currentSum += a[r];
+        while (currentSum > t) {
+            currentSum -= a[l];
+            l++;
+        }
+        maxBooks = max(maxBooks, r - l + 1);
+    }
+    cout << maxBooks << "\\n";
+    return 0;
+}`,
   },
 ];
 
-export default function MentorStudio() {
+function MentorStudioContent() {
   const { profile, topicWeaknesses, recentSubmissions } = useUser();
+  const searchParams = useSearchParams();
   const [persona, setPersona] = useState<MentorPersona>("SOCRATIC");
-  const [selectedProblemIndex, setSelectedProblemIndex] = useState(0);
+
+  // Problem Focus State
+  const [problems, setProblems] = useState<ProblemFocus[]>(PRESET_PROBLEMS);
+  const [activeProblemKey, setActiveProblemKey] = useState<string>(PRESET_PROBLEMS[0].key);
+  const activeProblem =
+    problems.find((p) => p.key.toUpperCase() === activeProblemKey.toUpperCase()) || problems[0];
+
+  // Codeforces Search Input State
+  const [cfInput, setCfInput] = useState("");
+  const [isFetchingProblem, setIsFetchingProblem] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   // Chat State
   const [messages, setMessages] = useState<MentorChatMessage[]>([]);
-
-  useEffect(() => {
-    setMessages([
-      {
-        id: "msg-welcome",
-        role: "assistant",
-        content: `Hello ${profile.handle}! I am your AI Competitive Programming Mentor. I know your current rating is **${profile.rating}** (${profile.rank}) and I have analyzed your recent contest and practice submissions.\n\nAsk me for progressive hints, paste your code for an instant bug diagnosis, or ask why your solution is encountering TLE/WA!`,
-        timestampSeconds: Math.floor(Date.now() / 1000),
-      },
-    ]);
-  }, [profile.handle, profile.rating, profile.rank]);
   const [inputMessage, setInputMessage] = useState("");
   const [isThinking, setIsThinking] = useState(false);
 
@@ -84,10 +152,197 @@ export default function MentorStudio() {
   const [loadingHint, setLoadingHint] = useState(false);
 
   // Code Review State
-  const activeProblem = PRESET_PROBLEMS[selectedProblemIndex];
   const [sourceCode, setSourceCode] = useState(activeProblem.sampleCode);
   const [reviewReport, setReviewReport] = useState<CodeReviewReport | null>(null);
   const [analyzingCode, setAnalyzingCode] = useState(false);
+
+  // AI Provider & Key State
+  const [aiStatus, setAiStatus] = useState<{
+    configured: boolean;
+    provider?: string;
+    model?: string;
+    maskedKey?: string;
+  }>({ configured: false });
+  const [showAiModal, setShowAiModal] = useState(false);
+  const [apiKeyInput, setApiKeyInput] = useState("");
+  const [isSavingKey, setIsSavingKey] = useState(false);
+  const [keySaveMessage, setKeySaveMessage] = useState<string | null>(null);
+
+  // Fetch AI status on mount
+  const checkAiStatus = useCallback(async () => {
+    try {
+      const res = await fetch("/api/mentor/api-key");
+      if (res.ok) {
+        const data = await res.json();
+        setAiStatus(data);
+      }
+    } catch (e) {
+      console.warn("Could not check AI key status:", e);
+    }
+  }, []);
+
+  useEffect(() => {
+    checkAiStatus();
+  }, [checkAiStatus]);
+
+  // Handle saving API key
+  const handleSaveApiKey = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!apiKeyInput.trim() || isSavingKey) return;
+    setIsSavingKey(true);
+    setKeySaveMessage(null);
+
+    try {
+      const res = await fetch("/api/mentor/api-key", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ apiKey: apiKeyInput.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to connect API key.");
+      }
+
+      setKeySaveMessage(`Successfully connected to ${data.provider.toUpperCase()}! Real AI is now active.`);
+      setApiKeyInput("");
+      await checkAiStatus();
+
+      // Notify in chat
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `ai-conn-${Date.now()}`,
+          role: "assistant",
+          content: `⚡ **Real AI Successfully Connected (${data.provider.toUpperCase()})!**\n\nI am now running live neural algorithmic intelligence. Ask me any competitive programming question, deep-dive into invariants, or request step-by-step Socratic walkthroughs!`,
+          timestampSeconds: Math.floor(Date.now() / 1000),
+        },
+      ]);
+
+      setTimeout(() => {
+        setShowAiModal(false);
+        setKeySaveMessage(null);
+      }, 1500);
+    } catch (err: any) {
+      setKeySaveMessage(`Error: ${err.message}`);
+    } finally {
+      setIsSavingKey(false);
+    }
+  };
+
+  // Initial welcome message
+  useEffect(() => {
+    setMessages([
+      {
+        id: "msg-welcome",
+        role: "assistant",
+        content: `Hello ${profile.handle}! I am your AI Competitive Programming Mentor. I know your current rating is **${profile.rating}** (${profile.rank}) and I have analyzed your recent contest and practice submissions.\n\nAsk me for progressive hints, paste your code for an instant bug diagnosis, or set any Codeforces problem into focus above!`,
+        timestampSeconds: Math.floor(Date.now() / 1000),
+      },
+    ]);
+  }, [profile.handle, profile.rating, profile.rank]);
+
+  // Select an existing problem
+  const selectProblem = (problem: ProblemFocus) => {
+    setActiveProblemKey(problem.key);
+    setSourceCode(problem.sampleCode);
+    setHints([]);
+    setUnlockedTier(1);
+    setReviewReport(null);
+    setFetchError(null);
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: `switch-${Date.now()}`,
+        role: "assistant",
+        content: `Switched active focus to **${problem.key} — ${problem.name}** (${problem.rating} Rating).\n\n• **Tags**: ${
+          problem.tags.map((t) => `\`#${t}\``).join(" ") || "General"
+        }\n• Optimized starter code loaded. Ask me for progressive hints or submit your code for algorithmic diagnostics!`,
+        timestampSeconds: Math.floor(Date.now() / 1000),
+      },
+    ]);
+  };
+
+  // Fetch and focus a problem from Codeforces
+  const fetchAndSetProblem = useCallback(async (query: string) => {
+    const trimmed = query.trim();
+    if (!trimmed) return;
+
+    setIsFetchingProblem(true);
+    setFetchError(null);
+
+    try {
+      const res = await fetch("/api/codeforces/problem", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: trimmed }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success || !data.problem) {
+        throw new Error(data.error || `Could not find problem "${trimmed}" on Codeforces.`);
+      }
+
+      const fetchedProblem: ProblemFocus = {
+        key: data.problem.key,
+        name: data.problem.name,
+        rating: data.problem.rating,
+        tags: data.problem.tags,
+        timeLimit: data.problem.timeLimit || 2.0,
+        url: data.problem.url,
+        sampleCode: data.problem.sampleCode,
+      };
+
+      setProblems((prev) => {
+        const filtered = prev.filter(
+          (p) => p.key.toUpperCase() !== fetchedProblem.key.toUpperCase()
+        );
+        return [fetchedProblem, ...filtered];
+      });
+
+      setActiveProblemKey(fetchedProblem.key);
+      setSourceCode(fetchedProblem.sampleCode);
+      setHints([]);
+      setUnlockedTier(1);
+      setReviewReport(null);
+      setCfInput("");
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `cf-focus-${Date.now()}`,
+          role: "assistant",
+          content: `🎯 **Problem in focus set from Codeforces: ${fetchedProblem.key} — ${fetchedProblem.name}**\n\n• **Difficulty Rating**: ${fetchedProblem.rating}\n• **Algorithmic Topics**: ${
+            fetchedProblem.tags.map((t: string) => `\`#${t}\``).join(" ") || "General"
+          }\n• [Open problem statement on Codeforces ↗](${fetchedProblem.url})\n\nI have loaded an optimized starter template with Fast I/O into your code diagnostics editor. Feel free to ask for progressive hint tiers, discuss invariants, or verify edge cases!`,
+          timestampSeconds: Math.floor(Date.now() / 1000),
+        },
+      ]);
+    } catch (err: any) {
+      console.error("Failed to fetch CF problem:", err);
+      setFetchError(err.message || "Failed to set problem from Codeforces.");
+    } finally {
+      setIsFetchingProblem(false);
+    }
+  }, []);
+
+  // Form submit handler
+  const handleSetProblemSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!cfInput.trim() || isFetchingProblem) return;
+    fetchAndSetProblem(cfInput);
+  };
+
+  // Handle URL query parameter `?problem=...` once on mount
+  const initialHandled = useRef(false);
+  useEffect(() => {
+    if (initialHandled.current) return;
+    const initialQuery = searchParams.get("problem");
+    if (initialQuery) {
+      initialHandled.current = true;
+      fetchAndSetProblem(initialQuery);
+    }
+  }, [searchParams, fetchAndSetProblem]);
 
   // Unlock next hint tier
   const handleUnlockNextHint = async () => {
@@ -178,7 +433,7 @@ export default function MentorStudio() {
               rating: s.problemRating,
             })),
             currentProblem: {
-              index: activeProblem.key.split("-")[1] || "A",
+              index: activeProblem.key.replace(/^\d+/, "") || "A",
               name: activeProblem.name,
               rating: activeProblem.rating,
               tags: activeProblem.tags,
@@ -290,52 +545,164 @@ export default function MentorStudio() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* LEFT COLUMN: Problem Context, Hint Drawer & Code Reviewer (5 cols) */}
         <div className="lg:col-span-5 space-y-6">
-          {/* Problem Selector Card */}
-          <div className="bg-white border border-slate-200/90 shadow-sm rounded-2xl p-5 space-y-3">
+          {/* Active Problem Focus Card */}
+          <div className="bg-white border border-slate-200/90 shadow-sm rounded-2xl p-5 space-y-4">
+            {/* Header with Title and Rating */}
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                Active Problem Focus
-              </span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 font-bold">
-                {activeProblem.rating} Rating
-              </span>
-            </div>
-
-            <div className="flex gap-2">
-              {PRESET_PROBLEMS.map((p, idx) => (
-                <button
-                  key={p.key}
-                  onClick={() => {
-                    setSelectedProblemIndex(idx);
-                    setSourceCode(p.sampleCode);
-                    setHints([]);
-                    setUnlockedTier(1);
-                    setReviewReport(null);
-                  }}
-                  className={cn(
-                    "flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all text-center border shadow-xs",
-                    selectedProblemIndex === idx
-                      ? "bg-sky-50 text-sky-800 border-sky-300"
-                      : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-white"
-                  )}
-                >
-                  {p.key}
-                </button>
-              ))}
-            </div>
-
-            <div className="pt-2">
-              <h3 className="text-sm font-extrabold text-slate-900">{activeProblem.name}</h3>
-              <div className="flex flex-wrap gap-1.5 mt-1.5">
-                {activeProblem.tags.map((t) => (
-                  <span
-                    key={t}
-                    className="text-[10px] px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-medium border border-slate-200"
-                  >
-                    #{t}
-                  </span>
-                ))}
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  Active Problem Focus
+                </span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-200 font-semibold flex items-center gap-1">
+                  <Globe className="w-2.5 h-2.5 text-sky-500" />
+                  Codeforces
+                </span>
               </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 font-bold">
+                  {activeProblem.rating} Rating
+                </span>
+                {activeProblem.url && (
+                  <a
+                    href={activeProblem.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs px-2 py-0.5 rounded-full bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 font-semibold flex items-center gap-1 transition-colors"
+                    title="Open problem on Codeforces"
+                  >
+                    <span>CF</span>
+                    <ExternalLink className="w-2.5 h-2.5" />
+                  </a>
+                )}
+              </div>
+            </div>
+
+            {/* Set Problem from Codeforces Input Bar */}
+            <form onSubmit={handleSetProblemSubmit} className="space-y-1.5">
+              <div className="flex items-center gap-2">
+                <div className="relative flex-1">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                    <Search className="w-3.5 h-3.5" />
+                  </div>
+                  <input
+                    type="text"
+                    value={cfInput}
+                    onChange={(e) => {
+                      setCfInput(e.target.value);
+                      if (fetchError) setFetchError(null);
+                    }}
+                    placeholder="Enter CF ID (e.g. 1800E2, 71A, 4A) or paste URL..."
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:bg-white transition-all shadow-xs"
+                  />
+                  {cfInput && (
+                    <button
+                      type="button"
+                      onClick={() => setCfInput("")}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 text-xs font-bold"
+                    >
+                      &times;
+                    </button>
+                  )}
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={!cfInput.trim() || isFetchingProblem}
+                  className="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-xs flex items-center gap-1.5 transition-all disabled:opacity-40 shrink-0"
+                >
+                  {isFetchingProblem ? (
+                    <>
+                      <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Fetching...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Target className="w-3.5 h-3.5 text-sky-400" />
+                      <span>Focus Problem</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {fetchError && (
+                <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-[11px] flex items-center justify-between animate-fade-in font-medium">
+                  <div className="flex items-center gap-1.5">
+                    <AlertTriangle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                    <span>{fetchError}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setFetchError(null)}
+                    className="text-rose-600 hover:text-rose-900 font-bold ml-2"
+                  >
+                    &times;
+                  </button>
+                </div>
+              )}
+            </form>
+
+            {/* Selectable Problem Pills */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-[10px] text-slate-400 font-semibold">
+                <span className="uppercase tracking-wider">Quick Switch</span>
+                <span>{problems.length} problems loaded</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {problems.map((p) => {
+                  const isSelected = activeProblem.key.toUpperCase() === p.key.toUpperCase();
+                  return (
+                    <button
+                      key={p.key}
+                      type="button"
+                      onClick={() => selectProblem(p)}
+                      className={cn(
+                        "py-1.5 px-3 rounded-xl text-xs font-bold transition-all text-center border shadow-xs flex items-center gap-1.5",
+                        isSelected
+                          ? "bg-sky-50 text-sky-800 border-sky-300 ring-2 ring-sky-400/20"
+                          : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-white hover:text-slate-900"
+                      )}
+                    >
+                      {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-sky-500" />}
+                      <span>{p.key}</span>
+                      <span className="text-[10px] opacity-70 font-normal">({p.rating})</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Active Problem Meta Details */}
+            <div className="pt-2 border-t border-slate-100 flex items-start justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-extrabold text-slate-900">{activeProblem.name}</h3>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-bold border border-slate-200">
+                    CF {activeProblem.key}
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-1.5 mt-1.5">
+                  {activeProblem.tags.map((t) => (
+                    <span
+                      key={t}
+                      className="text-[10px] px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-medium border border-slate-200"
+                    >
+                      #{t}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {activeProblem.url && (
+                <a
+                  href={activeProblem.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1 transition-colors shrink-0 border border-slate-200"
+                >
+                  <span>Statement</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              )}
             </div>
           </div>
 
@@ -352,7 +719,7 @@ export default function MentorStudio() {
             {/* Display Unlocked Hints */}
             {hints.length === 0 ? (
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-center text-xs text-slate-500 font-medium">
-                No hints unlocked yet. Solve on your own first, or unlock Tier 1 for the fundamental problem observation.
+                No hints unlocked yet for <strong>{activeProblem.name}</strong>. Solve on your own first, or unlock Tier 1 for the fundamental problem observation.
               </div>
             ) : (
               <div className="space-y-3">
@@ -426,7 +793,18 @@ export default function MentorStudio() {
                 <Code2 className="w-4 h-4 text-sky-600" />
                 <h3 className="text-sm font-extrabold text-slate-900">Static Code Review & Bug Diagnostic</h3>
               </div>
-              <span className="text-[10px] text-slate-400 font-semibold">C++ / Python / Java</span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setSourceCode(activeProblem.sampleCode)}
+                  className="text-[10px] text-slate-400 hover:text-sky-700 font-semibold flex items-center gap-1 transition-colors"
+                  title="Reset code to current problem template"
+                >
+                  <RefreshCw className="w-3 h-3" />
+                  <span>Reset Starter</span>
+                </button>
+                <span className="text-[10px] text-slate-400 font-semibold">C++ / Python / Java</span>
+              </div>
             </div>
 
             <textarea
@@ -538,16 +916,32 @@ export default function MentorStudio() {
         {/* RIGHT COLUMN: Interactive Mentor Chat (7 cols) */}
         <div className="lg:col-span-7 flex flex-col h-[750px] bg-white border border-slate-200 shadow-sm rounded-2xl overflow-hidden">
           {/* Chat Header */}
-          <div className="px-5 py-3.5 border-b border-slate-200 bg-slate-50/70 flex items-center justify-between">
+          <div className="px-5 py-3 border-b border-slate-200 bg-slate-50/70 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                <span className={cn("animate-ping absolute inline-flex h-full w-full rounded-full opacity-75", aiStatus.configured ? "bg-emerald-400" : "bg-amber-400")}></span>
+                <span className={cn("relative inline-flex rounded-full h-2 w-2", aiStatus.configured ? "bg-emerald-500" : "bg-amber-500")}></span>
               </span>
               <span className="text-xs font-bold text-slate-900">Mentor Intelligence Stream</span>
             </div>
-            <div className="text-[11px] text-slate-500">
-              Active Persona: <strong className="text-sky-700 capitalize font-bold">{persona.replace(/_/g, " ")}</strong>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setShowAiModal(true)}
+                className={cn(
+                  "px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-all flex items-center gap-1.5 shadow-xs",
+                  aiStatus.configured
+                    ? "bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100"
+                    : "bg-amber-50 text-amber-800 border-amber-300 hover:bg-amber-100 animate-pulse"
+                )}
+                title="Configure Live Real AI Key"
+              >
+                <Sparkles className="w-3 h-3 text-amber-600" />
+                <span>{aiStatus.configured ? `Live AI: ${aiStatus.provider?.toUpperCase()}` : "Connect Real AI"}</span>
+              </button>
+              <div className="text-[11px] text-slate-500 hidden sm:block">
+                Persona: <strong className="text-sky-700 capitalize font-bold">{persona.replace(/_/g, " ")}</strong>
+              </div>
             </div>
           </div>
 
@@ -592,10 +986,10 @@ export default function MentorStudio() {
           <div className="p-3 border-t border-slate-100 bg-slate-50/50 flex items-center gap-2 overflow-x-auto">
             <span className="text-[10px] font-bold uppercase text-slate-400 shrink-0">Prompts:</span>
             {[
-              "Why did my solution TLE on test 4?",
-              "Give me a gentle hint for Problem C",
+              `Explain the optimal approach for ${activeProblem.name}`,
+              `What is the time complexity bottleneck for ${activeProblem.key}?`,
               "Check my code for integer overflow",
-              "How to improve my contest time management?",
+              "Give me a gentle hint for this problem",
             ].map((p, i) => (
               <button
                 key={i}
@@ -634,6 +1028,131 @@ export default function MentorStudio() {
           </div>
         </div>
       </div>
+      {/* Real AI API Key Configuration Modal */}
+      {showAiModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4 animate-fade-in">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-md w-full p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-sky-50 border border-sky-200 flex items-center justify-center">
+                  <Zap className="w-5 h-5 text-sky-600 fill-sky-500" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-extrabold text-slate-900">Connect Real AI Engine</h3>
+                  <p className="text-[11px] text-slate-500">Google Gemini &bull; OpenAI &bull; Groq</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAiModal(false)}
+                className="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 flex items-center justify-center font-bold text-base transition-colors"
+              >
+                &times;
+              </button>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-xs text-slate-600">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-slate-700">Active Engine:</span>
+                <span
+                  className={cn(
+                    "px-2.5 py-0.5 rounded text-[10px] font-bold border",
+                    aiStatus.configured
+                      ? "bg-emerald-100 text-emerald-800 border-emerald-300"
+                      : "bg-slate-200 text-slate-700 border-slate-300"
+                  )}
+                >
+                  {aiStatus.configured
+                    ? `${aiStatus.provider?.toUpperCase()} (${aiStatus.maskedKey})`
+                    : "Deterministic Heuristic"}
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-500 leading-relaxed">
+                Connect your API key to activate live reasoning, tailored Socratic hints, algorithm invariant derivations, and deep code diagnostics.
+              </p>
+            </div>
+
+            <form onSubmit={handleSaveApiKey} className="space-y-3.5">
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">
+                  API Key
+                </label>
+                <input
+                  type="password"
+                  value={apiKeyInput}
+                  onChange={(e) => setApiKeyInput(e.target.value)}
+                  placeholder="Paste Gemini (AIzaSy...) or OpenAI (sk-...) key..."
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:bg-white transition-all font-mono shadow-xs"
+                />
+                <p className="text-[10px] text-slate-400 mt-1">
+                  Supports Google Gemini (recommended), OpenAI, Groq, or OpenRouter keys.
+                </p>
+              </div>
+
+              {keySaveMessage && (
+                <div
+                  className={cn(
+                    "p-3 rounded-xl text-xs font-medium border animate-fade-in",
+                    keySaveMessage.startsWith("Error")
+                      ? "bg-rose-50 text-rose-800 border-rose-200"
+                      : "bg-emerald-50 text-emerald-800 border-emerald-200"
+                  )}
+                >
+                  {keySaveMessage}
+                </div>
+              )}
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAiModal(false)}
+                  className="px-3 py-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 rounded-xl"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={!apiKeyInput.trim() || isSavingKey}
+                  className="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs rounded-xl shadow-xs flex items-center gap-1.5 transition-all disabled:opacity-40"
+                >
+                  {isSavingKey ? (
+                    <>
+                      <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Validating...</span>
+                    </>
+                  ) : (
+                    <span>Save & Connect AI</span>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
+  );
+}
+
+function MentorStudioSkeleton() {
+  return (
+    <div className="space-y-6 pb-12 animate-pulse">
+      <div className="h-12 bg-slate-100 rounded-2xl w-1/3" />
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="lg:col-span-5 space-y-6">
+          <div className="h-48 bg-slate-100 rounded-2xl" />
+          <div className="h-64 bg-slate-100 rounded-2xl" />
+          <div className="h-80 bg-slate-100 rounded-2xl" />
+        </div>
+        <div className="lg:col-span-7 h-[750px] bg-slate-100 rounded-2xl" />
+      </div>
+    </div>
+  );
+}
+
+export default function MentorStudio() {
+  return (
+    <Suspense fallback={<MentorStudioSkeleton />}>
+      <MentorStudioContent />
+    </Suspense>
   );
 }

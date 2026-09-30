@@ -11,7 +11,6 @@ import {
   CalendarCheck,
   BookOpen,
   Repeat,
-  Swords,
   Bot,
   Terminal,
   ChevronRight,
@@ -40,15 +39,6 @@ const NAV_ITEMS = [
     badgeColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
     color: "text-emerald-600",
     activeBg: "bg-emerald-50/80 text-emerald-950 font-bold border-emerald-200 shadow-sm",
-  },
-  {
-    label: "Virtual Arena",
-    href: "/virtual",
-    icon: Swords,
-    badge: "Live",
-    badgeColor: "bg-rose-50 text-rose-700 border-rose-200",
-    color: "text-rose-600",
-    activeBg: "bg-rose-50/80 text-rose-950 font-bold border-rose-200 shadow-sm",
   },
   {
     label: "Contests & History",
